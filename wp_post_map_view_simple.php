@@ -29,38 +29,60 @@ defined('ABSPATH') or die('Are you ok?');
 
 add_shortcode('mapview', 'show_post_map');
 
+// Wortlänge für excerpt vorgeben
+function wp_example_excerpt_length( $length ) {
+    return 30;
+}
+add_filter( 'excerpt_length', 'wp_example_excerpt_length');
+
 
 function show_post_map($attr)
 {
 	global $wpdb;
-	$string = 'GEO-Daten werden kopiert.';
+	$string = 'GEO-Daten werden angezeigt.';
 	
 	$args = array('numberposts' => 100); // exclude category 9
 	$custom_posts = get_posts($args);
+	$i = 0;
+	echo '<table>';
+	echo  '<th>Nr.</th>';
+	echo  '<th>ID</th>';
+	echo  '<th>Lat.</th>';
+	echo  '<th>Lon.</th>';
+	echo  '<th>Titel</th>';
+	echo  '<th>Feat_Img</th>';
+	echo  '<th>Link</th>';
+	echo  '<th>Excerpt</th>';
 	foreach ($custom_posts as $post) { 
 		//setup_postdata($post);
-		$result = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."novomap_marker WHERE post_id = ".$post->ID);
-		if (sizeof($result)>0) {
-			$success = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."novomap_marker WHERE post_id = ".$post->ID);
-			$infos = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."novomap_marker WHERE post_id = ".$post->ID);
-			$oldlat = $infos->latitude;
-			$oldlon = $infos->longitude;
-			$success = update_post_meta($post->ID,'lat',$oldlat,'');
-			$success = update_post_meta($post->ID,'lon',$oldlon,'');
-		} else {
-			$success = update_post_meta($post->ID,'lat','0','');
-			$success = update_post_meta($post->ID,'lon','0','');
-		}
+		echo '<tr>';
+		echo "<td> $i </td>";
+		echo "<td> $post->ID </td>";
 		$lat = get_post_meta($post->ID, 'lat', true);
 		$lon = get_post_meta($post->ID, 'lon', true);
+		echo "<td> $lat </td>";
+		echo "<td> $lon </td>";
 		$title = $post->post_title;
-		$string .= "<br> lat= $lat lon= $lon  Titel: $title";
+		echo "<td> $title </td>";
+		//$string .= "<br>Nr. $i lat= $lat lon= $lon  Titel: $title";
+		$excerpt = get_the_excerpt($post->ID);
+		if (strpos($excerpt, 'urzbeschr') !== false) { 
+			$excerpt = ltrim(strstr($excerpt," "));
+		}
+		//$string .= $excerpt;
+		$featimage = get_the_post_thumbnail_url($post->ID, $size='post-thumbnail'); 
+		//$string .= $featimage;
+		echo "<td> $featimage </td>";
 		
+		$postlink = get_permalink($post->ID);
+		echo "<td> $postlink </td>";
+		echo "<td> $excerpt </td>";
+		//$string .= $postlink;
 		$alles = get_post_custom($post->ID);
-		
-		
+		$i++;
+		echo '</tr>';
 	}
-
+	echo '</table>';
 	return $string;
 }
 
@@ -99,3 +121,14 @@ function CheckGps($gpsvalue)
 		return null;
 	}
 }
+function get_excerpt(){
+	$excerpt = get_the_content();
+	$excerpt = preg_replace(" ([.*?])",'',$excerpt);
+	$excerpt = strip_shortcodes($excerpt);
+	$excerpt = strip_tags($excerpt);
+	$excerpt = substr($excerpt, 0, 50);
+	$excerpt = substr($excerpt, 0, strripos($excerpt, " "));
+	$excerpt = trim(preg_replace( '/\s+/', ' ', $excerpt));
+	$excerpt = $excerpt.'... <a href="'.get_the_permalink().'">more</a>';
+	return $excerpt;
+	}
