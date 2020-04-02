@@ -145,10 +145,10 @@ JB.GPX2GM.setparameters = function() {
 	JB.GPX2GM.parameters.routemarker = (typeof(Routemarker)!="undefined") ? Routemarker : "";
 	JB.GPX2GM.parameters.shwpname = (typeof(Shwpname)!="undefined") ? Shwpname : true;
 	JB.GPX2GM.parameters.shwpcmt = (typeof(Shwpcmt)!="undefined") ? Shwpcmt : true;
-	JB.GPX2GM.parameters.shwpdesc = (typeof(Shwpdesc)!="undefined") ? Shwpdesc : false;
-	JB.GPX2GM.parameters.shwptime = (typeof(Shwptime)!="undefined") ? Shwptime : false;
+	JB.GPX2GM.parameters.shwpdesc = (typeof(Shwpdesc)!="undefined") ? Shwpdesc : true;
+	JB.GPX2GM.parameters.shwptime = (typeof(Shwptime)!="undefined") ? Shwptime : true;
 	JB.GPX2GM.parameters.shwpshadow = (typeof(Shwpshadow)!="undefined") ? Shwpshadow : true;
-	JB.GPX2GM.parameters.wpcluster = (typeof(Wpcluster)!="undefined") ? Wpcluster : false;
+	JB.GPX2GM.parameters.wpcluster = (typeof(Wpcluster)!="undefined") ? Wpcluster : true;
 	JB.GPX2GM.parameters.bildpfad = (typeof(Bildpfad)!="undefined") ? Bildpfad : "";
 	JB.GPX2GM.parameters.gpxpfad = (typeof(Gpxpfad)!="undefined") ? Gpxpfad : ""; 
 	JB.GPX2GM.parameters.bildwegpunkticon = (typeof(Bildwegpunkticon)!="undefined") ? Bildwegpunkticon : "Bild"; // Bei "" Icon aus sym-Tag

@@ -670,6 +670,7 @@ JB.Map.prototype.Marker_Bild = function(coord,icon,bild) {
 	var img = new Image();
 	img.loaded = false;
 	var bild_icon;
+	var text = coord.cmt;
 	
 	marker[0].on("mouseover", function() {
 		if(img.loaded) {

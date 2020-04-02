@@ -401,7 +401,7 @@ JB.makeMap = function (ID) {
 							}
 							if(wp.lat<daten.wegpunkte.latmin) daten.wegpunkte.latmin=wp.lat; if(wp.lat>daten.wegpunkte.latmax) daten.wegpunkte.latmax=wp.lat;
 							if(wp.lon<daten.wegpunkte.lonmin) daten.wegpunkte.lonmin=wp.lon; if(wp.lon>daten.wegpunkte.lonmax) daten.wegpunkte.lonmax=wp.lon;
-							if(im[i].alt) wp.cmt = im[i].alt; 
+							if(im[i].text) wp.cmt = im[i].text; 
 							else if (im[i].innerHTML) wp.cmt = im[i].innerHTML;
 							else wp.cmt = "";
 							wp.desc = ""; //wp.cmt;
@@ -466,7 +466,7 @@ JB.makeMap = function (ID) {
 							if(wp.lat<daten.wegpunkte.latmin) daten.wegpunkte.latmin=wp.lat; if(wp.lat>daten.wegpunkte.latmax) daten.wegpunkte.latmax=wp.lat;
 							if(wp.lon<daten.wegpunkte.lonmin) daten.wegpunkte.lonmin=wp.lon; if(wp.lon>daten.wegpunkte.lonmax) daten.wegpunkte.lonmax=wp.lon;
 							wp.cmt = dv[i].innerHTML?dv[i].innerHTML:"";
-							wp.desc = ""; // wp.cmt;
+							wp.desc = "XXXXX"; // wp.cmt;
 							wp.link = dv[i].getAttribute("data-link")?dv[i].getAttribute("data-link"):"" ;
 							wp.sym = dv[i].getAttribute("data-icon")?dv[i].getAttribute("data-icon"):"default" ;
 							wp.time = 0;
