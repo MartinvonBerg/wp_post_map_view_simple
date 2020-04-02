@@ -15,34 +15,33 @@
  * @wordpress-plugin
  * Plugin Name:       wp_post_map_view_simple
  * Plugin URI:        www.mvb1.de
- * Description:       Anzeige aller Posts mit GPS-Daten (lat, lon) in einer Karte
- * Version:           1.0.0
+ * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
+ * Version:           0.2.0
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       wp_post_map_view
- * Domain Path:       /languages
  */
 
 defined('ABSPATH') or die('Are you ok?');
 
 add_shortcode('mapview', 'show_post_map');
 
-// Wortlänge für excerpt vorgeben
+// Wortlänge für excerpt vorgeben. Gilt für alle Excerpts auf der ganzen Seite!!!
 function wp_example_excerpt_length( $length ) {
-    return 30;
+    return 50; // Anzahl Worte!
 }
 add_filter( 'excerpt_length', 'wp_example_excerpt_length');
-
 
 function show_post_map($attr)
 {
 	global $wpdb;
-	$mapheight = 600;
-	$string = 'GEO-Daten werden angezeigt.';
 	
-	$args = array('numberposts' => 100); // exclude category 9
+	// Pfade und Verzeichnisse definieren
+	$plugin_path = $plugin_url = plugins_url('/', __FILE__);
+	$wp_postmap_path = $plugin_path . 'images/';
+	
+	$args = array('numberposts' => 100); 
 	$custom_posts = get_posts($args);
 	$i = 0;
 	// echo '<table>';
@@ -56,7 +55,10 @@ function show_post_map($attr)
 	// // echo  '<th>Link</th>';
 	// echo  '<th>Excerpt</th>';
 
-	$string  .= '<div id="map10" class="gpxview::OPENTOPO" style="width:100%;height:' . $mapheight . 'px"></div>';
+	//$string  .= '<div id="map10" class="gpxview::OPENTOPO" style="width:100%;height:' . $mapheight . 'px"></div>';
+	$string .= '<div class="box1">';
+	$string .= '<div id="map" style="height: '. $mapheight .'px"></div>';
+	//$string .= '<div id="map"></div>';
 	$string  .= '<div id="map10_img">';
 	
 	// Bildinfo ausgeben, auch für SEO! 
@@ -71,7 +73,7 @@ function show_post_map($attr)
 			// echo "<td> $post->ID </td>";
 			// echo "<td> $lat </td>";
 			// echo "<td> $lon </td>";
-			$title = substr($post->post_title,0,50);
+			$title = substr($post->post_title,0,80); // Länge des Titels beschränken, Anzahl Zeichen
 			// echo "<td> $title </td>";
 			$tags= get_the_tags($post->ID);
 			$tagnames = array();
@@ -82,7 +84,7 @@ function show_post_map($attr)
 			}
 			
 			$tag2 = implode(" ",$tagnames);
-			$icon = get_icon($tag2);
+			$icon = wp_postmap_get_icon($tag2);
 			// echo "<td> $icon </td>";
 			//$string .= "<br>Nr. $i lat= $lat lon= $lon  Titel: $title";
 			$excerpt = get_the_excerpt($post->ID);
@@ -98,7 +100,7 @@ function show_post_map($attr)
 			// echo "<td> $postlink </td>";
 			// echo "<td> $excerpt </td>";
 			//$string .= $postlink;
-			$alles = get_post_custom($post->ID);
+			//$alles = get_post_custom($post->ID);
 			$i++;
 			// echo '</tr>';
 			$string  .= '<a alt="' . $title . '" href="' . $featimage . '" data-title="'.$title.'" data-icon="'. $icon. '" data-geo="lat:' . $lat . ',lon:' . $lon . '" data-link="'. $postlink .'">' . $excerpt. '</a>';
@@ -108,13 +110,15 @@ function show_post_map($attr)
 		}
 	}
 	// echo '</table>';
-	$string  .= '</div>';
+	$string  .= '</div></div>';
+	$string  .= '<script>var g_wp_postmap_path = "' . $wp_postmap_path . '";'; 
+	$string  .= '</script>';
 	return $string;
 }
 
 require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
 
-function get_icon($arraytagnames)
+function wp_postmap_get_icon($arraytagnames)
 {
 	$icon = "";
 	switch (true){
