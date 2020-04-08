@@ -102,7 +102,7 @@ function wp_postmap_get_icon($arraytagnames)
 		case stristr($arraytagnames,'Wander') !== false:
 			$icon = "hiking";
 			break;
-		case stristr($arraytagnames,'Bergwander') !== false:
+		case stristr($arraytagnames,'Bergtour') !== false:
 			$icon = "mountain";
 			break;	
 		case stristr($arraytagnames,'skitour') !== false:

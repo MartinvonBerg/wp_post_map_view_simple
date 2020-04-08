@@ -14,13 +14,17 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
                     var par = geodata[j].split(":");
                     geodata[j] = parseFloat(par[1]);
                 }
-                touren[index] = new Object;
-                touren[index]["excerpt"] = this.text.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ");
-                touren[index]["link"] = this.dataset.link;
-                touren[index]["img"] = this.href;
-                touren[index]["title"] = this.dataset.title.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ");
-                touren[index]["category"] = this.dataset.icon;
-                touren[index]["coord"] = geodata;
+                if (isNaN(geodata[0]) || isNaN(geodata[1])){
+                    // do nothing
+                } else {
+                    touren[index] = new Object;
+                    touren[index]["excerpt"] = this.text.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ");
+                    touren[index]["link"] = this.dataset.link;
+                    touren[index]["img"] = this.href;
+                    touren[index]["title"] = this.dataset.title.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ");
+                    touren[index]["category"] = this.dataset.icon;
+                    touren[index]["coord"] = geodata;
+                }
             }
         }
 
@@ -242,7 +246,7 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
         let lat_lng = m._latlng;
         bounds.extend(lat_lng);
     });
-    map.fitBounds(bounds);
+    map.fitBounds(bounds, { padding: [50, 50] });
 
     L.Control.Watermark = L.Control.extend({
         onAdd: function (map) {
@@ -254,7 +258,7 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
             img.style.cursor = 'pointer';
             img.title = 'Alles anzeigen';
             img.onclick = function () {
-                map.fitBounds(bounds); // TODO: Loop
+                map.fitBounds(bounds, { padding: [50, 50] }); // TODO: Loop
                 map.removeLayer(group1);
                 map.addLayer(group1);
                 map.removeLayer(group2);
@@ -328,18 +332,26 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
     });
 
     jQuery(window).on("resize", function() {
-        var screenw = jQuery(window).width();
-        var divwidth = jQuery('.box1').width();
+        var or = window.orientation;
+        var h = window.screen.availHeight;
+        var w = window.screen.availWidth;
 
-        if (screenw < 769) {
-            divwidth = 0.62 * divwidth;
-            if (divwidth<400) {divwidth=400};
-            jQuery("#map").height(0.62*divwidth);
+        if (or == undefined) { // Desktop Version
+            var divwidth = jQuery('.box1').width();
+            var divhgt = 0.8 * divwidth;
+            if (divhgt<400) {divhgt=400};
+            jQuery("#map").height(divhgt);
+            console.log('Desktop');
+            //map.fitBounds(bounds, { padding: [50, 50] });
+        } else { // Mobile Version
+            if ((or == 0) || (or == 180)) { // Hochformat
+                jQuery("#map").height(0.75*w);
+            } else { // Querformat
+                jQuery("#map").height(0.5*h);
+            }
+
         }
-        else {
-            jQuery("#map").height(0.88*divwidth);
-        }
-        map.fitBounds(bounds, { padding: [50, 50] });
+        //map.fitBounds(bounds, { padding: [50, 50] });
         map.invalidateSize();
     }).trigger('resize');
 
@@ -366,6 +378,27 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
     
     jQuery(window).load(function(){
         var activeLayer =  control.getOverlays();
+        var or = window.orientation;
+        var h = window.screen.availHeight;
+        var w = window.screen.availWidth;
+
+        if (or == undefined) { // Desktop Version
+            var divwidth = jQuery('.box1').width();
+            var divhgt = 0.8 * divwidth;
+            if (divhgt<400) {divhgt=400};
+            jQuery("#map").height(divhgt);
+        } else { // Mobile Version
+            if ((or == 0) || (or == 180)) { // Hochformat
+                jQuery("#map").height(0.75*w);
+            } else { // Querformat
+                jQuery("#map").height(0.5*h);
+            }
+
+        }
+      
+        map.fitBounds(bounds, { padding: [50, 50] });
+        map.invalidateSize();
+
         switch (activeLayer) {
             case 'OpenStreetMap':
                 jQuery('.leaflet-container').css("background","#b9d3dc");
