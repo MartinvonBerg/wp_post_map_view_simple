@@ -6,7 +6,7 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
   
     var touren = new Array(); // Daten aus dem <a>-Tag laden
     jQuery('a').each(function (index, value) { // Achtung: geht nur, wenn die Marker als <a> auf der Seite erzeugt werden und sonst keine a-Elemente mit geo-daten vorhanden sind
-        var geodata = this.dataset.geo;
+        var geodata = this.dataset.geo; // Index for das touren-array evtl. als eigene Lauf-Variable, da index aus beliebigen Werten besteht
         if (geodata) {
             geodata = geodata.split(",");
             if (geodata.length == 2) {
@@ -107,7 +107,7 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
     // Karenlayer definieren
     var layer1 = new L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            attribution: 'MapData:&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | MapStyle:&copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
         });
 
     var layer2 = new L.tileLayer('http://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/ {y}.png', {
