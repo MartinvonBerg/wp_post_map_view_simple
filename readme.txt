@@ -81,3 +81,10 @@ There are no FAQs just yet.
 == Upgrade Notice ==
 
 There is no need to upgrade just yet.
+
+== Credits ==
+This plugin uses the great work from:
+
+- leaflet, see: https://leafletjs.com/
+- leaflet markercluster: https://github.com/Leaflet/Leaflet.markercluster
+- wordpress for coding hints: https://de.wordpress.org/
