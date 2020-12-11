@@ -376,7 +376,10 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
         }
     });
     
-    jQuery(window).load(function(){
+    //Note: This API has been removed in jQuery 3.0; please use .on( "load", handler ) 
+    //instead of .load( handler ) and .trigger( "load" ) instead of .load().
+    //jQuery(window).load(function(){
+    jQuery(window).on("load", function() {    
         var activeLayer =  control.getOverlays();
         var or = window.orientation;
         var h = window.screen.availHeight;
