@@ -3,29 +3,30 @@
 /**
  *
  * @link              www.mvb1.de
- * @since             1.0.0
+ * @since             0.0.1
  * @package           Wp_post_map_view_simple
  *
  * @wordpress-plugin
  * Plugin Name:       wp_post_map_view_simple
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.3.0
+ * Version:           0.4.0
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
+namespace mvbplugins\postmapviewsimple;
 
 defined('ABSPATH') or die('Are you ok?');
 
-add_shortcode('mapview', 'show_post_map');
+add_shortcode('mapview', '\mvbplugins\postmapviewsimple\show_post_map');
 
 // Wortlänge für excerpt vorgeben. Gilt für alle Excerpts auf der ganzen Seite!!!
 function wp_example_excerpt_length( $length ) {
     return 50; // Anzahl Worte!
 }
-add_filter( 'excerpt_length', 'wp_example_excerpt_length');
+add_filter( 'excerpt_length', '\mvbplugins\postmapviewsimple\wp_example_excerpt_length');
 
 function show_post_map($attr)
 {

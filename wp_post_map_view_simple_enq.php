@@ -1,5 +1,8 @@
 <?php
-add_action('wp_enqueue_scripts', 'wp_post_map_scripts');
+namespace mvbplugins\postmapviewsimple;
+
+add_action('wp_enqueue_scripts', '\mvbplugins\postmapviewsimple\wp_post_map_scripts');
+
 function wp_post_map_scripts()
 {
   wp_reset_query();

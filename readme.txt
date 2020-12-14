@@ -3,7 +3,7 @@ Contributors: Martin von Berg
 Donate link: http://www.mvb1.de
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
-Tested up to: 5.4.0
+Tested up to: 5.6
 Requires PHP: 7.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -77,6 +77,10 @@ There are no FAQs just yet.
 
 = 0.3.0 =
 *   First release: 1.04.2020
+
+= 0.4.0 =
+*   14.12.2020
+* namespace introduced
 
 == Upgrade Notice ==
 
