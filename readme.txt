@@ -16,7 +16,6 @@ Anzeige aller Wordpress-Posts mit GPX-Daten (lat,lon) in den Custom-Fields auf e
 (Schlagwörtern) eingeteilt (Auswahl in der Karte und spezifische Icons)
 Shortcode: [mapview] Fertig. Keine Optionen!
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CQA6XZ7LUMBJQ)
 
 == Screenshots ==
 
