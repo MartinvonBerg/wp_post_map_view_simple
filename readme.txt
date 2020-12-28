@@ -82,6 +82,11 @@ There are no FAQs just yet.
 *   14.12.2020
 * namespace introduced
 
+= 0.5.0 =
+*   28.12.2020
+* speed improvement: the excerpt function was definitely too slow. New excerpt based on abstracts <p> only!
+* function for tags to string replaced with anonymous function, mayve to improve speed
+
 == Upgrade Notice ==
 
 There is no need to upgrade just yet.
