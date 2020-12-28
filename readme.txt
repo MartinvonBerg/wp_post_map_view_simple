@@ -16,6 +16,7 @@ Anzeige aller Wordpress-Posts mit GPX-Daten (lat,lon) in den Custom-Fields auf e
 (Schlagwörtern) eingeteilt (Auswahl in der Karte und spezifische Icons)
 Shortcode: [mapview] Fertig. Keine Optionen!
 
+
 == Screenshots ==
 
 There are no screenshots yet, see : https://www.mvb1.de/uebersichtskarte/ for an example of the plugin.
