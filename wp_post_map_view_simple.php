@@ -10,7 +10,7 @@
  * Plugin Name:       wp_post_map_view_simple
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.5.0
+ * Version:           0.6.0
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+

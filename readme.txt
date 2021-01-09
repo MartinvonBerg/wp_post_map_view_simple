@@ -86,7 +86,11 @@ There are no FAQs just yet.
 = 0.5.0 =
 *   28.12.2020
 * speed improvement: the excerpt function was definitely too slow. New excerpt based on abstracts <p> only!
-* function for tags to string replaced with anonymous function, mayve to improve speed
+* function for tags to string replaced with anonymous function, maybe to improve speed
+
+= 0.6.0 =
+*   09.01.2021
+* mobile improvement: Don't show zoom-control for mobile versions
 
 == Upgrade Notice ==
 

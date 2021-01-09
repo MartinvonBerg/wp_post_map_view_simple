@@ -3,7 +3,8 @@
 if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
 
 (function (window, document, undefined) {
-  
+    let mobile = (/iphone|ipod|android|webos|ipad|iemobile|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+
     var touren = new Array(); // Daten aus dem <a>-Tag laden
     jQuery('a').each(function (index, value) { // Achtung: geht nur, wenn die Marker als <a> auf der Seite erzeugt werden und sonst keine a-Elemente mit geo-daten vorhanden sind
         var geodata = this.dataset.geo; // Index for das touren-array evtl. als eigene Lauf-Variable, da index aus beliebigen Werten besteht
@@ -104,7 +105,7 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
         //shadowAnchor: [22, 94]
     });
     
-    // Karenlayer definieren
+    // Kartenlayer definieren
     var layer1 = new L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: 'MapData:&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | MapStyle:&copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
@@ -125,9 +126,16 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri User Community'
     });
 
+    if ( mobile ) {
+        layer1.options.attribution = layer2.options.attribution;
+        layer3.options.attribution = layer2.options.attribution;
+        layer4.options.attribution = layer2.options.attribution;
+      };
+
     var mapOptions = {
         center: [48.0, 12],
         zoom: 10,
+        zoomControl: false,
         layers: [layer1]
     }
 
@@ -144,6 +152,12 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
     var scale = L.control.scale();
     // Adding scale control to the map
     scale.addTo(map);
+
+    // create scale control top left // mobile: zoom deactivate. use fingers!
+    if ( ! mobile ) { 
+        var controlZoom = new L.Control.Zoom( {position: 'topleft'}); 
+        controlZoom.addTo(map); 
+    }
 
     // Creating markergroups ----------------------- TODO: LOOP, abhängig von der Anzahl der Kategorien!
     var LayerSupportGroup = L.markerClusterGroup.layerSupport(), 
