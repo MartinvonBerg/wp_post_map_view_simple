@@ -1,4 +1,5 @@
 "use strict";
+// Titel	Kategory	GPX-Datei	Land	Region+Link Strecke	Höhenmeter	Tourdatum	Schwierigkeit + Anforderungen		Höchster Punkt	evtl. Tourenbeschreibung als AJAX
 
 if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
 
@@ -355,7 +356,7 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
             var divhgt = 0.8 * divwidth;
             if (divhgt<400) {divhgt=400};
             jQuery("#map").height(divhgt);
-            console.log('Desktop');
+            //console.log('Desktop');
             //map.fitBounds(bounds, { padding: [50, 50] });
         } else { // Mobile Version
             if ((or == 0) || (or == 180)) { // Hochformat
