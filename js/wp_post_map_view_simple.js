@@ -1,9 +1,10 @@
-"use strict";
+
 // Titel	Kategory	GPX-Datei	Land	Region+Link Strecke	Höhenmeter	Tourdatum	Schwierigkeit + Anforderungen		Höchster Punkt	evtl. Tourenbeschreibung als AJAX
 
 if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
 
 (function (window, document, undefined) {
+    "use strict";
     let mobile = (/iphone|ipod|android|webos|ipad|iemobile|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
 
     var touren = new Array(); // Daten aus dem <a>-Tag laden
