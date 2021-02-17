@@ -3,7 +3,7 @@ Contributors: Martin von Berg
 Donate link: http://www.mvb1.de
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
-Tested up to: 5.6
+Tested up to: 5.6.1
 Requires PHP: 7.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -91,6 +91,12 @@ There are no FAQs just yet.
 = 0.6.0 =
 *   09.01.2021
 * mobile improvement: Don't show zoom-control for mobile versions
+
+= 0.7.0 =
+*   17.02.2021
+* PHP 8 compatibility check with phpcs. OK. No change necessary.
+* replace 'jQuery' with $
+* run js on page only if div 'map10_img' is on page
 
 == Upgrade Notice ==
 
