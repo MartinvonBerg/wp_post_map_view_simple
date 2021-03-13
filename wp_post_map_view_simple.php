@@ -41,9 +41,6 @@ function show_post_map($attr)
 	$gpx_dir = $up_dir . '/' . $gpxpath . '/';    // gpx_dir
 	//$gpx_url = $up_url . '/' . $gpxpath . '/';    // gpx_url
 
-	// Report simple running errors
-	//error_reporting(E_ERROR | E_PARSE);
-	
 	$args = array('numberposts' => 100, 'post_type' => 'post'); 
 	$custom_posts = get_posts($args);
 
@@ -116,36 +113,25 @@ function show_post_map($attr)
 			// get the address corresponding to posts lat and lon customfield
 			$geoaddresstest =  get_post_meta($post->ID,'geoadress');	
 			if ( ! empty($geoaddresstest[0]) ) {
-				$geoaddress['country'] = '';
-				$geoaddress['state'] = '';
-				$geoaddress['village'] = '';
-                $geoaddress['municipality'] = '';
-                $geoaddress['town'] = '';
-                $geoaddress['city'] = '';
-                $geoaddress['county'] = '';
 				$test = $geoaddresstest[0]; // we need only the first index
-				$geoaddress = maybe_unserialize($test);	// type conversion to array
-				$geoaddress = sanitize_geoaddress($geoaddress);
-				/*
-				foreach ($geoaddress as $key => $value) {
-					if ($key != 'country') {
-						$v .= $value . ', ';
-					} else {
-						$v .= $value;
-						break;
-					}
-				}
-				*/
+				$geoaddress = maybe_unserialize($test);	// type conversion to string Dist: 20,3 km, Gain: 758 Hm, Loss: 756 Hm
+			
 			} else {
                 $geoaddress = [];
                 if (\current_user_can('edit_posts')) {
                     $geoaddress = get_geoaddress($post->ID, $lat, $lon);
                 } else {
-                    $geoaddress = sanitize_geoaddress($geoaddress);
+                    $type = \gettype($geoaddress);
+                    if ('array' == $type) {
+                        $geoaddress = sanitize_geoaddress($geoaddress);
+                    } else {
+                        $text = 'wrong type';
+                        $test = $text;
+					}
 				}
 			}
 
-			// get the statistics of the gpx-track, TODO: für alle Tracks
+			// get the statistics of the gpx-track, TODO: für alle Tracks in customfield schreiben
 			/*
 			$geostattest =  get_post_meta($post->ID,'geostat');
 			if ( ! empty($geostattest[0]) ) {
@@ -205,6 +191,39 @@ function show_post_map($attr)
                     $geostat = '--';
 				}
 
+				if       ( isset($geoaddress['village'])){
+                      $address = $geoaddress['village'];
+				} elseif ( isset($geoaddress['city'])) {
+					  $address = $geoaddress['city'];	
+				} elseif ( isset($geoaddress['town'])) {
+					  $address = $geoaddress['town'];
+				} elseif ( isset($geoaddress['municipality'])) {
+					  $address = $geoaddress['municipality'];
+				} elseif ( isset($geoaddress['county'])) {
+				      $address = $geoaddress['county'];
+				} elseif ( isset($geoaddress['state'])) {
+					  $address = $geoaddress['state'];
+				} else {
+                    $address = 'none';
+				}
+
+                if       ( isset($geoaddress['state']) ) {
+                        $state = $geoaddress['state'];
+                } elseif ( isset($geoaddress['county'])) {
+					    $state = $geoaddress['county'];
+				} elseif ( isset($geoaddress['state_district']))  {
+                        $state = $geoaddress['state_district'];
+				} else {
+                    $state = 'none';
+				}
+
+                if (isset($geoaddress['country'])) {
+                    $country = $geoaddress['country'];
+                } else {
+                    $country = 'none';
+				}
+
+
                 $data2[] = array(
                     'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
                     'lat' => $lat,
@@ -212,9 +231,9 @@ function show_post_map($attr)
                     'title' => $title,
                     'category' => $cat,
                     'link' => $postlink,
-                    'address' => (((($geoaddress['village'] ?? $geoaddress['city']) ?? $geoaddress['town']) ?? $geoaddress['municipality']) ?? $geoaddress['county']) ?? $geoaddress['state'],
-                    'country' => $geoaddress['country'],
-                    'state' => ($geoaddress['state'] ?? $geoaddress['county']) ?? $geoaddress['state_district'],
+                    'address' => $address,
+					'country' => $country,
+                	'state' => $state,
                     'gpxfile' => $gpxfile,
                     'geostat' => $geostat,
                 );
@@ -251,15 +270,15 @@ function show_post_map($attr)
 	foreach ($data2 as $data) {
         $gpxfile = $gpx_dir . $data['gpxfile'];
 		$geostatarr= \explode(' ', $data['geostat'] );
-        isset($geostatarr[0]) ? '' :  $geostatarr[0] = 0;
-		isset($geostatarr[1]) ? '' :  $geostatarr[1] = 0;
-		isset($geostatarr[4]) ? '' :  $geostatarr[4] = 0;
-		isset($geostatarr[7]) ? '' :  $geostatarr[7] = 0;
+        isset($geostatarr[0]) ? '' :  $geostatarr[0] = '';
+		isset($geostatarr[1]) ? '' :  $geostatarr[1] = '';
+		isset($geostatarr[4]) ? '' :  $geostatarr[4] = '';
+		isset($geostatarr[7]) ? '' :  $geostatarr[7] = '';
        
 		$googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
         $string  .= '<tr>';
 		$string  .= '<td>' . $data['id'] . '</td>';
-        $string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['gpxfile'] . '</a></td>';
+        $string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
 		$string  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
         $geostatarr[1] = \str_replace(',', '.', $geostatarr[1]);
 		$string  .= '<td>' . $geostatarr[1] ?? 0 . '</td>';
