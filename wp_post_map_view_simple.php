@@ -35,14 +35,14 @@ function show_post_map($attr)
 	$plugin_path = plugins_url('/', __FILE__);
 	$wp_postmap_path = $plugin_path . 'images/';
 	$lenexcerpt = 150;
-    $gpxpath = 'gpx'; // TODO: hole aus dem custom field von fotorama_multi!
+    $gpxpath = get_option( 'fotorama_elevation_option_name' )['path_to_gpx_files_2'] ?? 'gpx';
 	//$up_url = gpxview_get_upload_dir('baseurl');  // upload_url
 	$up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
 	$gpx_dir = $up_dir . '/' . $gpxpath . '/';    // gpx_dir
 	//$gpx_url = $up_url . '/' . $gpxpath . '/';    // gpx_url
 
 	// Report simple running errors
-	error_reporting(E_ERROR | E_PARSE);
+	//error_reporting(E_ERROR | E_PARSE);
 	
 	$args = array('numberposts' => 100, 'post_type' => 'post'); 
 	$custom_posts = get_posts($args);
@@ -77,22 +77,31 @@ function show_post_map($attr)
                 if (($sub == '<p>') and (false == $isshortcode)) {
                     $p .= substr($line, 3) . ' ';
                 }	
-
-				// extract the gpxfile from the shortcode. TODO: no and multiple gpx-files testen!
-				// TODO: mehrfache shortcodes auf einer Seite
-				$isshortcode = strpos($line,'[gpxview');	
-				if ( is_numeric($isshortcode) ) {
-					$isgpxfile = strpos($line,'gpxfile'); // suche nicht nach dem shortcode, sondern ob ein gpxfile definiert wirde
-					if ( $isgpxfile) {
-                        $gpx = preg_match('.[gG][pP][xX].', $line, $matches);
-                        $gpx = strpos($line, '.' . $matches[0]);
-                        $gpxfile[] = substr($line, $isgpxfile+9, $gpx-$isgpxfile-5);						
-					} else { //$gpxfile = 'none';
-					 }
-				}
-
 				$p = str_replace('</p>','',$p);
+
+				// extract the gpxfile from the shortcode
+				$isshortcode = strpos($line,'[gpxview');	
+
+				if ( is_numeric($isshortcode) ) {
+					$line = str_replace(' ', '', $line);
+					$isgpxfile = strpos($line,'gpxfile'); // suche nicht nach dem shortcode, sondern ob ein gpxfile definiert wirde
+
+					if ( $isgpxfile) {
+                        $line = substr($line, $isgpxfile+9);
+						$gpx = substr($line, 0, strpos($line, '"'));
+                        $morethanone = strpos($gpx, ',');
+                        if ($morethanone) {
+                            $gpxfilearr = explode(',', $gpx);
+                        } else {
+                            $gpxfilearr[] = $gpx;
+						}
+                     					
+					} else { //$gpxfilearr = 'none';
+					 }
+				}	
 			} 
+
+			// sanitize Excerpt
 			$p = str_replace('Kurzbeschreibung:','',$p);
 			$p = str_replace('Tourenbeschreibung:','',$p);
 			$p = strip_tags($p); // html-Tags entfernen
@@ -116,6 +125,7 @@ function show_post_map($attr)
                 $geoaddress['county'] = '';
 				$test = $geoaddresstest[0]; // we need only the first index
 				$geoaddress = maybe_unserialize($test);	// type conversion to array
+				$geoaddress = sanitize_geoaddress($geoaddress);
 				/*
 				foreach ($geoaddress as $key => $value) {
 					if ($key != 'country') {
@@ -135,7 +145,8 @@ function show_post_map($attr)
 				}
 			}
 
-			// get the statistics of the gpx-track
+			// get the statistics of the gpx-track, TODO: für alle Tracks
+			/*
 			$geostattest =  get_post_meta($post->ID,'geostat');
 			if ( ! empty($geostattest[0]) ) {
 				$test = $geostattest[0]; // we need only the first index
@@ -152,9 +163,9 @@ function show_post_map($attr)
                     $geostatarr= \explode(' ', $geostat);
 
 					if ('Dist:' == $geostatarr[0] && \current_user_can('edit_posts')) {
-						$geostatfield = maybe_serialize($geostat);
-						delete_post_meta($post->ID,'geoadress');
-						update_post_meta($post->ID,'geoadress', $geostatfield,'');
+						//$geostatfield = maybe_serialize($geostat);
+						//delete_post_meta($post->ID,'geostat');
+						//update_post_meta($post->ID,'geostat', $geostatfield,'');
 					} elseif ( 'Dist:' != $geostatarr[0] ) {
                         $geostat = 'file valid but no statistics';
 					} 
@@ -162,24 +173,54 @@ function show_post_map($attr)
                     $geostat = '--';
 				}
 			}
-			
+			*/
+
 			$lat = number_format( floatval($lat), 6);
 			$lon = number_format( floatval($lon), 6);
-           
-            $data2[] = array(
-				'id' => $i, 
-				'lat' => $lat, 
-				'lon' => $lon, 
-				'title' => $title, 
-				'category' => $cat, 
-				'link' => $postlink, 
-				'address' => (((($geoaddress['village'] ?? $geoaddress['city']) ?? $geoaddress['town']) ?? $geoaddress['municipality']) ?? $geoaddress['county']) ?? $geoaddress['state'],
-				'country' => $geoaddress['country'], 
-				'state' => ($geoaddress['state'] ?? $geoaddress['county']) ?? $geoaddress['state_district'],
-				'gpxfile' => $gpxfile,
-				'geostat' => $geostat,
-			);
-            $gpxfile = null;
+            $gpxcount = 1;
+
+			if ($gpxfilearr == null) {
+                $gpxfilearr[0] = '';
+			}
+
+            foreach ($gpxfilearr as $gpxfile) {
+
+				$path_to_gpxfile = '';
+				$path_to_gpxfile = $gpx_dir . $gpxfile;
+
+				if ( \is_file( $path_to_gpxfile) ) {		
+					$gpxdata = \simplexml_load_file($path_to_gpxfile);
+					$geostat = (string) $gpxdata->metadata->desc;
+					// geostat prüfen
+                    $geostatarr= \explode(' ', $geostat);
+
+					if ('Dist:' == $geostatarr[0] && \current_user_can('edit_posts')) {
+						//$geostatfield = maybe_serialize($geostat);
+						//delete_post_meta($post->ID,'geostat');
+						//update_post_meta($post->ID,'geostat', $geostatfield,'');
+					} elseif ( 'Dist:' != $geostatarr[0] ) {
+                        $geostat = 'file valid but no statistics';
+					} 
+                } else {
+                    $geostat = '--';
+				}
+
+                $data2[] = array(
+                    'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
+                    'lat' => $lat,
+                    'lon' => $lon,
+                    'title' => $title,
+                    'category' => $cat,
+                    'link' => $postlink,
+                    'address' => (((($geoaddress['village'] ?? $geoaddress['city']) ?? $geoaddress['town']) ?? $geoaddress['municipality']) ?? $geoaddress['county']) ?? $geoaddress['state'],
+                    'country' => $geoaddress['country'],
+                    'state' => ($geoaddress['state'] ?? $geoaddress['county']) ?? $geoaddress['state_district'],
+                    'gpxfile' => $gpxfile,
+                    'geostat' => $geostat,
+                );
+                $gpxcount++;
+            }
+            $gpxfilearr = null;
 		}
 	}
 	
@@ -210,15 +251,15 @@ function show_post_map($attr)
 	foreach ($data2 as $data) {
         $gpxfile = $gpx_dir . $data['gpxfile'];
 		$geostatarr= \explode(' ', $data['geostat'] );
-        $npgx = count($data[0]['gpxfile']);
-		if ($npgx > 1) {
-            $adfadf= 1;
-		}
-
+        isset($geostatarr[0]) ? '' :  $geostatarr[0] = 0;
+		isset($geostatarr[1]) ? '' :  $geostatarr[1] = 0;
+		isset($geostatarr[4]) ? '' :  $geostatarr[4] = 0;
+		isset($geostatarr[7]) ? '' :  $geostatarr[7] = 0;
+       
 		$googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
         $string  .= '<tr>';
 		$string  .= '<td>' . $data['id'] . '</td>';
-        $string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
+        $string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['gpxfile'] . '</a></td>';
 		$string  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
         $geostatarr[1] = \str_replace(',', '.', $geostatarr[1]);
 		$string  .= '<td>' . $geostatarr[1] ?? 0 . '</td>';
@@ -363,7 +404,7 @@ function sanitize_geoaddress($geoaddress) {
 	isset($geoaddress['municipality']) ? '' : $geoaddress['municipality'] = '';
 	isset($geoaddress['country']) ? '' : $geoaddress['country'] = '';
 	isset($geoaddress['state']) ? '' : $geoaddress['state'] = '';
-	isset($geoaddress['country']) ? '' : $geoaddress['country'] = '';
+	isset($geoaddress['county']) ? '' : $geoaddress['county'] = '';
 	isset($geoaddress['state_district']) ? '' : $geoaddress['state_district'] = '';
     return $geoaddress;
 }
