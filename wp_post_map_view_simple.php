@@ -42,7 +42,7 @@ function show_post_map($attr)
 	//$gpx_url = $up_url . '/' . $gpxpath . '/';    // gpx_url
 
 	// Report simple running errors
-	error_reporting(E_ERROR | E_WARNING | E_PARSE);
+	error_reporting(E_ERROR | E_PARSE);
 	
 	$args = array('numberposts' => 100, 'post_type' => 'post'); 
 	$custom_posts = get_posts($args);
@@ -74,17 +74,21 @@ function show_post_map($attr)
 			foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
 				$sub = substr($line,0,3); // html-tag aus der zeile ausschneiden
 				$isshortcode = strpos($line,'['); 
-				if (($sub == '<p>') and ($isshortcode == false)) {
-					$p .= substr($line,3) . ' ';
+                if (($sub == '<p>') and (false == $isshortcode)) {
+                    $p .= substr($line, 3) . ' ';
+                }	
 
-				// extract the gpxfile from the shortcode. TODO: no and multiple gpx-files testen!	
-				} elseif ( $isshortcode ) {
+				// extract the gpxfile from the shortcode. TODO: no and multiple gpx-files testen!
+				// TODO: mehrfache shortcodes auf einer Seite
+				$isshortcode = strpos($line,'[gpxview');	
+				if ( is_numeric($isshortcode) ) {
 					$isgpxfile = strpos($line,'gpxfile'); // suche nicht nach dem shortcode, sondern ob ein gpxfile definiert wirde
 					if ( $isgpxfile) {
                         $gpx = preg_match('.[gG][pP][xX].', $line, $matches);
                         $gpx = strpos($line, '.' . $matches[0]);
-                        $gpxfile = substr($line, $isgpxfile+9, $gpx-$isgpxfile-5);
-					} else { $gpxfile = 'none'; }
+                        $gpxfile[] = substr($line, $isgpxfile+9, $gpx-$isgpxfile-5);						
+					} else { //$gpxfile = 'none';
+					 }
 				}
 
 				$p = str_replace('</p>','',$p);
@@ -175,6 +179,7 @@ function show_post_map($attr)
 				'gpxfile' => $gpxfile,
 				'geostat' => $geostat,
 			);
+            $gpxfile = null;
 		}
 	}
 	
@@ -205,16 +210,20 @@ function show_post_map($attr)
 	foreach ($data2 as $data) {
         $gpxfile = $gpx_dir . $data['gpxfile'];
 		$geostatarr= \explode(' ', $data['geostat'] );
+        $npgx = count($data[0]['gpxfile']);
+		if ($npgx > 1) {
+            $adfadf= 1;
+		}
 
 		$googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
         $string  .= '<tr>';
 		$string  .= '<td>' . $data['id'] . '</td>';
-        $string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['gpxfile'] . '</a></td>';
+        $string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
 		$string  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
         $geostatarr[1] = \str_replace(',', '.', $geostatarr[1]);
-		$string  .= '<td>' . $geostatarr[1] . '</td>';
-		$string  .= '<td>' . $geostatarr[4] . '</td>';
-		$string  .= '<td>' . $geostatarr[7] . '</td>';
+		$string  .= '<td>' . $geostatarr[1] ?? 0 . '</td>';
+		$string  .= '<td>' . $geostatarr[4] ?? 0 . '</td>';
+		$string  .= '<td>' . $geostatarr[7] ?? 0 . '</td>';
 		$string  .= '<td>' . $data['country'] . '</td>';
 		$string  .= '<td>' . $data['state'] . '</td>';
 		$string  .= '<td><a href="' . $googleurl . '" target="_blank">'. $data['address'] .'</a></td>';
