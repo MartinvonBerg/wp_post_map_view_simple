@@ -10,13 +10,13 @@
  * Plugin Name:       wp_post_map_view_simple
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.7.0
+ * Version:           0.8.0
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
-// TODO: force_update einführen?
+
 namespace mvbplugins\postmapviewsimple;
 
 defined('ABSPATH') or die('Are you ok?');
@@ -115,23 +115,19 @@ function show_post_map($attr)
 			if ( ! empty($geoaddresstest[0]) ) {
 				$test = $geoaddresstest[0]; // we need only the first index
 				$geoaddress = maybe_unserialize($test);	// type conversion to string Dist: 20,3 km, Gain: 758 Hm, Loss: 756 Hm
-			
-			} else {
+				$type = gettype( $geoaddress ); 
+			} 
+
+			if ( empty($geoaddresstest[0]) || 'string' == $type ) {
                 $geoaddress = [];
                 if (\current_user_can('edit_posts')) {
                     $geoaddress = get_geoaddress($post->ID, $lat, $lon);
                 } else {
-                    $type = \gettype($geoaddress);
-                    if ('array' == $type) {
-                        $geoaddress = sanitize_geoaddress($geoaddress);
-                    } else {
-                        $text = 'wrong type';
-                        $test = $text;
-					}
+                    $geoaddress = 'was_string_but_not_set';
 				}
 			}
 
-			// get the statistics of the gpx-track, TODO: für alle Tracks in customfield schreiben
+			// get the statistics of the gpx-track
 			/*
 			$geostattest =  get_post_meta($post->ID,'geostat');
 			if ( ! empty($geostattest[0]) ) {
@@ -228,7 +224,7 @@ function show_post_map($attr)
                     'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
                     'lat' => $lat,
                     'lon' => $lon,
-                    'title' => $title,
+                    'title' => count($gpxfilearr) == 1 ? $title : $title . ' - ' . \str_replace('.gpx', '', $gpxfile),
                     'category' => $cat,
                     'link' => $postlink,
                     'address' => $address,
@@ -252,8 +248,18 @@ function show_post_map($attr)
 	$string  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion</br></p>';
 	$string  .= '<p>Suche in der Tabelle nach beliebigen Inhalten:</p>';
 	
-	//$string  .= '<div><table data-toggle="table" data-search="true" data-show-columns="true" data-show-search-clear-button="true" data-pagination="true"><thead><tr>';
-    $string  .= '<div><table data-toggle="table" data-search="true" data-show-search-clear-button="true"><thead><tr>';
+	$string  .= '<div><table id="post_table" class="table-sm" data-locale="en-US" data-toggle="table" 
+				 data-search="true" data-search-accent-neutralise="true" data-show-search-clear-button="true">
+				 <thead class="thead-light"><tr>';
+				 /* Diese Einstellung funktionieren nur lokal nicht auf mvb1.de mit dem theme photo perfect
+				 -data-show-columns="true"  
+				 -data-pagination="true" 
+				 -data-show-pagination-switch="true"
+				 -data-pagination-v-align="both"
+				 -data-buttons-align="left"
+				 -data-page-size="20"
+				 ><thead class="thead-light"><tr>';
+				 */
     $string  .= '<th data-sortable="true" data-field="id">Nr</th>';
     $string  .= '<th data-field="Titel">Titel</th>';
     $string  .= '<th data-sortable="true" data-field="Kategorie">Kategorie</th>';
@@ -286,14 +292,16 @@ function show_post_map($attr)
 		$string  .= '<td>' . $geostatarr[7] ?? 0 . '</td>';
 		$string  .= '<td>' . $data['country'] . '</td>';
 		$string  .= '<td>' . $data['state'] . '</td>';
-		$string  .= '<td><a href="' . $googleurl . '" target="_blank">'. $data['address'] .'</a></td>';
+		$string  .= '<td><a href="' . $googleurl . '" target="_blank" rel="noopener noreferrer">'. $data['address'] .'</a></td>';
 		//$string  .= '<td>' . $data['lat'] . '</td>';
 		//$string  .= '<td>' . $data['lon'] . '</td>';
 		$string  .= '</tr>';
 	}
 
     $string  .= '</tbody></table></div>';
-	
+
+	wp_localize_script('wp_post_map_view_simple_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $wp_postmap_path, ));
+		
 	return $string;
 }
 
@@ -386,7 +394,7 @@ function wp_postmap_get_cat($arraytagnames)
 }
 
 /**
- * get the geoaddress for coordinates as json from momitatim
+ * get the geoaddress for coordinates as json from nominatim
  *
  * @param integer $postid the id of the current post
  * @param string $lat latitude of the current post as stored in custom field lat
@@ -405,8 +413,8 @@ function get_geoaddress($postid, $lat, $lon) {
 	$geojson = json_decode(file_get_contents( $url , false, $context ));
 	$geoadress = (array) $geojson->address;
 	$geoadressfield = maybe_serialize($geoadress);
-	delete_post_meta($postid,'geoadress');
-	update_post_meta($postid,'geoadress', $geoadressfield,'');
+	//delete_post_meta($postid,'geoadress');
+	//update_post_meta($postid,'geoadress', $geoadressfield,'');
     return $geoadressfield;
 }
 

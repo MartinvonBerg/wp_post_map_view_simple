@@ -7,7 +7,8 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
 (function (window, document, $, undefined) {
     "use strict";
     var numberOfboxes = document.querySelectorAll('[id=map10_img]').length;
-
+    g_wp_postmap_path = g_wp_postmap_path.g_wp_postmap_path;
+    
     if (numberOfboxes == 1) {
         let mobile = (/iphone|ipod|android|webos|ipad|iemobile|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
 
@@ -440,6 +441,17 @@ if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
                     break;
             }
         });
+
+        // i18n: locale for post table TODO: locale allgemein einbauen
+        var lang = navigator.language;
+        var $table = $('#post_table')
+
+        $(function() {
+            $table.bootstrapTable('refreshOptions', {
+                locale: lang
+            });
+        });
+        
     }
     
 })(window, document, jQuery);

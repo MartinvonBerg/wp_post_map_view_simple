@@ -13,8 +13,9 @@ Here is a short description of the plugin. This should be no more. The following
 == Description ==
 
 Anzeige aller Wordpress-Posts mit GPX-Daten (lat,lon) in den Custom-Fields auf einer OpenStreetMap-Karte. Die Posts werden nach Kategorien in den Tags 
-(Schlagwörtern) eingeteilt (Auswahl in der Karte und spezifische Icons)
+(Schlagwörtern) eingeteilt (Auswahl in der Karte und spezifische Icons). Zusätzlich wird eine Tabelle mit allen Posts angezeigt.
 Shortcode: [mapview] Fertig. Keine Optionen!
+Hinweis: Geo Mashup funktioniert sehr ähnlich und bieter mehr Optionen!
 
 
 == Screenshots ==
@@ -97,6 +98,13 @@ There are no FAQs just yet.
 * PHP 8 compatibility check with phpcs. OK. No change necessary.
 * replace 'jQuery' with $
 * run js on page only if div 'map10_img' is on page
+
+= 0.8.0 =
+*   30.03.2021
+* added a table to show all posts under the map. It is not configurable. Used bootstrap-table for that.
+* Full functionality is not given with theme Photo perfect pro.
+* handle for leaflet fixed to load it only once.
+* loaded all files locally. pass variable "g_wp_postmap_path" by localize_scripts to javascript
 
 == Upgrade Notice ==
 
