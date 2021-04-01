@@ -11,11 +11,11 @@ function wp_post_map_scripts()
   //If page is using slider portfolio template then load our slider script
   // Load Styles
   //wp_enqueue_style('wp_post_map_style5', 'https://use.fontawesome.com/releases/v5.6.3/css/all.css');
-  wp_enqueue_style('leaflet_css', $plugin_url . 'css/leaflet.min.css');
-  wp_enqueue_style('markercluster_css', $plugin_url . 'css/MarkerCluster.min.css');
-  wp_enqueue_style('markercluster_default_css', $plugin_url . 'css/MarkerCluster.Default.min.css');
-  wp_enqueue_style('bootstrap_table_css', $plugin_url . 'css/bootstrap-table.min.css', '', '1.18.2');
-  wp_enqueue_style('wp_post_map_view_simple_css', $plugin_url . 'css/wp_post_map_view_simple.min.css');
+  wp_enqueue_style('leaflet_css',                 $plugin_url . 'css/leaflet.min.css');
+  wp_enqueue_style('markercluster_css',           $plugin_url . 'css/MarkerCluster.min.css');
+  wp_enqueue_style('markercluster_default_css',   $plugin_url . 'css/MarkerCluster.Default.min.css');
+  wp_enqueue_style('bootstrap_table_css',         $plugin_url . 'css/bootstrap-table.min.css', '', '1.18.2');
+  wp_enqueue_style('wp_post_map_view_simple_css', $plugin_url . 'css/wp_post_map_view_simple.min.css', '', '0.8.0');
   
  
   // Load Scripts

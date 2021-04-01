@@ -2,8 +2,6 @@
  * JS-File for past-map-view-simple
  */
 
-if (typeof g_wp_postmap_path === 'undefined') { var g_wp_postmap_path = ''; }
-
 (function (window, document, $, undefined) {
     "use strict";
     var numberOfboxes = document.querySelectorAll('[id=map10_img]').length;

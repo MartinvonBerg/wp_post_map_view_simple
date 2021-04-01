@@ -105,6 +105,7 @@ There are no FAQs just yet.
 * Full functionality is not given with theme Photo perfect pro.
 * handle for leaflet fixed to load it only once.
 * loaded all files locally. pass variable "g_wp_postmap_path" by localize_scripts to javascript
+* introduced a transient variable to store the generated html output. is re-generated if a new post is published
 
 == Upgrade Notice ==
 
