@@ -43,7 +43,7 @@ function show_post_map($attr)
 	$expires = (int) get_option( '_transient_timeout_post_map_html_output', 0 ); // int value 0 if not set
 	$transient_set_time = $expires - $transient_duration;
 
-	if ($last_post_date > $transient_set_time) {
+	if ( ($last_post_date > $transient_set_time) || \current_user_can( 'administrator' )) {
 		\delete_transient( 'post_map_html_output' );
 	}
 
