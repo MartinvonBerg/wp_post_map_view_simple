@@ -31,7 +31,8 @@ add_shortcode('mapview', '\mvbplugins\postmapviewsimple\show_post_map');
  */
 function show_post_map($attr)
 {
-	
+	require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
+
 	// Pfade und Verzeichnisse definieren
 	$plugin_path = plugins_url('/', __FILE__);
 	$wp_postmap_path = $plugin_path . 'images/';
@@ -130,7 +131,7 @@ function show_post_map($attr)
 				$featimage = get_the_post_thumbnail_url($post->ID, $size='thumbnail'); 
 				$postlink = get_permalink($post->ID);
 				$i++;
-				$string  .= '<a alt="' . $title . '" href="' . $featimage . '" data-title="'.$title.'" data-icon="'. $icon. '" data-geo="lat:' . $lat . ',lon:' . $lon . '" data-link="'. $postlink .'">' . $excerpt. '</a>';
+				$string  .= '<a href="' . $featimage . '" data-title="'.$title.'" data-icon="'. $icon. '" data-geo="lat:' . $lat . ',lon:' . $lon . '" data-link="'. $postlink .'">' . $excerpt. '</a>';
 
 				// get the address corresponding to posts lat and lon customfield
 				$geoaddresstest =  get_post_meta($post->ID,'geoadress');	
@@ -265,7 +266,7 @@ function show_post_map($attr)
 			
 		// generate table with post data: generate the header
 		$string  .= '<h4>Tourenübersicht</h4>';
-		$string  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion</br></p>';
+		$string  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p>';
 		$string  .= '<p>Suche in der Tabelle nach beliebigen Inhalten:</p>';
 		
 		$string  .= '<div><table id="post_table" class="table-sm" data-locale="en-US" data-toggle="table" 
@@ -283,9 +284,9 @@ function show_post_map($attr)
 		$string  .= '<th data-sortable="true" data-field="id">Nr</th>';
 		$string  .= '<th data-field="Titel">Titel</th>';
 		$string  .= '<th data-sortable="true" data-field="Kategorie">Kategorie</th>';
-		$string  .= '<th data-sortable="true" data-field="Distanz">Distanz</br>  km</th>';
-		$string  .= '<th data-sortable="true" data-field="Aufstieg">Aufstieg</br>  Hm</th>';
-		$string  .= '<th data-sortable="true" data-field="Abstieg">Abstieg</br> Hm</th>';
+		$string  .= '<th data-sortable="true" data-field="Distanz">Distanz<br>  km</th>';
+		$string  .= '<th data-sortable="true" data-field="Aufstieg">Aufstieg<br>  Hm</th>';
+		$string  .= '<th data-sortable="true" data-field="Abstieg">Abstieg<br> Hm</th>';
 		$string  .= '<th data-sortable="true" data-field="Land">Land</th>';
 		$string  .= '<th data-sortable="true" data-field="Region">Region</th>';
 		$string  .= '<th data-sortable="true" data-field="Stadt">Stadt</th>';
@@ -328,8 +329,6 @@ function show_post_map($attr)
 		
 	return $string;
 }
-
-require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
 
 /**
  * Zuordnung eines sprechenden icon-namens für javascript zu den Tags eines Posts 
