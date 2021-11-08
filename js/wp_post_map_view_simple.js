@@ -141,7 +141,8 @@
             center: [48.0, 12],
             zoom: 10,
             zoomControl: false,
-            layers: [layer1]
+            layers: [layer1],
+            tap : false,
         }
 
         var baseMaps = {

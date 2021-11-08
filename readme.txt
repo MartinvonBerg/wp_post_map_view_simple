@@ -3,9 +3,10 @@ Contributors: Martin von Berg
 Donate link: http://www.mvb1.de/ueber-mich
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
-Tested up to: 5.7
+Tested up to: 5.8.1
 Requires PHP: 7.2
 License: GPLv2
+Stable Tag: 0.8.1
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
@@ -106,6 +107,10 @@ There are no FAQs just yet.
 * handle for leaflet fixed to load it only once.
 * loaded all files locally. pass variable "g_wp_postmap_path" by localize_scripts to javascript
 * introduced a transient variable to store the generated html output. is re-generated if a new post is published
+
+= 0.8.1 =
+*   08.11.2021
+*   Added 'tab: false' for Safari to open the pop-ups of single tours.
 
 == Upgrade Notice ==
 
