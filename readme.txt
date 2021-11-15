@@ -122,3 +122,4 @@ This plugin uses the great work from:
 - leaflet, see: https://leafletjs.com/
 - leaflet markercluster: https://github.com/Leaflet/Leaflet.markercluster
 - wordpress for coding hints: https://de.wordpress.org/
+- map-icons generated with: https://mapicons.mapsmarker.com/
