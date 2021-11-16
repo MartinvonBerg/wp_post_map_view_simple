@@ -20,4 +20,4 @@ wp_enqueue_script('leaflet_markercluster_js',              $plugin_url . 'js/lea
 wp_enqueue_script('leaflet_markercluster_layersupport_js', $plugin_url . 'js/leaflet.markercluster.layersupport.min.js', array('jquery'), '2.0.1', true);
 wp_enqueue_script('bootstrap_table_js',                    $plugin_url . 'js/bootstrap-table.min.js', array('jquery'), '1.18.2', true);
 wp_enqueue_script('bootstrap_table_locale_all_js',         $plugin_url . 'js/bootstrap-table-locale-all.min.js', array('jquery'), '1.18.2', true);
-wp_enqueue_script('wp_post_map_view_simple_js',            $plugin_url . 'js/wp_post_map_view_simple.js', array('jquery'), '0.9.0', true);
+wp_enqueue_script('wp_post_map_view_simple_js',            $plugin_url . 'js/wp_post_map_view_simple.min.js', array('jquery'), '0.9.0', true);

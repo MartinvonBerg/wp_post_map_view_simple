@@ -357,7 +357,10 @@ function wp_postmap_get_icon($arraytagnames)
 			$icon = "mountain";
 			break;	
 		case stristr($arraytagnames,'skitour') !== false:
-			$icon = "skiing"	;
+			$icon = "skiing";
+			break;
+		case stristr($arraytagnames,'Paddeln') !== false:
+			$icon = "kayaking";
 			break;
 		case stristr($arraytagnames,'reisebericht') !== false:
 			$icon = "travel";
@@ -401,6 +404,9 @@ function wp_postmap_get_cat($arraytagnames)
 			break;	
 		case stristr($arraytagnames,'skitour') !== false:
 			$icon = "Skitour"	;
+			break;
+		case stristr($arraytagnames,'Paddeln') !== false:
+			$icon = "Paddeln";
 			break;
 		case stristr($arraytagnames,'reisebericht') !== false:
 			$icon = "Reisebericht";
