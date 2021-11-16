@@ -83,108 +83,61 @@
             controlZoom.addTo(map); 
         }
 
-        // Creating markergroups ----------------------- TODO: LOOP, abhängig von der Anzahl der Kategorien!
+        // Creating markergroups ----------------------- 
         let LayerSupportGroup = L.markerClusterGroup.layerSupport();
         LayerSupportGroup.addTo(map);   
                     
         // Creating markers -----------------------
-        var group1 = L.layerGroup(), // hiking     $icon = "hiking";
-        group2 = L.layerGroup(), // bike-hike  $icon = "bike-hike";
-        group3 = L.layerGroup(), // cycling    $icon = "cycling";
-        group4 = L.layerGroup(), // MTB        $icon = "MTB";
-        group5 = L.layerGroup(), // mountain   $icon = "mountain";
-        group6 = L.layerGroup(), // skiing     $icon = "skiing"
-        group7 = L.layerGroup(), // kayaking   $icon = "kayaking";
-        group8 = L.layerGroup(); // travel     $icon = "travel";
-
+        let group = new Array();
+        allIcons.forEach( function(sIcon, index) {
+            group[index] = L.layerGroup();
+        }); 
+     
         var marker = new Array();
         var nposts = Array( allIcons.length ).fill(0);
         var j = 0;
         var icn, grp;
-        touren.forEach(tour => { // TODO: Loop
-            switch (tour["category"]) {
-                case 'hiking':
-                icn = myIcon[0];
-                grp = group1;
-                nposts[0] = nposts[0] +1;
-                    break;
-                
-                case 'bike-hike':
-                icn = myIcon[1];
-                grp = group2;
-                nposts[1] = nposts[1] +1;
-                    break;
+        touren.forEach(tour => { 
+            //allIcons.forEach( function(icon, index) {
+            let found = false;
 
-                case 'cycling':
-                icn = myIcon[2];
-                grp = group3;
-                nposts[2] = nposts[2] +1;
+            for (let index = 0; index < allIcons.length; index++) {    
+                if (tour["category"] == allIcons[index][1]) {
+                    icn = myIcon[index];
+                    grp = group[index];
+                    nposts[index]++;
+                    found = true;
                     break;
+                };
+            };
 
-                case 'MTB':
-                icn = myIcon[3];
-                grp = group4;
-                nposts[3] = nposts[3] +1;
-                    break;
-
-                case 'mountain':
-                icn = myIcon[4];
-                grp = group5;
-                nposts[4] = nposts[4] +1;
-                    break;
-
-                case 'skiing':
-                icn = myIcon[5];
-                grp = group6;
-                nposts[5] = nposts[5] +1;
-                    break;
-
-                case 'kayaking':
-                icn = myIcon[6];
-                grp = group7;
-                nposts[6] = nposts[6] +1;
-                break;
-
-                case 'travel':
-                icn = myIcon[7];
-                grp = group8;
-                nposts[7] = nposts[7] +1;
-                    break;    
-
-                default:
-                icn = myIcon[7];
-                grp = group8;
-                nposts[7] = nposts[7] +1;
-                    break;
+            if ( ! found ) {
+                icn = myIcon[ allIcons.length-1 ];
+                grp = group[ allIcons.length-1];
+                nposts[ allIcons.length-1]++;
             }
+
             marker.push(new L.Marker(tour["coord"], { title: tour["title"], icon: icn })); 
             marker[j].bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br><img src="' + tour["img"] + '">' + tour["excerpt"] + '</a>');
             marker[j].addTo(grp);
             j++;
         });
-        // ---------------------------------------- TODO: LOOP
-        LayerSupportGroup.checkIn([group1, group2, group3, group4, group5, group6, group7, group8]); 
-
+        
+        group.forEach( function(sgrp, index) {
+            LayerSupportGroup.checkIn(group[index]);
+        }); 
+        
         let control = L.control.layers(baseMaps, null, { collapsed: true });
 
-        control.addOverlay(group1, '<img class="layerIcon" src="'+g_wp_postmap_path+'hiking2.png"/> Wandern (' + nposts[0] + ')');               // hiking     $icon = "hiking";; 
-        control.addOverlay(group2, '<img class="layerIcon" src="'+g_wp_postmap_path+'mountainbiking-3.png"/> Bike-Hike (' + nposts[1] + ')');    // bike-hike  $icon = 'bike-hike';
-        control.addOverlay(group3, '<img class="layerIcon" src="'+g_wp_postmap_path+'cycling.png"/> Radfahren (' + nposts[2] + ')');             // cycling    $icon = 'cycling';
-        control.addOverlay(group4, '<img class="layerIcon" src="'+g_wp_postmap_path+'MTB.png"/> MTB (' + nposts[3] + ')');                       // MTB        $icon = 'MTB';
-        control.addOverlay(group5, '<img class="layerIcon" src="'+g_wp_postmap_path+'peak2.png"/> Bergtour (' + nposts[4] + ')');                // mountain   $icon = 'mountain';
-        control.addOverlay(group6, '<img class="layerIcon" src="'+g_wp_postmap_path+'skiing.png"/> Skitour (' + nposts[5] + ')');                // skiing     $icon = 'skiing'
-        control.addOverlay(group7, '<img class="layerIcon" src="'+g_wp_postmap_path+'kayaking2.png"/> Kayaktour (' + nposts[6] + ')');                // skiing     $icon = 'skiing'
-        control.addOverlay(group8, '<img class="layerIcon" src="'+g_wp_postmap_path+'campingcar.png"/> Reisebericht (' + nposts[7] + ')');       // travel     $icon = 'travel';
+        allIcons.forEach( function(icon, index) {
+            control.addOverlay(group[index], '<img class="layerIcon" src="' + g_wp_postmap_path + icon[0] + '"/> '+icon[2]+' (' + nposts[index] + ')');  
+        });
+      
         control.addTo(map);
 
-        group1.addTo(map); // Adding to map or to AutoMCG are now equivalent.
-        group2.addTo(map);
-        group3.addTo(map);
-        group4.addTo(map);
-        group5.addTo(map);
-        group6.addTo(map);
-        group7.addTo(map);
-        group8.addTo(map);
+        group.forEach( function(sgrp, index) {
+            group[index].addTo(map);
+        }); 
         // ---------------------------------------------------
 
         var bounds = L.latLngBounds();
@@ -204,30 +157,17 @@
                 img.style.cursor = 'pointer';
                 img.title = 'Alles anzeigen';
                 img.onclick = function () {
-                    map.fitBounds(bounds, { padding: [50, 50] }); // TODO: Loop
-                    map.removeLayer(group1);
-                    map.addLayer(group1);
-                    map.removeLayer(group2);
-                    map.addLayer(group2);
-                    map.removeLayer(group3);
-                    map.addLayer(group3);
-                    map.removeLayer(group4);
-                    map.addLayer(group4);
-                    map.removeLayer(group5);
-                    map.addLayer(group5);
-                    map.removeLayer(group6);
-                    map.addLayer(group6);
-                    map.removeLayer(group7);
-                    map.addLayer(group7);
-                    map.removeLayer(group8);
-                    map.addLayer(group8);
+                    map.fitBounds(bounds, { padding: [50, 50] }); 
+                    group.forEach( function(sgrp, index) {
+                        map.removeLayer(group[index]);
+                        map.addLayer(group[index]);
+                    });
                 };
                 return img;
             },
-            onRemove: function (map) {
+            onRemove: function () {
                 // Nothing to do here
             }
-
         });
 
         L.control.watermark = function (opts) {
