@@ -112,6 +112,10 @@ There are no FAQs just yet.
 *   08.11.2021
 *   Added 'tab: false' for Safari to open the pop-ups of single tours.
 
+= 0.9.0 =
+*   16.11.2021
+*   Rework for flexible icons and groups provided by php script. tours are now passed to JS as variable.
+
 == Upgrade Notice ==
 
 There is no need to upgrade just yet.
