@@ -36,6 +36,18 @@ function show_post_map($attr)
 	// Pfade und Verzeichnisse definieren
 	$plugin_path = plugins_url('/', __FILE__);
 	$wp_postmap_path = $plugin_path . 'images/';
+
+	// icons für javascript definieren
+	$allIcons = array(
+		array ('hiking2.png', 'hiking', 'Wandern'),
+		array ('mountainbiking-3.png', 'bike-hike', 'Bike-Hike'),
+		array ('cycling.png', 'cycling', 'Radfahren'),
+		array ('MTB.png', 'MTB', 'MTB'),
+		array ('peak2.png', 'mountain', 'Bergtour'),
+		array ('skiing.png', 'skiing', 'Skitour'),
+		array ('kayaking2.png','kayaking','Paddeln'),
+		array ('campingcar.png', 'travel', 'Reisebericht'),
+	  );
 	
 	// check the transient set time and delete transient if post was published during that time
 	$transient_duration = \WEEK_IN_SECONDS;
@@ -49,14 +61,15 @@ function show_post_map($attr)
 	}
 
 	// generate the output if not set in transient
-	if ( false === ( $string = get_transient( 'post_map_html_output' ) ) ) {
+	//if ( false === ( $string = get_transient( 'post_map_html_output' ) ) ) {
+	if ( true ) {
 		// Pfade und Verzeichnisse und Variablen definieren
 		$lenexcerpt = 150;
 		$gpxpath = get_option( 'fotorama_elevation_option_name' )['path_to_gpx_files_2'] ?? 'gpx';
 		//$up_url = gpxview_get_upload_dir('baseurl');  // upload_url
 		$up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
 		$gpx_dir = $up_dir . '/' . $gpxpath . '/';    // gpx_dir
-		//$gpx_url = $up_url . '/' . $gpxpath . '/';    // gpx_url
+		$postArray = [];
 		
 		$args = array(
 			'numberposts' => 100, 
@@ -133,6 +146,15 @@ function show_post_map($attr)
 				$i++;
 				$string  .= '<a href="' . $featimage . '" data-title="'.$title.'" data-icon="'. $icon. '" data-geo="lat:' . $lat . ',lon:' . $lon . '" data-link="'. $postlink .'">' . $excerpt. '</a>';
 
+				$postArray[] = array(
+					'img' => $featimage,
+					'title' 	=> $title,
+					'category'  	=> $icon,
+					'coord'   	=> array( floatval($lat), floatval($lon) ),
+					'link' 	=> $postlink,
+					'excerpt' 	=> $excerpt,
+				);
+
 				// get the address corresponding to posts lat and lon customfield
 				$geoaddresstest =  get_post_meta($post->ID,'geoadress');	
 				if ( ! empty($geoaddresstest[0]) ) {
@@ -149,36 +171,6 @@ function show_post_map($attr)
 						$geoaddress = 'was_string_but_not_set';
 					}
 				}
-
-				// get the statistics of the gpx-track
-				/*
-				$geostattest =  get_post_meta($post->ID,'geostat');
-				if ( ! empty($geostattest[0]) ) {
-					$test = $geostattest[0]; // we need only the first index
-					$geostat = maybe_unserialize($test);	// type conversion to array
-				
-				} else {
-					$path_to_gpxfile = '';
-					$path_to_gpxfile = $gpx_dir . $gpxfile;
-
-					if ( \is_file( $path_to_gpxfile) ) {		
-						$gpxdata = \simplexml_load_file($path_to_gpxfile);
-						$geostat = (string) $gpxdata->metadata->desc;
-						// geostat prüfen
-						$geostatarr= \explode(' ', $geostat);
-
-						if ('Dist:' == $geostatarr[0] && \current_user_can('edit_posts')) {
-							//$geostatfield = maybe_serialize($geostat);
-							//delete_post_meta($post->ID,'geostat');
-							//update_post_meta($post->ID,'geostat', $geostatfield,'');
-						} elseif ( 'Dist:' != $geostatarr[0] ) {
-							$geostat = 'file valid but no statistics';
-						} 
-					} else {
-						$geostat = '--';
-					}
-				}
-				*/
 
 				$lat = number_format( floatval($lat), 6);
 				$lon = number_format( floatval($lon), 6);
@@ -263,7 +255,9 @@ function show_post_map($attr)
 		}
 		
 		$string  .= '</div></div>'; // close divs for the map
-			
+
+		wp_localize_script('wp_post_map_view_simple_js', 'php_touren' , $postArray );
+
 		// generate table with post data: generate the header
 		$string  .= '<h4>Tourenübersicht</h4>';
 		$string  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p>';
@@ -321,11 +315,12 @@ function show_post_map($attr)
 		}
 		
 		$string  .= '</tbody></table></div>';
-		// end generation of html output: write the html-output in $string now as get_transient
+		// end generation of html output: write the html-output in $string now as set_transient
 		\set_transient('post_map_html_output', $string, $transient_duration);
 	} 
 
 	wp_localize_script('wp_post_map_view_simple_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $wp_postmap_path, ));
+	wp_localize_script('wp_post_map_view_simple_js', 'php_allIcons', $allIcons );
 		
 	return $string;
 }

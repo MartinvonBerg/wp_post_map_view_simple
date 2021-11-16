@@ -4,58 +4,21 @@
 
 (function (window, document, $, undefined) {
     "use strict";
-    var numberOfboxes = document.querySelectorAll('[id=map10_img]').length;
+    let numberOfboxes = document.querySelectorAll('[id=map10_img]').length;
     g_wp_postmap_path = g_wp_postmap_path.g_wp_postmap_path;
     
     if (numberOfboxes == 1) {
         let mobile = (/iphone|ipod|android|webos|ipad|iemobile|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
 
-        var touren = new Array(); // Daten aus dem <a>-Tag laden
-        $('a').each(function (index, value) { // Achtung: geht nur, wenn die Marker als <a> auf der Seite erzeugt werden und sonst keine a-Elemente mit geo-daten vorhanden sind
-            var geodata = this.dataset.geo; // Index for das touren-array evtl. als eigene Lauf-Variable, da index aus beliebigen Werten besteht
-            if (geodata) {
-                geodata = geodata.split(",");
-                if (geodata.length == 2) {
-                    for (var j = 0; j < 2; j++) {
-                        var par = geodata[j].split(":");
-                        geodata[j] = parseFloat(par[1]);
-                    }
-                    if (isNaN(geodata[0]) || isNaN(geodata[1])){
-                        // do nothing
-                    } else {
-                        touren[index] = new Object;
-                        touren[index]["excerpt"] = this.text.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ");
-                        touren[index]["link"] = this.dataset.link;
-                        touren[index]["img"] = this.href;
-                        touren[index]["title"] = this.dataset.title.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ");
-                        touren[index]["category"] = this.dataset.icon;
-                        touren[index]["coord"] = geodata;
-                    }
-                }
-            }
-
-        });
+        // get the data from the php variable with all tours or posts
+        let touren = Object.values(php_touren); // Daten aus dem <a>-Tag laden
     
-        // Icons definieren, TODO: besser als Klasse und als LOOP, abhängig von der Anzahl der Kategorien!
-        var icnh = 32;
-        var icnw = 32;
-        var allIcons = new Array(
-            Array ('hiking2.png', 'hiking', 'Wandern'),
-            Array ('mountainbiking-3.png', 'bike-hike', 'Bike-Hike'),
-            Array ('cycling.png', 'cycling', 'Radfahren'),
-            Array ('MTB.png', 'MTB', 'MTB'),
-            Array ('peak2.png', 'mountain', 'Bergtour'),
-            Array ('skiing.png', 'skiing', 'Skitour'),
-            Array ('kayaking2.png','kayaking','Paddeln'),
-            Array ('campingcar.png', 'travel', 'Reisebericht'),
-          );
+        // Icons definieren aus der php variable übernehmen
+        let allIcons = php_allIcons;
+        let myIcon = new Array();
 
-        let iconindex = 0;
-        let my2Icon = new Array();
-
-        allIcons.forEach(icon => {
-            iconindex++;
-            my2Icon[iconindex] = L.icon({
+        allIcons.forEach( function(icon, iconindex) {
+            myIcon[iconindex] = L.icon({
               iconUrl: g_wp_postmap_path + icon[0],
               iconSize: [32, 32],
               iconAnchor: [0, 0],
@@ -65,8 +28,7 @@
               //shadowAnchor: [22, 94]
             });            
           });  
-
-          
+ 
         // Kartenlayer definieren
         var layer1 = new L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -113,7 +75,6 @@
 
         // Creating scale control
         var scale = L.control.scale();
-        // Adding scale control to the map
         scale.addTo(map);
 
         // create scale control top left // mobile: zoom deactivate. use fingers!
@@ -123,85 +84,76 @@
         }
 
         // Creating markergroups ----------------------- TODO: LOOP, abhängig von der Anzahl der Kategorien!
-        var LayerSupportGroup = L.markerClusterGroup.layerSupport();
-
-        let groups = new Array();
-        allIcons.forEach( function(icon, index) {
-            groups[index+1] = L.layerGroup();
-        }); 
-        /*
-            group1 = L.layerGroup(), // hiking     $icon = "hiking";
-            group2 = L.layerGroup(), // bike-hike  $icon = "bike-hike";
-            group3 = L.layerGroup(), // cycling    $icon = "cycling";
-            group4 = L.layerGroup(), // MTB        $icon = "MTB";
-            group5 = L.layerGroup(), // mountain   $icon = "mountain";
-            group6 = L.layerGroup(), // skiing     $icon = "skiing"
-            group7 = L.layerGroup(), // skiing     $icon = "skiing"
-            group8 = L.layerGroup(), // travel     $icon = "travel";
-          */          
-        let control = L.control.layers(baseMaps, null, { collapsed: true });
-        var i, a, title;
-
-        LayerSupportGroup.addTo(map);
-
+        let LayerSupportGroup = L.markerClusterGroup.layerSupport();
+        LayerSupportGroup.addTo(map);   
+                    
         // Creating markers -----------------------
+        var group1 = L.layerGroup(), // hiking     $icon = "hiking";
+        group2 = L.layerGroup(), // bike-hike  $icon = "bike-hike";
+        group3 = L.layerGroup(), // cycling    $icon = "cycling";
+        group4 = L.layerGroup(), // MTB        $icon = "MTB";
+        group5 = L.layerGroup(), // mountain   $icon = "mountain";
+        group6 = L.layerGroup(), // skiing     $icon = "skiing"
+        group7 = L.layerGroup(), // kayaking   $icon = "kayaking";
+        group8 = L.layerGroup(); // travel     $icon = "travel";
+
         var marker = new Array();
-        var nposts = [0,0,0,0,0,0,0,0]; // TODO: Loop
+        var nposts = Array( allIcons.length ).fill(0);
         var j = 0;
         var icn, grp;
         touren.forEach(tour => { // TODO: Loop
             switch (tour["category"]) {
                 case 'hiking':
-                icn = my2Icon[1];
-                grp = groups[1];
+                icn = myIcon[0];
+                grp = group1;
                 nposts[0] = nposts[0] +1;
                     break;
                 
                 case 'bike-hike':
-                icn = my2Icon[2];
-                grp = groups[2];
+                icn = myIcon[1];
+                grp = group2;
                 nposts[1] = nposts[1] +1;
                     break;
 
                 case 'cycling':
-                icn = my2Icon[3];
-                grp = groups[3];
+                icn = myIcon[2];
+                grp = group3;
                 nposts[2] = nposts[2] +1;
                     break;
 
                 case 'MTB':
-                icn = my2Icon[4];
-                grp = groups[4];
+                icn = myIcon[3];
+                grp = group4;
                 nposts[3] = nposts[3] +1;
                     break;
 
                 case 'mountain':
-                icn = my2Icon[5];
-                grp = groups[5];
+                icn = myIcon[4];
+                grp = group5;
                 nposts[4] = nposts[4] +1;
                     break;
 
                 case 'skiing':
-                icn = my2Icon[6];
-                grp = groups[6];
+                icn = myIcon[5];
+                grp = group6;
                 nposts[5] = nposts[5] +1;
                     break;
 
                 case 'kayaking':
-                    icn = my2Icon[7];
-                    grp = groups[7];
-                    nposts[5] = nposts[5] +1;
-                        break;
+                icn = myIcon[6];
+                grp = group7;
+                nposts[6] = nposts[6] +1;
+                break;
 
                 case 'travel':
-                icn = my2Icon[8];
-                grp = groups[8];
+                icn = myIcon[7];
+                grp = group8;
                 nposts[7] = nposts[7] +1;
-                    break;   
+                    break;    
 
                 default:
-                icn = my2Icon[8];
-                grp = groups[8];
+                icn = myIcon[7];
+                grp = group8;
                 nposts[7] = nposts[7] +1;
                     break;
             }
@@ -211,26 +163,20 @@
             j++;
         });
         // ---------------------------------------- TODO: LOOP
-        allIcons.forEach( function(icon, index) {
-            LayerSupportGroup.checkIn( groups[index+1] );
-        }); 
-        //LayerSupportGroup.checkIn([group1, group2, group3, group4, group5, group6, group7, group8]); 
+        LayerSupportGroup.checkIn([group1, group2, group3, group4, group5, group6, group7, group8]); 
 
-        allIcons.forEach( function(icon, index) {
-            //LayerSupportGroup.checkIn( groups[index+1] );
-            control.addOverlay(groups[index+1], '<img class="layerIcon" src="'+ g_wp_postmap_path + icon[0] + '"/> Wandern (' + nposts[0] + ')'); 
-        });
-        /*
+        let control = L.control.layers(baseMaps, null, { collapsed: true });
+
         control.addOverlay(group1, '<img class="layerIcon" src="'+g_wp_postmap_path+'hiking2.png"/> Wandern (' + nposts[0] + ')');               // hiking     $icon = "hiking";; 
         control.addOverlay(group2, '<img class="layerIcon" src="'+g_wp_postmap_path+'mountainbiking-3.png"/> Bike-Hike (' + nposts[1] + ')');    // bike-hike  $icon = 'bike-hike';
         control.addOverlay(group3, '<img class="layerIcon" src="'+g_wp_postmap_path+'cycling.png"/> Radfahren (' + nposts[2] + ')');             // cycling    $icon = 'cycling';
         control.addOverlay(group4, '<img class="layerIcon" src="'+g_wp_postmap_path+'MTB.png"/> MTB (' + nposts[3] + ')');                       // MTB        $icon = 'MTB';
         control.addOverlay(group5, '<img class="layerIcon" src="'+g_wp_postmap_path+'peak2.png"/> Bergtour (' + nposts[4] + ')');                // mountain   $icon = 'mountain';
         control.addOverlay(group6, '<img class="layerIcon" src="'+g_wp_postmap_path+'skiing.png"/> Skitour (' + nposts[5] + ')');                // skiing     $icon = 'skiing'
-        control.addOverlay(group7, '<img class="layerIcon" src="'+g_wp_postmap_path+'kayaking2.png"/> Bootstour (' + nposts[6] + ')');                // skiing     $icon = 'skiing'
+        control.addOverlay(group7, '<img class="layerIcon" src="'+g_wp_postmap_path+'kayaking2.png"/> Kayaktour (' + nposts[6] + ')');                // skiing     $icon = 'skiing'
         control.addOverlay(group8, '<img class="layerIcon" src="'+g_wp_postmap_path+'campingcar.png"/> Reisebericht (' + nposts[7] + ')');       // travel     $icon = 'travel';
         control.addTo(map);
-        
+
         group1.addTo(map); // Adding to map or to AutoMCG are now equivalent.
         group2.addTo(map);
         group3.addTo(map);
@@ -239,12 +185,6 @@
         group6.addTo(map);
         group7.addTo(map);
         group8.addTo(map);
-        */
-        allIcons.forEach( function(icon, index) {
-            //LayerSupportGroup.checkIn( groups[index+1] );
-            //control.addOverlay(groups[index+1], '<img class="layerIcon" src="'+ g_wp_postmap_path + icon[0] + '"/> Wandern (' + nposts[0] + ')'); 
-            groups[index+1].addTo(map);
-        });
         // ---------------------------------------------------
 
         var bounds = L.latLngBounds();
@@ -302,7 +242,7 @@
             var string = '';
             var max = children.length;
             if (max > 10) { max = 10 };
-            for (i = 0; i < max; i++) {
+            for (let i = 0; i < max; i++) {
                 names.push(children[i].options.title);
                 string = string + '- ' + children[i].options.title + '<br>';
 
@@ -314,7 +254,7 @@
         LayerSupportGroup.on('clustermouseout', function (a) {
             a.propagatedFrom.bindTooltip('').closeTooltip();
         });
-        /*
+
         L.Control.Layers.include({
             getOverlays: function() {
             // create hash to hold all layers
@@ -338,7 +278,7 @@
             return activemaplayer;
             }
         });
-        */
+
         $(window).on("resize", function() {
             var or = window.orientation;
             var h = window.screen.availHeight;
