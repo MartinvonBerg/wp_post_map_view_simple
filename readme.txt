@@ -6,7 +6,7 @@ Requires at least: 5.0
 Tested up to: 5.8.1
 Requires PHP: 7.2
 License: GPLv2
-Stable Tag: 0.8.1
+Stable Tag: 0.9.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
