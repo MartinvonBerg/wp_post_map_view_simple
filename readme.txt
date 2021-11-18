@@ -6,7 +6,7 @@ Requires at least: 5.0
 Tested up to: 5.8.1
 Requires PHP: 7.2
 License: GPLv2
-Stable Tag: 0.9.0
+Stable Tag: 0.9.1
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
@@ -61,8 +61,7 @@ There are no screenshots yet, see : https://www.mvb1.de/uebersichtskarte/ for an
     - Das Design wird direkt im CSS eingestellt. Kartenhöhe nicht vergessen!
 
     1.5 TODO
-    JS zumindest so flexibel gestalten, daß sich die MarkerCluster an den Kategorien ausrichten. Die Icons müssen dann wie die Kategorie heißen.
-    Dann wird das JS durch PHP und den HTML-Code gesteuert. 
+    Allgemeine Optimierung, mehr als Wunsch. 
 
 == Installation ==
 
@@ -115,6 +114,10 @@ There are no FAQs just yet.
 = 0.9.0 =
 *   16.11.2021
 *   Rework for flexible icons and groups provided by php script. tours are now passed to JS as variable.
+
+= 0.9.1 =
+*   18.11.2021
+*   introduced and tested transients for PHP -> JS variable $postArray
 
 == Upgrade Notice ==
 

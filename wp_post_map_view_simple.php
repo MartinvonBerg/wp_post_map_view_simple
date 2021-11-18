@@ -10,14 +10,12 @@
  * Plugin Name:       wp_post_map_view_simple
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.9.0
+ * Version:           0.9.1
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
-
-// TODO: solve transients and php variable to js. change enqueue to minified js
 
 namespace mvbplugins\postmapviewsimple;
 
@@ -60,11 +58,15 @@ function show_post_map($attr)
 
 	if ( ($last_post_date > $transient_set_time) || \current_user_can( 'administrator' )) {
 		\delete_transient( 'post_map_html_output' );
+		\delete_transient( 'post_map_js_postArray_output' );
 	}
 
 	// generate the output if not set in transient
-	//if ( false === ( $string = get_transient( 'post_map_html_output' ) ) ) {
-	if ( true ) {
+	$string = get_transient( 'post_map_html_output' );
+	$postArray = get_transient( 'post_map_js_postArray_output' );
+
+	if ( ! $string || ! $postArray ) {
+	
 		// Pfade und Verzeichnisse und Variablen definieren
 		$lenexcerpt = 150;
 		$gpxpath = get_option( 'fotorama_elevation_option_name' )['path_to_gpx_files_2'] ?? 'gpx';
@@ -319,8 +321,10 @@ function show_post_map($attr)
 		$string  .= '</tbody></table></div>';
 		// end generation of html output: write the html-output in $string now as set_transient
 		\set_transient('post_map_html_output', $string, $transient_duration);
+		\set_transient('post_map_js_postArray_output', $postArray, $transient_duration);
 	} 
 
+	wp_localize_script('wp_post_map_view_simple_js', 'php_touren' , $postArray );
 	wp_localize_script('wp_post_map_view_simple_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $wp_postmap_path, ));
 	wp_localize_script('wp_post_map_view_simple_js', 'php_allIcons', $allIcons );
 		
