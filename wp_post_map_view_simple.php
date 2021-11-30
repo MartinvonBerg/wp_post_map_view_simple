@@ -4,13 +4,13 @@
  *
  * @link              www.mvb1.de
  * @since             5.3.0
- * @package           wp_post_map_view_simple
+ * @package           PostMapTableView
  *
  * @wordpress-plugin
- * Plugin Name:       wp_post_map_view_simple
+ * Plugin Name:       PostMapTableView
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.9.1
+ * Version:           0.10.0
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+
@@ -265,30 +265,19 @@ function show_post_map($attr)
 		// generate table with post data: generate the header
 		$string  .= '<h4>Tourenübersicht</h4>';
 		$string  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p>';
-		$string  .= '<p>Suche in der Tabelle nach beliebigen Inhalten:</p>';
-		
-		$string  .= '<div><table id="post_table" class="table-sm" data-locale="en-US" data-toggle="table" 
-					data-search="true" data-search-accent-neutralise="true" data-show-search-clear-button="true">
-					<thead class="thead-light"><tr>';
-					/* Diese Einstellung funktionieren nur lokal nicht auf mvb1.de mit dem theme photo perfect
-					-data-show-columns="true"  
-					-data-pagination="true" 
-					-data-show-pagination-switch="true"
-					-data-pagination-v-align="both"
-					-data-buttons-align="left"
-					-data-page-size="20"
-					><thead class="thead-light"><tr>';
-					*/
-		$string  .= '<th data-sortable="true" data-field="id">Nr</th>';
-		$string  .= '<th data-field="Titel">Titel</th>';
-		$string  .= '<th data-sortable="true" data-field="Kategorie">Kategorie</th>';
-		$string  .= '<th data-sortable="true" data-field="Distanz">Distanz<br>  km</th>';
-		$string  .= '<th data-sortable="true" data-field="Aufstieg">Aufstieg<br>  Hm</th>';
-		$string  .= '<th data-sortable="true" data-field="Abstieg">Abstieg<br> Hm</th>';
-		$string  .= '<th data-sortable="true" data-field="Land">Land</th>';
-		$string  .= '<th data-sortable="true" data-field="Region">Region</th>';
-		$string  .= '<th data-sortable="true" data-field="Stadt">Stadt</th>';
-		//$string  .= '<th>Breite</th><th>Länge</th>';
+		$string  .= '<p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p>';
+		$string  .= '<button id="tablereset" type="button">Reset Filter</button>';
+		$string  .= '<table id="post_table"><thead><tr>';
+				
+		$string  .= '<th>Nr</th>';
+		$string  .= '<th>Titel</th>';
+		$string  .= '<th>Kategorie</th>';
+		$string  .= '<th>Distanz</th>';
+		$string  .= '<th>Aufstieg</th>';
+		$string  .= '<th>Abstieg</th>';
+		$string  .= '<th>Land</th>';
+		$string  .= '<th>Region</th>';
+		$string  .= '<th>Stadt</th>';
 		$string  .= '</tr></thead><tbody>';
 		
 		// generate table with post data 
@@ -307,9 +296,9 @@ function show_post_map($attr)
 			$string  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
 			$string  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
 			$geostatarr[1] = \str_replace(',', '.', $geostatarr[1]);
-			$string  .= '<td>' . $geostatarr[1] ?? 0 . '</td>';
-			$string  .= '<td>' . $geostatarr[4] ?? 0 . '</td>';
-			$string  .= '<td>' . $geostatarr[7] ?? 0 . '</td>';
+			$string  .= '<td>' . floatval($geostatarr[1]) ?? 0 . '</td>';
+			$string  .= '<td>' . floatval($geostatarr[4]) ?? 0 . '</td>';
+			$string  .= '<td>' . floatval($geostatarr[7]) ?? 0 . '</td>';
 			$string  .= '<td>' . $data['country'] . '</td>';
 			$string  .= '<td>' . $data['state'] . '</td>';
 			$string  .= '<td><a href="' . $googleurl . '" target="_blank" rel="noopener noreferrer">'. $data['address'] .'</a></td>';
@@ -318,7 +307,8 @@ function show_post_map($attr)
 			$string  .= '</tr>';
 		}
 		
-		$string  .= '</tbody></table></div>';
+		$string  .= '</tbody></table>';
+		
 		// end generation of html output: write the html-output in $string now as set_transient
 		\set_transient('post_map_html_output', $string, $transient_duration);
 		\set_transient('post_map_js_postArray_output', $postArray, $transient_duration);

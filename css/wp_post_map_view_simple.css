@@ -49,3 +49,24 @@
     color: black;
     text-decoration: none;
 }
+
+.tabulator-header {
+    background-color: #000 !important;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    background-color: lightgray;
+}
+
+.tabulator .tabulator-footer {
+    white-space: pre-wrap !important;
+ }
+ 
+ .tabulator .tabulator-footer .tabulator-page-size {
+   margin: 0px;
+   max-width: 100px;
+ }
+ 
+ .tabulator .tabulator-footer .tabulator-page {
+    background: hsl(0deg 0% 20% / 99%) !important;
+ }

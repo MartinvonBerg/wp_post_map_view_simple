@@ -1,12 +1,12 @@
 === wp-post-map-view-simple ===
 Contributors: Martin von Berg
-Donate link: http://www.mvb1.de/ueber-mich
+Donate link: http://www.mvb1.de
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
-Tested up to: 5.8.1
-Requires PHP: 7.2
+Tested up to: 5.8.2
+Requires PHP: 7.4
 License: GPLv2
-Stable Tag: 0.9.1
+Stable Tag: 0.10.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
@@ -118,6 +118,10 @@ There are no FAQs just yet.
 = 0.9.1 =
 *   18.11.2021
 *   introduced and tested transients for PHP -> JS variable $postArray
+
+= 0.10.0 =
+*   30.11.2021
+*   switched to tabulator.info
 
 == Upgrade Notice ==
 
