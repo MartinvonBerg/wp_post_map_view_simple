@@ -7,7 +7,7 @@
  * @package           PostMapTableView
  *
  * @wordpress-plugin
- * Plugin Name:       PostMapTableView
+ * Plugin Name:       Post Map Table View
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
  * Version:           0.10.0

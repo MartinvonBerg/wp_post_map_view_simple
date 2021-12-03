@@ -62,6 +62,7 @@
             zoomControl: false,
             layers: [layer1],
             tap : false,
+            gestureHandling: true,            
         }
 
         var baseMaps = {
