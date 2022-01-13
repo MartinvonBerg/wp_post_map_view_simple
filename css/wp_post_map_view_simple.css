@@ -1,6 +1,7 @@
 #map {
-    height: 800px;
+    max-height: 800px;
     width: 100%;
+    max-width: 1000px;
     margin: 0;
     padding: 0
 }
@@ -34,6 +35,10 @@
     max-width: 250px;
 }
 
+.leaflet-popup-content b {
+    font-weight: bold !important;
+}
+
 .leaflet-popup-content img {
     margin-left: auto;
     margin-right: auto;
@@ -50,8 +55,12 @@
     text-decoration: none;
 }
 
+.tabulator {
+    background-color: #FFF !important;
+}
+
 .tabulator-header {
-    background-color: #000 !important;
+    background-color: #FFF !important;
 }
 
 .tabulator .tabulator-header .tabulator-col {
