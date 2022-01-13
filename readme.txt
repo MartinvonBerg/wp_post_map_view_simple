@@ -6,7 +6,7 @@ Requires at least: 5.0
 Tested up to: 5.8.2
 Requires PHP: 7.4
 License: GPLv2
-Stable Tag: 0.10.0
+Stable Tag: 0.10.1
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
@@ -27,7 +27,7 @@ There are no screenshots yet, see : https://www.mvb1.de/uebersichtskarte/ for an
 1.Post-Vorbereitung
     1.1. Vorbereitung
     - Custom-Fields: 
-        Lat : Lattitude eintragen
+        Lat : Lattitude eintragen (Punkt als Dezimaltrenner verwenden!)
         Lon : Longitude eintragen
         Posts mit (0,0) oder ungültigen oder keinen Daten werden ignoriert
         Übersicht, ob alle Custom-Fields gesetzt sind: am besten mit WP-Plugin Admin Columns und spezifischer Ansicht.
@@ -42,10 +42,32 @@ There are no screenshots yet, see : https://www.mvb1.de/uebersichtskarte/ for an
         Bergtour ->     mountain      peak2.png
         skitour ->      skiing        skiing.png
         reisebericht -> travel        campingcar.png
+        Paddeln    ->   Paddeln       kayaking2.png
         default ->      travel        campingcar.png
+
+    Definiert wird das in einem PHP-Array:
+    $allIcons = array(
+		array ('hiking2.png', 'hiking', 'Wandern'),
+		array ('mountainbiking-3.png', 'bike-hike', 'Bike-Hike'),
+		array ('cycling.png', 'cycling', 'Radfahren'),
+		array ('MTB.png', 'MTB', 'MTB'),
+		array ('peak2.png', 'mountain', 'Bergtour'),
+		array ('skiing.png', 'skiing', 'Skitour'),
+		array ('kayaking2.png','kayaking','Paddeln'),
+		array ('campingcar.png', 'travel', 'Reisebericht'),
+	);
 
     1.2. Karte erzeugen
     - Shortcode [mapview] auf Seite einbinden. Fertig.
+    - Folgende Parameter stehen zur Verfügung
+        <Parameter>      <Default-Wert>
+        'numberposts' => 100,  // Anzahl der anzuzeigenden Posts
+        'post_type'   => 'post',  // Verwende Posts zur Anzeige, keine Alternative möglich. Am besten auf post lassen.
+        'showmap'     => 'true',   // Zeige die Karte
+        'showtable'   => 'true',    // Zeige die Tabelle
+        'category'    => 'all',   // Auswahl der Kategorien, am besten auf 'all' lassen
+        'headerhtml'  => '',       // Alternativer html-Code für den Header der Tabelle 
+    
 
     1.3. Randbedingungen und Einstellungen
     - Titel wird auf 80 Zeichen gekürzt (Zeile 53 im ...php)
@@ -122,6 +144,10 @@ There are no FAQs just yet.
 = 0.10.0 =
 *   30.11.2021
 *   switched to tabulator.info
+
+= 0.10.1 =
+*   13.01.2022
+*   CSS changes for new theme. Readme update
 
 == Upgrade Notice ==
 
