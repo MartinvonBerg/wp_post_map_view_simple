@@ -6,7 +6,7 @@ Requires at least: 5.0
 Tested up to: 5.8.2
 Requires PHP: 7.4
 License: GPLv2
-Stable Tag: 0.10.1
+Stable Tag: 0.10.2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
@@ -16,7 +16,7 @@ Here is a short description of the plugin. This should be no more. The following
 Anzeige aller Wordpress-Posts mit GPX-Daten (lat,lon) in den Custom-Fields auf einer OpenStreetMap-Karte. Die Posts werden nach Kategorien in den Tags 
 (Schlagwörtern) eingeteilt (Auswahl in der Karte und spezifische Icons). Zusätzlich wird eine Tabelle mit allen Posts angezeigt.
 Shortcode: [mapview] Fertig. Keine Optionen!
-Hinweis: Geo Mashup funktioniert sehr ähnlich und bieter mehr Optionen!
+Hinweis: Geo Mashup funktioniert sehr ähnlich und bietet mehr Optionen!
 
 
 == Screenshots ==
@@ -148,6 +148,10 @@ There are no FAQs just yet.
 = 0.10.1 =
 *   13.01.2022
 *   CSS changes for new theme. Readme update
+
+= 0.10.2 =
+*   16.01.2022
+*   Minor PHP bugfix.
 
 == Upgrade Notice ==
 

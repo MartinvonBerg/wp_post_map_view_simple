@@ -10,7 +10,7 @@
  * Plugin Name:       Post Map Table View
  * Plugin URI:        www.mvb1.de
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.10.1
+ * Version:           0.10.2
  * Author:            Martin von Berg
  * Author URI:        www.mvb1.de
  * License:           GPL-2.0+
@@ -86,8 +86,9 @@ function show_post_map( $attr )
 	// loop through all posts and fetch data for the output
 	foreach ($custom_posts as $post) { 
 		
-		$lat = $post->lat;
-		$lon = $post->lon;
+		$lat = $post->lat ?? 0;
+		$lon = $post->lon ?? 0;
+		$gpxfilearr = null;
 
 		if ( ! ( (is_null($lat) || (0 == $lat) ) && (is_null($lon) || (0 == $lon)) ) ) { // Achte auf das Not!
 			$title = substr($post->post_title,0,80); // Länge des Titels beschränken, Anzahl Zeichen
@@ -253,7 +254,7 @@ function show_post_map( $attr )
 				);
 				$gpxcount++;
 			}
-			$gpxfilearr = null;
+			//$gpxfilearr = null;
 		}
 	}
 	// close divs for the map
