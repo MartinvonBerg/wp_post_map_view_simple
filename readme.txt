@@ -3,7 +3,7 @@ Contributors: Martin von Berg
 Donate link: http://www.mvb1.de
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
-Tested up to: 5.8.2
+Tested up to: 5.9
 Requires PHP: 7.4
 License: GPLv2
 Stable Tag: 0.10.2
