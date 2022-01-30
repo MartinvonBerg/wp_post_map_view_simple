@@ -1,6 +1,6 @@
 === wp-post-map-view-simple ===
 Contributors: Martin von Berg
-Donate link: http://www.mvb1.de
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CQA6XZ7LUMBJQ
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
 Tested up to: 5.9
@@ -21,7 +21,7 @@ Hinweis: Geo Mashup funktioniert sehr ähnlich und bietet mehr Optionen!
 
 == Screenshots ==
 
-There are no screenshots yet, see : https://www.mvb1.de/uebersichtskarte/ for an example of the plugin.
+There are no screenshots yet, see : https://www.berg-reise-foto.de/uebersichtskarte/ for an example of the plugin.
 
 
 1.Post-Vorbereitung
