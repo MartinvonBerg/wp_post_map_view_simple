@@ -2,17 +2,17 @@
 
 /**
  *
- * @link              www.mvb1.de
+ * @link              https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * @since             5.3.0
  * @package           PostMapTableView
  *
  * @wordpress-plugin
  * Plugin Name:       Post Map Table View
- * Plugin URI:        www.mvb1.de
+ * Plugin URI:        https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
  * Version:           0.10.3
  * Author:            Martin von Berg
- * Author URI:        www.mvb1.de
+ * Author URI:        https://www.berg-reise-foto.de/info/ueber-mich/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
