@@ -10,7 +10,7 @@
  * Plugin Name:       Post Map Table View
  * Plugin URI:        https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.10.3
+ * Version:           0.10.4
  * Author:            Martin von Berg
  * Author URI:        https://www.berg-reise-foto.de/info/ueber-mich/
  * License:           GPL-2.0+
@@ -50,6 +50,7 @@ function show_post_map( $attr )
 	$up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
 	$gpx_dir = $up_dir . '/' . $gpxpath . '/';    // gpx_dir
 	$postArray = [];
+	$data2 = [];
 	$lenexcerpt = 150;
 
 	// extract and handle shortcode parameters
@@ -86,8 +87,8 @@ function show_post_map( $attr )
 	// loop through all posts and fetch data for the output
 	foreach ($custom_posts as $post) { 
 		
-		$lat = $post->lat ?? 0;
-		$lon = $post->lon ?? 0;
+		$lat = get_post_meta($post->ID,'lat', true) ?? '';
+		$lon = get_post_meta($post->ID,'lon', true) ?? '';
 		$gpxfilearr = null;
 
 		if ( ! ( (is_null($lat) || (0 == $lat) ) && (is_null($lon) || (0 == $lon)) ) ) { // Achte auf das Not!
@@ -159,12 +160,16 @@ function show_post_map( $attr )
 			);
 
 			// get the address corresponding to posts lat and lon customfield
-			$geoaddresstest =  get_post_meta($post->ID,'geoadress');	
+			$geoaddresstest =  get_post_meta($post->ID,'geoadress');
+			$type = '';	
 			if ( ! empty($geoaddresstest[0]) ) {
 				$test = $geoaddresstest[0]; // we need only the first index
-				$geoaddress = maybe_unserialize($test);	// type conversion to string Dist: 20,3 km, Gain: 758 Hm, Loss: 756 Hm
+				$geoaddress = maybe_unserialize($test);	// type conversion to string
 				$type = gettype( $geoaddress ); 
 			} 
+
+			$lat = number_format( floatval($lat), 6);
+			$lon = number_format( floatval($lon), 6);
 
 			if ( empty($geoaddresstest[0]) || 'string' == $type ) {
 				$geoaddress = [];
@@ -175,8 +180,6 @@ function show_post_map( $attr )
 				}
 			}
 
-			$lat = number_format( floatval($lat), 6);
-			$lon = number_format( floatval($lon), 6);
 			$gpxcount = 1;
 
 			if ($gpxfilearr == null) {
@@ -268,12 +271,12 @@ function show_post_map( $attr )
 	if ( $showtable ){
 		// generate table with post data: generate the header
 		if ( $headerhtml == '') {
-			$table_out  .= '<h4>Tourenübersicht</h4>';
+			$table_out  = '<h4>Tourenübersicht</h4>';
 			$table_out  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p>';
 			$table_out  .= '<p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p>';
 		} else {
 			$headerhtml = str_replace(array("\r", "\n"), '', $headerhtml);
-			$table_out  .= $headerhtml;
+			$table_out  = $headerhtml;
 		}
 		$table_out  .= '<button id="tablereset" type="button">Reset Filter</button>';
 		$table_out  .= '<table id="post_table"><thead><tr>';
