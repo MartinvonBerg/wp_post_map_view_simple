@@ -31,7 +31,9 @@ add_shortcode('mapview', '\mvbplugins\postmapviewsimple\show_post_map');
  */
 function show_post_map( $attr )
 {
-	// icons für javascript definieren
+	// icons für javascript und php definieren als array of arrays
+	// struktur eines sub-arrays: < Dateiname-Icon-im-Ordner-Images:string, zu-suchendes-Schlagwort-im-Post:string, Tour-Name-in-der-Karte:string >
+	
 	$allIcons = array(
 		array ('hiking2.png', 'hiking', 'Wandern'),
 		array ('mountainbiking-3.png', 'bike-hike', 'Bike-Hike'),
