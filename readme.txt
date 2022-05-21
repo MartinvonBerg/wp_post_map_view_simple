@@ -3,10 +3,10 @@ Contributors: Martin von Berg
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CQA6XZ7LUMBJQ
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
 Requires at least: 5.0
-Tested up to: 5.9
+Tested up to: 6.0
 Requires PHP: 7.4
 License: GPLv2
-Stable Tag: 0.10.4
+Stable Tag: 0.10.5
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin. This should be no more. The following text is mainly in German.
@@ -160,6 +160,10 @@ There are no FAQs just yet.
 = 0.10.4 =
 *   02.02.2022
 *   Minor PHP Warning correction to satisfy PHPStan (level 5) and QueryMonitor
+
+= 0.10.5=
+*   14.05.0222
+* Test with WordPress 6.0.
 
 == Upgrade Notice ==
 
