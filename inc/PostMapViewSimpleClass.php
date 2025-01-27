@@ -35,33 +35,42 @@ interface PostMapViewSimpleInterface {
 
 /**
  * main shortcode function to generate the html
- *
+ * TODO: add phpunit tests for the methods of this class
+ * TODO: use webpack for JS, CSS generation. Update all JS libraries
+ * TODO: use tileserver
+ * TODO: provide post_types and categories as arrays
+ * TODO: finally add the functions similar to maps Marker pro!
+ * 
  * @author Martin von Berg
  */
 final class PostMapViewSimple implements PostMapViewSimpleInterface {
-	private $plugin_path;
-    private $wp_postmap_path;
-	private $gpxpath;
+	private $plugin_url;
+    private $wp_postmap_url;
+	private $gpxfolder = 'gpx'; // option? or shortcode?
 	private $up_dir;
 	private $gpx_dir;
 	private $postArray = [];
-	private $data2 = [];
-	private $lenexcerpt = 150;
+	private $geoDataArray = [];
+	private $lenexcerpt = 150; // option? or shortcode?
+    private $useWPExcerpt = false; // option? or shortcode?
+    private $titlelength = 80; // option? or shortcode?
     private $numberposts = 100;
-    private $post_type = 'post';
+    private $post_type = 'post'; // TODO: do it for different post types, so this might be an array
 	private $showmap = true;
 	private $showtable = true;
-	private $category = 'all';
+	private $category = 'all'; // TODO : use an array of categories as well
 	private $headerhtml = '';
 	private $allIcons = [];
+    private $useTileServer = true; // option? or shortcode?
+    private $convertTilesToWebp = true; // option? or shortcode?
+	private $htaccessTileServerIsOK = false;
 	
 	public function __construct( $attr ) {
-		// --------------- constructor start
-		$this->plugin_path = plugin_dir_url(__DIR__);
-		$this->wp_postmap_path = $this->plugin_path . 'images/';
-		$this->gpxpath = get_option( 'fotorama_elevation_option_name' )['path_to_gpx_files_2'] ?? 'gpx'; // option?
+		
+		$this->plugin_url = plugin_dir_url(__DIR__);
+		$this->wp_postmap_url = $this->plugin_url . 'images/';
 		$this->up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
-		$this->gpx_dir = $this->up_dir . '/' . $this->gpxpath . '/';    // gpx_dir
+		$this->gpx_dir = $this->up_dir . '/' . $this->gpxfolder . '/';    // gpx_dir
 		
 		// extract and handle shortcode parameters
 		$attr = shortcode_atts ( array ( 
@@ -79,50 +88,82 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		$this->showtable = $attr['showtable'] === 'true';
 		$this->category = strtolower( $attr['category'] );
 		$this->headerhtml = $attr['headerhtml'];
-		
-		// --------------- constructor end
+
+        if ( $this->useTileServer) {
+            $this->htaccessTileServerIsOK = $this->checkHtaccess();
+            !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+        }
 	}
 	
 	public function show_post_map() :string {
+
+        // check the transient set time and delete transient if post was published during that time
+        $transient_duration = \WEEK_IN_SECONDS;
+        $last_post_date = \get_lastpostdate('server', 'any'); // "2020-12-24 13:16:03.000000"
+        $last_post_date = \strtotime( $last_post_date ); // now in seconds from 01.01.1970 00:00:00.000
+        $expires = (int) get_option( '_transient_timeout_post_map_html_output', 0 ); // int value 0 if not set
+        $transient_set_time = $expires - $transient_duration;
+
+        if ( ($last_post_date > $transient_set_time) ) {
+            \delete_transient( 'post_map_html_output' );
+            \delete_transient( 'post_map_js_postArray_output' );
+            delete_transient('post_map_all_Icons_array');
+        }
+
+        // generate the output if not set in transient
+        $html = get_transient( 'post_map_html_output' );
+        $this->postArray = get_transient( 'post_map_js_postArray_output' );
+        // load icons for the categories
+        $this->allIcons = get_transient('post_map_all_Icons_array');
+
+        if ( !$html || !$this->postArray || !$this->allIcons || $this->is_user_editing_overview_map() ) {
 		
-		$args = array(
-			'numberposts' => $this->numberposts, 
-			'post_type'   => $this->post_type,
-		);
-		
-		// start processing of posts and prepara the data
-		[$this->postArray, $this->data2] = $this->prepare_data( $args, $this->gpx_dir, $this->lenexcerpt );
-		
-		// generate html for map with post data 
-		$string = '';
-		if ( $this->showmap ) {
-			require_once __DIR__ . '/enqueue_map.php';
-			$string = $this->generate_map_html($this->postArray);
-		}
-		
-		// generate html for table with post data
-		if ( $this->showtable ){
-			require_once __DIR__ . '/enqueue_tabulator.php';
-			$table_out = $this->generate_table_html( $this->headerhtml, $this->data2, $this->category );
-			$string .= $table_out;
-		}
-		
-		// ----------------
-		// load icons for the categories
-		$this->allIcons = get_icon_mapping_array();
-		
-		//enqueue scripts
+            $args = array(
+                'numberposts' => $this->numberposts, 
+                'post_type'   => $this->post_type,
+                'post_status' => 'publish'
+            );
+            
+            // start processing of posts and prepara the data
+            [$this->postArray, $this->geoDataArray] = $this->prepare_data( $args, $this->gpx_dir, $this->lenexcerpt );
+            
+            // generate html for map with post data 
+            $html = '';
+            if ( $this->showmap ) {
+                //require_once __DIR__ . '/enqueue_map.php';
+                $html = $this->generate_map_html($this->postArray);
+            }
+            
+            // generate html for table with post data
+            if ( $this->showtable ){
+                //require_once __DIR__ . '/enqueue_tabulator.php';
+                $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray, $this->category );
+            }
+
+            $this->allIcons = get_icon_mapping_array();
+
+            // end generation of html output: write the html-output in $string now as set_transient
+		    \set_transient('post_map_html_output', $html, $transient_duration);
+		    \set_transient('post_map_js_postArray_output', $this->postArray, $transient_duration);
+            \set_transient('post_map_all_Icons_array', $this->allIcons, $transient_duration);
+        }
+            
+        //enqueue scripts
+        if ( $this->showmap ) { require_once __DIR__ . '/enqueue_map.php'; }
+        if ( $this->showtable ){ require_once __DIR__ . '/enqueue_tabulator.php'; }
 		require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
 		
 		wp_localize_script('wp_post_map_view_simple_js', 'php_touren' , $this->postArray );
-		wp_localize_script('wp_post_map_view_simple_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $this->wp_postmap_path, ));
+		wp_localize_script('wp_post_map_view_simple_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $this->wp_postmap_url, ));
 		wp_localize_script('wp_post_map_view_simple_js', 'php_allIcons', $this->allIcons );
 		// ----------------
 		
-		return $string;
+		return $html;
 	}
     // ---------------- pivate functions ----------------
     private function generate_table_html( $headerhtml, $data2, $category ) {
+        if ( count($data2) === 0) return '';
+
         // generate table with post data: generate the header
         if ( $headerhtml == '') {
             $table_out  = '<h4>Tourenübersicht</h4>';
@@ -132,6 +173,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $headerhtml = str_replace(array("\r", "\n"), '', $headerhtml);
             $table_out  = $headerhtml;
         }
+
         $table_out  .= '<button id="tablereset" type="button">Reset Filter</button>';
         $table_out  .= '<table id="post_table"><thead><tr>';
                             
@@ -147,20 +189,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $table_out  .= '</tr></thead><tbody>';
         
         // generate table with post data 
-        $catcounter = 0;
         foreach ($data2 as $data) {
-            $datacat = preg_replace("/[^a-zA-Z]+/", "", $data['wpcategory']);
-            //$table_out  .= '<tr>';
-            //$table_out  .= '<td>' . $datacat . ' : ' . $category . '</td>';
-            //$table_out  .= '</tr>'; 
+            $datacat = preg_replace("/[^a-zA-Z]+/", "", $data['wpcategory']); 
     
             if ( ($category === 'all') || ( $datacat == $category)) {
                 // get geo statistics
-                $geostatarr= \explode(' ', $data['geostat'] );
-                isset($geostatarr[0]) ? '' :  $geostatarr[0] = '';
-                isset($geostatarr[1]) ? '' :  $geostatarr[1] = '';
-                isset($geostatarr[4]) ? '' :  $geostatarr[4] = '';
-                isset($geostatarr[7]) ? '' :  $geostatarr[7] = '';
+                $geostatarr= \explode(' ', $data['geostat'] ); // gives strings of the values
                 
                 // define google url
                 $googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
@@ -170,25 +204,25 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $table_out  .= '<td>' . $data['id'] . '</td>';
                 $table_out  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
                 $table_out  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
-                $geostatarr[1] = \str_replace(',', '.', $geostatarr[1]);
-                $table_out  .= '<td>' . floatval($geostatarr[1]) ?? 0 . '</td>';
-                $table_out  .= '<td>' . floatval($geostatarr[4]) ?? 0 . '</td>';
-                $table_out  .= '<td>' . floatval($geostatarr[7]) ?? 0 . '</td>';
+                $table_out  .= '<td>' . $geostatarr[1] . '</td>';
+                $table_out  .= '<td>' . $geostatarr[4] . '</td>';
+                $table_out  .= '<td>' . $geostatarr[7] . '</td>';
                 $table_out  .= '<td>' . $data['country'] . '</td>';
                 $table_out  .= '<td>' . $data['state'] . '</td>';
                 $table_out  .= '<td><a href="' . $googleurl . '" target="_blank" rel="noopener noreferrer">'. $data['address'] .'</a></td>';
                 $table_out  .= '</tr>';
-                $catcounter += 1;
-            }		
+            }
         }
     
         // finally close table
         $table_out  .= '</tbody></table>';
-        if ( $catcounter == 0 ) $table_out = '';
+        
         return $table_out;
     }
     
     private function generate_map_html( $allposts ) {
+        if ( count( $allposts) === 0) return '';
+        // TODO : check if the allposts-array has all keys that are used below?
         $string = '';
         $string .= '<div class="box1">';
         $string .= '<div id="map"></div>'; // hier wird die Karte erzeugt!
@@ -206,13 +240,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     
     private function generate_the_excerpt( $post, $length ) {
         $excerpt = $post->post_excerpt;
-        $useWPExcerpt = false; // option?
     
         if ( ! empty( $excerpt ) ) {
             return $excerpt . '...';
         }
     
-        if ( $useWPExcerpt ) {
+        if ( $this->useWPExcerpt ) {
             $excerpt = $post->post_content;
             $excerpt = apply_filters( 'the_content', $excerpt );
             $excerpt = str_replace( ']]>', ']]&gt;', $excerpt );
@@ -244,7 +277,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     }
     
     private function get_statistics_from_gpxfile( $path_to_gpxfile ) {
-        $geostat = '--';
+        $default = '0 0 0 0 0 0 0 0';
     
         if ( \is_file( $path_to_gpxfile) ) {		
             $gpxdata = \simplexml_load_file($path_to_gpxfile);
@@ -252,12 +285,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             // geostat prüfen
             $geostatarr= \explode(' ', $geostat);
     
-            if ( 'Dist:' !== $geostatarr[0] ) {
-                $geostat = 'file valid but no statistics';
-            } 
+            if ( 'Dist:' !== $geostatarr[0] && !isset($geostatarr[1]) && !isset($geostatarr[4]) && !isset($geostatarr[7]) ) {
+                //file with desc in meta but no statistics
+                return $default;
+                
+            //sanitize the geostatistics value and array
+            } else {
+                $geostatarr[1] = number_format_i18n(floatval( $geostatarr[1]), 1);
+                $geostatarr[4] = number_format_i18n(floatval( $geostatarr[1]), 1);
+                $geostatarr[4] = number_format_i18n(floatval( $geostatarr[1]), 1);
+                $geostat = implode(' ', $geostatarr);
+                return $geostat;
+            }
         }
     
-        return $geostat;
+        return $default;
     }
     
     private function sanitize_geoaddress( $geoaddress ) {
@@ -280,18 +322,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     }
     
     private function prepare_data( $args, $gpx_dir, $lenexcerpt ) {
+        $postArray = [];
+        $data2 = [];
         $custom_posts = get_posts($args);
         $i = 0;
         
         // loop through all posts and fetch data for the output
         foreach ($custom_posts as $post) { 
             
-            $lat = get_post_meta($post->ID,'lat', true) ?? '';
-            $lon = get_post_meta($post->ID,'lon', true) ?? '';
+            $lat = get_post_meta($post->ID,'lat', true);
+            $lon = get_post_meta($post->ID,'lon', true);
             $gpxfilearr = [];
     
-            if ( ! ( (is_null($lat) || (0 == $lat) ) && (is_null($lon) || (0 == $lon)) ) ) { // Achte auf das Not!
-                $title = substr($post->post_title,0,80); // Länge des Titels beschränken, Anzahl Zeichen
+            if ( is_numeric($lat) && is_numeric($lon) ) // breaking change : posts without lat lon are no longer shown!
+            {
+                $title = substr($post->post_title,0,$this->titlelength); // Länge des Titels beschränken, Anzahl Zeichen
             
                 // tags des posts holen und in string umwandeln
                 $tag3 =  implode( ', ', wp_get_post_tags($post->ID, array('fields' => 'names')));
@@ -299,11 +344,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $cat = wp_postmap_get_cat($tag3);
                 $wpcat = \get_the_category( $post->ID );
                 $wpcat = count($wpcat) === 1 ? strtolower($wpcat[0]->name) : 'multiple';
-            
-                // Excerpt nur aus den Absätzen <p> herstellen! Schlüsselwörter entfernen, dürfen dann im Text nicht vorkommen
-                // Absätze mit [shortcodes] werden ignoriert.
-                // der html-code muss mit zeilenumbrüchen formatiert sein, sonst geht das nicht!
                 $content = $post->post_content;
+
+                // extract the gpxfile from the shortcode fo fotoramay if any
                 foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
                     
                     // extract the gpxfile from the shortcode
@@ -325,7 +368,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                         }
                     }
                 }
-    
+
+                // Excerpt nur aus den Absätzen <p> herstellen! Schlüsselwörter entfernen, dürfen dann im Text nicht vorkommen
+                // Absätze mit [shortcodes] werden ignoriert.
+                // der html-code muss mit zeilenumbrüchen formatiert sein, sonst geht das nicht!
                 $excerpt = $this->generate_the_excerpt($post, $lenexcerpt);
                 $featimage = get_the_post_thumbnail_url($post->ID, $size='thumbnail'); 
                 $postlink = get_permalink($post->ID);
@@ -345,25 +391,18 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 );
     
                 // get the address corresponding to posts lat and lon customfield
-                $geoaddresstest =  get_post_meta($post->ID,'geoadress', false);
-                $type = '';	
-                if ( ! empty($geoaddresstest[0]) ) {
-                    $test = $geoaddresstest[0]; // we need only the first index
-                    $geoaddress = maybe_unserialize($test);	// type conversion to string
-                    $type = gettype( $geoaddress ); 
-                } 
-    
                 $lat = number_format( floatval($lat), 6);
                 $lon = number_format( floatval($lon), 6);
-    
-                if ( empty($geoaddresstest[0]) || 'string' == $type ) {
-                    $geoaddress = [];
-                    if (\current_user_can('edit_posts')) {
-                        $geoaddress = get_geoaddress($post->ID, $lat, $lon);
-                    } else {
-                        $geoaddress = 'was_string_but_not_set';
-                    }
+                
+                $geoaddresstest =  get_post_meta($post->ID,'geoadress', true);
+                if ( !empty($geoaddresstest) ) {
+                    $geoaddress = maybe_unserialize($geoaddresstest);	// type conversion to string 
+                } else {
+                    // lat and lon have to be set always
+                    $geoaddress = get_geoaddress($post->ID, $lat, $lon); // breaking change : this Plugin does not longer set the metadata!
                 }
+                // sanitize geoaddress
+                ['address' => $address, 'state' => $state, 'country' => $country] = $this->sanitize_geoaddress($geoaddress);
     
                 $gpxcount = 1;
                 if ( empty($gpxfilearr) ) $gpxfilearr = [''];
@@ -371,8 +410,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 foreach ($gpxfilearr as $gpxfile) {
     
                     $geostat = $this->get_statistics_from_gpxfile( $gpx_dir . $gpxfile );
-                    // sanitize geoaddress
-                    ['address' => $address, 'state' => $state, 'country' => $country] = $this->sanitize_geoaddress($geoaddress);
     
                     $data2[] = array(
                         'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
@@ -394,6 +431,58 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
     
         return [$postArray, $data2];
+    }
+
+    // ---- htaccess helper -----------------
+	/**
+	 * Check if file .htaccess is available in the sub-folder 'leaflet_map_tiles' and try to fetch the 
+	 * testfile, which will be responded with status code 302 file by the script 'tileserver.php'.
+	 * 
+	 * @return boolean the result of the htaccess check
+	 */
+	private function checkHtaccess()
+	{
+		// try to access testfile.webp which will be redirected to testfile.php if .htaccess is working. 
+		// The file 'testfile.webp' shall not be existent!
+		$path = \str_replace('inc/', '', plugins_url('/', __FILE__)) . 'leaflet_map_tiles/';
+
+		if (\ini_get('allow_url_fopen') === '1') {
+			$url = $path . 'testfile.webp';
+            $context = stream_context_create( array(
+                'http'=>array(
+                    'timeout' => 2.0 // TOD0 : Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
+                )
+            ), );
+
+			// switch off PHP error reporting and get the url.
+			$ere = \error_reporting();
+			\error_reporting(0);
+			$test = fopen($url, 'r', false, $context);
+			\error_reporting($ere);
+
+			// check if header contains status code 302
+			if ($test !== false) {
+				$code = $http_response_header[0];
+				$found = \strpos($code, '302');
+				fclose($test);
+				if ($found  !== false) return true;
+			}
+		}
+		return false;
+	}
+
+    private function is_user_editing_overview_map() {
+        if ( is_user_logged_in() && is_admin() ) {
+            $screen = get_current_screen();
+
+            if ( 'page' === $screen->post_type && isset($_GET['post'])) {
+                $post_id = $_GET['post'];
+                $post = get_post( $post_id);
+
+                if ($post && has_shortcode( $post->post_content, 'mapview' )) return true;
+            }
+        }
+        return false;
     }
 
 }
