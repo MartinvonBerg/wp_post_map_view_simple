@@ -98,37 +98,3 @@ function wp_postmap_load_category_mapping( $file = null ) {
 
     return $data;
 }
-
-/**
- * Wandelt die Daten aus einer JSON-Datei in ein Array um, das die Zuordnung von Icons, Kategorien und Namen enthält.
- * icons für javascript und php definieren als array of arrays
- * struktur eines sub-arrays: < Dateiname-Icon-im-Ordner-Images:string, zu-suchendes-Schlagwort-im-Post:string, Tour-Name-in-der-Karte:string >
-	
- * @param string $jsonFilePath Der Pfad zur JSON-Datei.
- * @return array Ein Array mit den Werten für Icons, Kategorien und Namen.
- */
-function get_icon_mapping_array( $file = null ) {
-    // JSON-Datei laden
-    if ( $file === null ) {
-        $data = wp_postmap_load_category_mapping();
-    } else {
-        $data = wp_postmap_load_category_mapping( $file);
-    }
-
-    if (!is_array($data) || !isset($data['mapping'])) {
-        return []; // Rückgabe eines leeren Arrays bei ungültigem JSON
-    }
-    
-    $allIcons = [];
-
-    // JSON-Mapping verarbeiten
-    foreach ($data['mapping'] as $key => $mapping) {
-        $iconPng = isset($mapping['icon-png']) ? $mapping['icon-png'] : $data['default']['icon-png'];
-        $icon = isset($mapping['icon']) ? $mapping['icon'] : $data['default']['icon'];
-        $category = isset($mapping['category']) ? $mapping['category'] : $data['default']['category'];
-
-        $allIcons[] = [$iconPng, $icon, $category];
-    }
-
-    return $allIcons;
-}

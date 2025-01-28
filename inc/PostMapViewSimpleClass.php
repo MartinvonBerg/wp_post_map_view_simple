@@ -27,7 +27,6 @@ use function mvbplugins\helpers\get_geoaddress as get_geoaddress;
 require_once __DIR__ . '/get_icon_cat.php';
 use function mvbplugins\helpers\wp_postmap_get_icon as wp_postmap_get_icon;
 use function mvbplugins\helpers\wp_postmap_get_cat as wp_postmap_get_cat;
-use function mvbplugins\helpers\get_icon_mapping_array as get_icon_mapping_array;
 
 interface PostMapViewSimpleInterface {
 	public function show_post_map(): string;
@@ -44,7 +43,8 @@ interface PostMapViewSimpleInterface {
  */
 final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
-	// ---------- shortcode parameters ----------
+	static $numberShortcodes = 0;
+    // ---------- shortcode parameters ----------
     private $numberposts = 100; // is shortcode parameter
     private $post_type = 'post'; // is shortcode parameter // TODO: do it for different post types, so this might be an array
 	private $showmap = true; // is shortcode parameter
@@ -69,8 +69,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	private $gpx_dir;
 	private $postArray = [];
 	private $geoDataArray = [];
-    private $allIcons = []; // TODO: test load as json with webpack
-	private $htaccessTileServerIsOK = false;
+    private $htaccessTileServerIsOK = false;
     
 	
 	public function __construct( $attr ) {
@@ -110,16 +109,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( ($last_post_date > $transient_set_time) ) {
             delete_transient( 'post_map_html_output' );
             delete_transient( 'post_map_js_postArray_output' );
-            delete_transient('post_map_all_Icons_array');
         }
 
         // generate the output if not set in transient
         $html = get_transient( 'post_map_html_output' );
         $this->postArray = get_transient( 'post_map_js_postArray_output' );
-        // load icons for the categories
-        $this->allIcons = get_transient('post_map_all_Icons_array');
 
-        if ( !$html || !$this->postArray || !$this->allIcons || $this->is_user_editing_overview_map() ) {
+        if ( !$html || !$this->postArray || $this->is_user_editing_overview_map() ) {
 
             // check htaccess for tileserver only here 
             if ( $this->useTileServer) {
@@ -149,22 +145,18 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray, $this->category );
             }
 
-            $this->allIcons = get_icon_mapping_array();
-
             // end generation of html output: write the html-output in $string now as set_transient
 		    \set_transient('post_map_html_output', $html, $transient_duration);
 		    \set_transient('post_map_js_postArray_output', $this->postArray, $transient_duration);
-            \set_transient('post_map_all_Icons_array', $this->allIcons, $transient_duration);
         }
             
         // --- enqueue scripts
-        if ( $this->showmap ) { require_once __DIR__ . '/enqueue_map.php'; }
-        if ( $this->showtable ){ require_once __DIR__ . '/enqueue_tabulator.php'; }
+        //if ( $this->showmap ) { require_once __DIR__ . '/enqueue_map.php'; }
+        //if ( $this->showtable ){ require_once __DIR__ . '/enqueue_tabulator.php'; }
 		require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
 		
-		wp_localize_script('wp_post_map_view_simple_js', 'php_touren' , $this->postArray );
-		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $this->wp_postmap_url, ));
-		wp_localize_script('wp_pmtv_main_js', 'php_allIcons', $this->allIcons );
+		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
+		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 'path'  => $this->wp_postmap_url, 'number' => self::$numberShortcodes ) );
 		// ----------------
 		
 		return $html;

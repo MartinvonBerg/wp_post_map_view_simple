@@ -4,51 +4,52 @@
         "icon": "travel",
         "icon-png": "campingcar.png"
     },
-    "mapping": {
-        "Trekk": {
+    "mapping": [
+        {
             "category": "Trekking",
             "icon": "hiking",
             "icon-png": "hiking.png"
         },
-        "bike&&hike": {
+        {
             "category": "Bike-Hike",
             "icon": "bike-hike",
             "icon-png": "mountainbiking-3.png"
         },
-        "Radfahren": {
+        {
             "category": "Radfahren",
             "icon": "cycling",
             "icon-png": "cycling.png"
         },
-        "MTB": {
+        {
             "category": "MTB",
             "icon": "MTB",
             "icon-png": "MTB.png"
         },
-        "Wander": {
+        {
             "category": "Wandern",
             "icon": "hiking",
             "icon-png": "hiking2.png"
         },
-        "Bergtour": {
+        {
             "category": "Bergtour",
             "icon": "mountain",
             "icon-png": "peak2.png"
         },
-        "skitour": {
+        {
             "category": "Skitour",
             "icon": "skiing",
             "icon-png": "skiing.png"
         },
-        "Paddeln": {
+        {
             "category": "Paddeln",
             "icon": "kayaking",
             "icon-png": "kayaking2.png"
         },
-        "reisebericht": {
+        {
             "category": "Reisebericht",
             "icon": "travel",
             "icon-png": "campingcar.png"
         }
-    }
+    ]
+    
 }
