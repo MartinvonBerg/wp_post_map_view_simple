@@ -9,6 +9,7 @@ $plugin_rel_dir = 'wp-content/plugins/PostMapTableView';
 
 // define test environment
 define( 'PLUGIN_PHPUNIT', true );
+define( 'WEEK_IN_SECONDS', 1 );
 
 // define fake ABSPATH
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,4 +44,9 @@ function maybe_serialize($data) {
 
 function maybe_unserialize($data) {
     return unserialize($data);
+}
+
+function strip_shortcodes($content) {
+	// Entferne alle Shortcodes im Format [shortcode] oder [shortcode attr="value"]...[/shortcode]
+	return preg_replace('/\[(\w+)(?:[^\]]*)?\](?:.*?\[\/\1\])?/s', '', $content);
 }

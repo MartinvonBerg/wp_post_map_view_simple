@@ -30,6 +30,18 @@ class PostMapViewSimpleClassTest extends TestCase
 
     public function testShowPostMapWithTwoPosts()
     {
+        expect('get_lastpostdate')
+            ->andReturn('2025-01-27 12:00:00');
+
+        expect('delete_transient')
+            ->andReturn( true );
+
+        expect('get_transient')
+            ->andReturn( false );
+
+        expect('set_transient')
+            ->andReturn( true );
+
         expect('plugins_url')
             ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
 
@@ -86,7 +98,7 @@ class PostMapViewSimpleClassTest extends TestCase
             (object) ['ID' => 2, 'post_title' => 'Post 2', 'post_content' => '<p>Content of Post 2</p>', 'post_excerpt' => ''],
         ];
 
-        $args = ['numberposts' => 5, 'post_type'   => 'post'];
+        $args = ['numberposts' => 5, 'post_type'   => 'post', 'post_status' => 'publish'];
 
         // Mock die Funktion get_posts
         expect('get_posts')
@@ -140,13 +152,26 @@ class PostMapViewSimpleClassTest extends TestCase
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
         $output = $class->show_post_map();
 
-        $expected = '<div class="box1"><div id="map"></div><div id="map10_img"><a href="http://localhost/wordpress/wp-content/uploads/2022/01/thumbnail-1.jpg" data-title="Post 1" data-icon="travel" data-geo="lat:12.98765,lon:49.123456" data-link="http://localhost/wordpress/post-permalink">Content of Post 1 ...</a><a href="http://localhost/wordpress/wp-content/uploads/2022/01/thumbnail-1.jpg" data-title="Post 2" data-icon="travel" data-geo="lat:12.98765,lon:49.123456" data-link="http://localhost/wordpress/post-permalink">Content of Post 2 ...</a></div></div>';
+        $expected = '<div class="box1"><div id="map"></div><div id="map10_img"><a href="http://localhost/wordpress/wp-content/uploads/2022/01/thumbnail-1.jpg" data-title="Post 1" data-icon="travel" data-geo="lat:12.98765,lon:49.123456" data-link="http://localhost/wordpress/post-permalink">Content of Post 1...</a><a href="http://localhost/wordpress/wp-content/uploads/2022/01/thumbnail-1.jpg" data-title="Post 2" data-icon="travel" data-geo="lat:12.98765,lon:49.123456" data-link="http://localhost/wordpress/post-permalink">Content of Post 2...</a></div></div>';
         
         $this->assertEquals($expected, $output);
     }
 
     public function testShowPostMapWithTable()
     {
+        expect('get_lastpostdate')
+            ->andReturn('2025-01-27 12:00:00');
+
+        expect('delete_transient')
+            ->andReturn( true );
+
+        expect('get_transient')
+            ->andReturn( false );
+
+        expect('set_transient')
+            ->andReturn( true );
+
+        
         expect('plugins_url')
             ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
 
@@ -203,7 +228,7 @@ class PostMapViewSimpleClassTest extends TestCase
             (object) ['ID' => 2, 'post_title' => 'Post 2', 'post_content' => '<p>Content of Post 2</p>', 'post_excerpt' => ''],
         ];
 
-        $args = ['numberposts' => 5, 'post_type'   => 'post'];
+        $args = ['numberposts' => 5, 'post_type'   => 'post', 'post_status' => 'publish'];
 
         // Mock die Funktion get_posts
         expect('get_posts')
@@ -257,10 +282,8 @@ class PostMapViewSimpleClassTest extends TestCase
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
         $output = $class->show_post_map();
 
-        $expected = '<h4>Tourenübersicht</h4><p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p><p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p><button id="tablereset" type="button">Reset Filter</button><table id="post_table"><thead><tr><th>Nr</th><th>Titel</th><th>Kategorie</th><th>Distanz</th><th>Aufstieg</th><th>Abstieg</th><th>Land</th><th>Region</th><th>Stadt</th></tr></thead><tbody><tr><td>1</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 1</a></td><td>Reisebericht</td><td>0<td>0<td>0<td>none</td><td>none</td><td><a href="https://www.google.com/maps/place/12.987650,49.123456/@12.987650,49.123456,9z" target="_blank" rel="noopener noreferrer">none</a></td></tr><tr><td>2</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 2</a></td><td>Reisebericht</td><td>0<td>0<td>0<td>none</td><td>none</td><td><a href="https://www.google.com/maps/place/12.987650,49.123456/@12.987650,49.123456,9z" target="_blank" rel="noopener noreferrer">none</a></td></tr></tbody></table>';
+        $expected = '<h4>Tourenübersicht</h4><p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p><p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p><button id="tablereset" type="button">Reset Filter</button><table id="post_table"><thead><tr><th>Nr</th><th>Titel</th><th>Kategorie</th><th>Distanz</th><th>Aufstieg</th><th>Abstieg</th><th>Land</th><th>Region</th><th>Stadt</th></tr></thead><tbody><tr><td>1</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 1</a></td><td>Reisebericht</td><td>0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://www.google.com/maps/place/12.987650,49.123456/@12.987650,49.123456,9z" target="_blank" rel="noopener noreferrer">none</a></td></tr><tr><td>2</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 2</a></td><td>Reisebericht</td><td>0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://www.google.com/maps/place/12.987650,49.123456/@12.987650,49.123456,9z" target="_blank" rel="noopener noreferrer">none</a></td></tr></tbody></table>';
         
         $this->assertEquals($expected, $output);
     }
-
-
 }

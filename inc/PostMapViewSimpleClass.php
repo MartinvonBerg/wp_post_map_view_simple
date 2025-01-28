@@ -35,35 +35,43 @@ interface PostMapViewSimpleInterface {
 
 /**
  * main shortcode function to generate the html
- * TODO: add phpunit tests for the methods of this class
+ * 
  * TODO: use webpack for JS, CSS generation. Update all JS libraries
- * TODO: use tileserver
+ * TODO: use tileserver : update JS
  * TODO: provide post_types and categories as arrays
  * TODO: finally add the functions similar to maps Marker pro!
  * 
- * @author Martin von Berg
  */
 final class PostMapViewSimple implements PostMapViewSimpleInterface {
-	private $plugin_url;
+
+	// ---------- shortcode parameters ----------
+    private $numberposts = 100; // is shortcode parameter
+    private $post_type = 'post'; // is shortcode parameter // TODO: do it for different post types, so this might be an array
+	private $showmap = true; // is shortcode parameter
+	private $showtable = true; // is shortcode parameter
+	private $category = 'all'; // is shortcode parameter // TODO : use an array of categories as well
+	private $headerhtml = ''; // is shortcode parameter
+	// ---------- end of shortcode parameters ----------
+
+    // ------------------- possible options -------------------
+    private $gpxfolder = 'gpx'; // option? or shortcode?
+    private $lenexcerpt = 150; // option? or shortcode?
+    private $useWPExcerptExtraction = false; // option? or shortcode?
+    private $titlelength = 80; // option? or shortcode?
+    private $useTileServer = true; // option? or shortcode?
+    private $convertTilesToWebp = true; // option? or shortcode?
+    private $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:']; // option? or shortcode?
+    // ------------------- end of possible options -------------------
+
+    private $plugin_url;
     private $wp_postmap_url;
-	private $gpxfolder = 'gpx'; // option? or shortcode?
 	private $up_dir;
 	private $gpx_dir;
 	private $postArray = [];
 	private $geoDataArray = [];
-	private $lenexcerpt = 150; // option? or shortcode?
-    private $useWPExcerpt = false; // option? or shortcode?
-    private $titlelength = 80; // option? or shortcode?
-    private $numberposts = 100;
-    private $post_type = 'post'; // TODO: do it for different post types, so this might be an array
-	private $showmap = true;
-	private $showtable = true;
-	private $category = 'all'; // TODO : use an array of categories as well
-	private $headerhtml = '';
-	private $allIcons = [];
-    private $useTileServer = true; // option? or shortcode?
-    private $convertTilesToWebp = true; // option? or shortcode?
+    private $allIcons = []; // TODO: test load as json with webpack
 	private $htaccessTileServerIsOK = false;
+    
 	
 	public function __construct( $attr ) {
 		
@@ -88,11 +96,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		$this->showtable = $attr['showtable'] === 'true';
 		$this->category = strtolower( $attr['category'] );
 		$this->headerhtml = $attr['headerhtml'];
-
-        if ( $this->useTileServer) {
-            $this->htaccessTileServerIsOK = $this->checkHtaccess();
-            !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
-        }
 	}
 	
 	public function show_post_map() :string {
@@ -105,8 +108,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $transient_set_time = $expires - $transient_duration;
 
         if ( ($last_post_date > $transient_set_time) ) {
-            \delete_transient( 'post_map_html_output' );
-            \delete_transient( 'post_map_js_postArray_output' );
+            delete_transient( 'post_map_html_output' );
+            delete_transient( 'post_map_js_postArray_output' );
             delete_transient('post_map_all_Icons_array');
         }
 
@@ -117,6 +120,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->allIcons = get_transient('post_map_all_Icons_array');
 
         if ( !$html || !$this->postArray || !$this->allIcons || $this->is_user_editing_overview_map() ) {
+
+            // check htaccess for tileserver only here 
+            if ( $this->useTileServer) {
+                $this->htaccessTileServerIsOK = $this->checkHtaccess();
+                !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+            }
 		
             $args = array(
                 'numberposts' => $this->numberposts, 
@@ -148,7 +157,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             \set_transient('post_map_all_Icons_array', $this->allIcons, $transient_duration);
         }
             
-        //enqueue scripts
+        // --- enqueue scripts
         if ( $this->showmap ) { require_once __DIR__ . '/enqueue_map.php'; }
         if ( $this->showtable ){ require_once __DIR__ . '/enqueue_tabulator.php'; }
 		require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
@@ -242,22 +251,28 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $excerpt = $post->post_excerpt;
     
         if ( ! empty( $excerpt ) ) {
-            return $excerpt . '...';
+            return $excerpt;
         }
     
-        if ( $this->useWPExcerpt ) {
-            $excerpt = $post->post_content;
-            $excerpt = apply_filters( 'the_content', $excerpt );
-            $excerpt = str_replace( ']]>', ']]&gt;', $excerpt );
-            $excerpt = strip_shortcodes( $excerpt );
-            $excerpt = strip_tags( $excerpt );
-            $excerpt = substr( $excerpt, 0, $length );
-            $excerpt = substr( $excerpt, 0, strrpos( $excerpt, ' ' ) );
-            $excerpt .= '...';
+        if ( $this->useWPExcerptExtraction ) {
+            $excerpt = apply_filters('the_content', $post->post_content);
+
+            // Entferne alle HTML-Headings (h1 bis h6) inklusive ihrer Inhalte
+            $excerpt = preg_replace('/<h[1-6][^>]*>.*?<\/h[1-6]>/si', '', $excerpt);
+
+            // Entferne doppelte oder überflüssige Leerzeilen und konvertiere nicht-HTML Leerzeichen
+            $excerpt = preg_replace(["/[\r\n]{2,}/", '/&nbsp;/'], ["\n", ' '], $excerpt);
+
+            // Entferne Shortcodes, Tags und trimme den Text
+            $excerpt = trim(strip_tags(strip_shortcodes($excerpt)));
+
+            // Kürze den Text auf die gewünschte Länge
+            $excerpt = substr($excerpt, 0, $length) . '...';
         } else {
             $content = $post->post_content;
             $p = '';
             foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
+                $line = trim($line);
                 $sub = substr($line,0,3); // html-tag aus der zeile ausschneiden
                 $isshortcode = strpos($line,'['); 
                 if (($sub == '<p>') and (false == $isshortcode)) {
@@ -266,11 +281,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $p = str_replace('</p>','',$p);
             }
             // sanitize Excerpt
-            $p = str_replace('Kurzbeschreibung:','',$p);
-            $p = str_replace('Tourenbeschreibung:','',$p);
-            $p = strip_tags($p); // html-Tags entfernen
-            $p = substr($p,0, $length); // erst jetzt auf die richtige länge kürszen
-            $excerpt = $p . '...';
+            $p = str_replace($this->contentFilter, '', $p);
+            $p = trim(strip_tags($p)); // html-Tags entfernen
+            $excerpt = substr($p,0, $length) . '...'; // erst jetzt auf die richtige länge kürszen
             } 
         
         return $excerpt;
@@ -292,8 +305,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             //sanitize the geostatistics value and array
             } else {
                 $geostatarr[1] = number_format_i18n(floatval( $geostatarr[1]), 1);
-                $geostatarr[4] = number_format_i18n(floatval( $geostatarr[1]), 1);
-                $geostatarr[4] = number_format_i18n(floatval( $geostatarr[1]), 1);
+                $geostatarr[4] = number_format_i18n(floatval( $geostatarr[4]), 1);
+                $geostatarr[7] = number_format_i18n(floatval( $geostatarr[7]), 1);
                 $geostat = implode(' ', $geostatarr);
                 return $geostat;
             }
@@ -394,7 +407,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $lat = number_format( floatval($lat), 6);
                 $lon = number_format( floatval($lon), 6);
                 
-                $geoaddresstest =  get_post_meta($post->ID,'geoadress', true);
+                $geoaddresstest =  get_post_meta($post->ID,'geoadress', true)[0] ?? '';
                 if ( !empty($geoaddresstest) ) {
                     $geoaddress = maybe_unserialize($geoaddresstest);	// type conversion to string 
                 } else {
@@ -450,7 +463,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 			$url = $path . 'testfile.webp';
             $context = stream_context_create( array(
                 'http'=>array(
-                    'timeout' => 2.0 // TOD0 : Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
+                    'timeout' => 5.0 // TODO : Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
                 )
             ), );
 
