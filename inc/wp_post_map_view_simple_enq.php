@@ -8,3 +8,4 @@ wp_enqueue_style('wp_post_map_view_simple_css', $plugin_url . 'css/wp_post_map_v
 
 // Load Scripts
 wp_enqueue_script('wp_post_map_view_simple_js', $plugin_url . 'js/wp_post_map_view_simple.min.js', array('jquery'), '0.10.5', true);
+wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', array('jquery'), '0.10.5', true);

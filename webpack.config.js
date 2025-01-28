@@ -1,1 +1,0 @@
-// webpack.config.js is the configuration file for webpack. It is a JavaScript file that exports an object with configuration options.

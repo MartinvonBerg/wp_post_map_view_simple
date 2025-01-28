@@ -163,8 +163,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
 		
 		wp_localize_script('wp_post_map_view_simple_js', 'php_touren' , $this->postArray );
-		wp_localize_script('wp_post_map_view_simple_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $this->wp_postmap_url, ));
-		wp_localize_script('wp_post_map_view_simple_js', 'php_allIcons', $this->allIcons );
+		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 'g_wp_postmap_path'  => $this->wp_postmap_url, ));
+		wp_localize_script('wp_pmtv_main_js', 'php_allIcons', $this->allIcons );
 		// ----------------
 		
 		return $html;

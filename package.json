@@ -8,7 +8,7 @@
 	"main": "build/index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "webpack --config webpack.config.js"
+		"build": "webpack --config ./js/webpack.config.js"
 	},
 	"devDependencies": {
 		"css-loader": "^7.1.2",
