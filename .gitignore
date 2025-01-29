@@ -6,3 +6,4 @@ package-lock.json
 build/*.js
 build/pmtv_main.js
 composer.lock
+build/*.png
