@@ -124,12 +124,17 @@ elseif ( $allowed )
 
 	// fetch the new file
 	$url = $preUrl . $tileServers[$tile]['server'] . $tileServers[$tile]['tile'] . '.' . $tileServers[$tile]['ext'];
-	$opts = array(
-		'http'=>array(
-			'method'=>'GET',
-			'header'=>'User-Agent: ' . $_SERVER["HTTP_USER_AGENT"] // just use the user agent from the request what is absolutely correct acc. to file usage policy.
-		)
-	);
+	$opts = [
+        'http' => [
+            'method'  => "GET",
+            'header'  => [
+                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+                "Referer: $site_url",
+                "Contact: $admin_email",
+            ],
+            'timeout' => 10, // Timeout in Sekunden
+        ]
+    ];
 	$context = stream_context_create($opts);
 	$imgData = file_get_contents( $url , false, $context );
 
