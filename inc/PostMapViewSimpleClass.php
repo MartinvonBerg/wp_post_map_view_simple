@@ -39,6 +39,7 @@ interface PostMapViewSimpleInterface {
  * TODO: use webpack for JS, CSS generation. Update all JS libraries
  * TODO: provide post_types and categories as arrays
  * TODO: finally add the functions similar to maps Marker pro!
+ * TODO: options or shortcodes for CSS map sizes
  * 
  */
 final class PostMapViewSimple implements PostMapViewSimpleInterface {
