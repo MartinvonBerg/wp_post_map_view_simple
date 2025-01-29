@@ -34,9 +34,9 @@ interface PostMapViewSimpleInterface {
 
 /**
  * main shortcode function to generate the html
- * 
+ * TODO: add tabulator JS
+ * TODO: update transients for pageVarsForJs
  * TODO: use webpack for JS, CSS generation. Update all JS libraries
- * TODO: use tileserver : update JS
  * TODO: provide post_types and categories as arrays
  * TODO: finally add the functions similar to maps Marker pro!
  * 
@@ -161,7 +161,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // --- enqueue scripts
         //if ( $this->showmap ) { require_once __DIR__ . '/enqueue_map.php'; }
         //if ( $this->showtable ){ require_once __DIR__ . '/enqueue_tabulator.php'; }
-		require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
+		//require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
+        $plugin_url = plugin_dir_url(__DIR__);
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '0.10.5', true);
 		
 		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 'path'  => $this->wp_postmap_url, 'number' => self::$numberShortcodes ) );

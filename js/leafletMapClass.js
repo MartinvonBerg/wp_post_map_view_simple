@@ -15,7 +15,7 @@ import "leaflet"; // switch-map: active: L in local var, ele not working complet
 //import './leaflet-ui/leaflet-ui-short.js'; // translation works without this, too.
 import '../node_modules/leaflet/dist/leaflet.css'; // always use the original file
 import './leafletMapClass.css';
-import './fullscreen/Control.FullScreen.css';
+import './fullscreen/Control.FullScreen.css'; // TODO als node_modules
 import '../css/wp_post_map_view_simple.css';
 //import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 import 'leaflet.markercluster';
@@ -430,7 +430,7 @@ class LeafletMap {
 
     setFullscreenButton() {
         // create a fullscreen button and add it to the map
-        import(/* webpackChunkName: "ControlFullscreen" */ './fullscreen/Control.FullScreen.js').then( () => {
+        import(/* webpackChunkName: "ControlFullscreen" */ './fullscreen/Control.FullScreen.js').then( () => { // TODO : als node_modules
             // the next two lines are here for testing
             let locLL = {};
             typeof(MyLL) === 'undefined' ? locLL = L : locLL = MyLL;

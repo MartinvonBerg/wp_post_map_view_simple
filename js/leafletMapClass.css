@@ -32,6 +32,5 @@
   
 [id="map0"] {
     width: 100%;
-    /*aspect-ratio: 1.50; */
-    height: 600px;
+    aspect-ratio: 1;
 }
