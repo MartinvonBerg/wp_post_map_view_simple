@@ -70,7 +70,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	private $postArray = [];
 	private $geoDataArray = [];
     private $htaccessTileServerIsOK = false;
-    
+    private $pageVarsForJs = [];
+    private $m = null;
 	
 	public function __construct( $attr ) {
 		
@@ -95,7 +96,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		$this->showtable = $attr['showtable'] === 'true';
 		$this->category = strtolower( $attr['category'] );
 		$this->headerhtml = $attr['headerhtml'];
-	}
+
+        $this->m = self::$numberShortcodes-1;
+        $this->pageVarsForJs[$this->m] = [];
+    }
 	
 	public function show_post_map() :string {
 
@@ -115,14 +119,18 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $html = get_transient( 'post_map_html_output' );
         $this->postArray = get_transient( 'post_map_js_postArray_output' );
 
-        if ( !$html || !$this->postArray || $this->is_user_editing_overview_map() ) {
+        if ( !$html || !$this->postArray || $this->is_user_editing_overview_map() || true ) { // TODO : remove true
 
             // check htaccess for tileserver only here 
             if ( $this->useTileServer) {
                 $this->htaccessTileServerIsOK = $this->checkHtaccess();
                 !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
             }
-		
+            $this->pageVarsForJs[$this->m]['useTileServer'] = $this->useTileServer ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['convertTilesToWebp'] = $this->convertTilesToWebp ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['htaccessTileServerIsOK'] = $this->htaccessTileServerIsOK ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['imagepath'] = $this->wp_postmap_url;
+
             $args = array(
                 'numberposts' => $this->numberposts, 
                 'post_type'   => $this->post_type,
@@ -157,6 +165,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		
 		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 'path'  => $this->wp_postmap_url, 'number' => self::$numberShortcodes ) );
+        wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
+
 		// ----------------
 		
 		return $html;
@@ -226,13 +236,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // TODO : check if the allposts-array has all keys that are used below?
         $string = '';
         $string .= '<div class="box1">';
-        $string .= '<div id="map"></div>'; // hier wird die Karte erzeugt!
+        $string .= '<div id="map0"></div>'; // hier wird die Karte erzeugt! // TODO : phpunit test anpassen
         $string .= '<div id="map10_img">';
     
         // loop through all posts and fetch data for the output
-        foreach ($allposts as $post) {
-            $string  .= '<a href="' . $post['featimage'] . '" data-title="'.$post['title'].'" data-icon="'. $post['icon']. '" data-geo="lat:' . $post['lat'] . ',lon:' . $post['lon'] . '" data-link="'. $post['link'] .'">' . $post['excerpt']. '</a>';
-        }
+        //foreach ($allposts as $post) {
+        //    $string  .= '<a href="' . $post['featimage'] . '" data-title="'.$post['title'].'" data-icon="'. $post['icon']. '" data-geo="lat:' . $post['lat'] . ',lon:' . $post['lon'] . '" data-link="'. $post['link'] .'">' . $post['excerpt']. '</a>';
+        //}
         // close divs for the map
         $string  .= '</div></div>';
     

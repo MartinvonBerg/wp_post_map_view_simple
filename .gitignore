@@ -3,5 +3,6 @@ vendor*
 archive*
 node_modules*
 package-lock.json
-build*
+build/*.js
 build/pmtv_main.js
+composer.lock
