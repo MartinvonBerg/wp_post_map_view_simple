@@ -8,18 +8,19 @@
 // only work with markers and controls in the first step.
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-import "leaflet"; // switch-map: active: L in local var, ele not working completely. Deaktiviere, um L in der lokalen Variable OHNE leaflet-elevation zu laden.
-// import * as L from "leaflet";  This grabs all the exports available inside leaflet.js, and makes them available as members of an object "L", effectively giving it its own namespace.
-//const MyLL = L.noConflict();
-
-//import './leaflet-ui/leaflet-ui-short.js'; // translation works without this, too.
-import '../node_modules/leaflet/dist/leaflet.css'; // always use the original file
-import './leafletMapClass.css';
-import './fullscreen/Control.FullScreen.css'; // TODO als node_modules
+import 'leaflet/dist/leaflet.css'; 
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
+import 'leaflet.fullscreen/Control.FullScreen.css';
+// local css
 import '../css/wp_post_map_view_simple.css';
-//import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
+import './leafletMapClass.css';
+
+import "leaflet"; 
 import 'leaflet.markercluster';
 import 'leaflet.markercluster.layersupport';
+import 'leaflet-gesture-handling';
 
 export {LeafletMap};
 
@@ -430,7 +431,7 @@ class LeafletMap {
 
     setFullscreenButton() {
         // create a fullscreen button and add it to the map
-        import(/* webpackChunkName: "ControlFullscreen" */ './fullscreen/Control.FullScreen.js').then( () => { // TODO : als node_modules
+        import(/* webpackChunkName: "ControlFullscreen" */ 'leaflet.fullscreen').then( () => {
             // the next two lines are here for testing
             let locLL = {};
             typeof(MyLL) === 'undefined' ? locLL = L : locLL = MyLL;

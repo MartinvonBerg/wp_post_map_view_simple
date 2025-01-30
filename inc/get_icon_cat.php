@@ -21,49 +21,38 @@ namespace mvbplugins\helpers;
 defined('ABSPATH') or die('Are you ok?');
 
 /**
- * Zuordnung eines Icons für die Tags eines Posts.
+ * Zuordnung eines Icons oder Kategorienamens für die Tags eines Posts.
  *
  * @param string $arraytagnames Die Tags des Posts als String.
+ * @param string $returnKey Der Schlüssel des zurückzugebenden Wertes.
  * @return string Der Icon-Name als String.
  */
-function wp_postmap_get_icon($arraytagnames) {
+function wp_postmap_get_icon_cat2($arraytagnames, $returnKey) {
+    
     $data = wp_postmap_load_category_mapping();
     $mapping = $data['mapping'];
-    $default = $data['default']['icon'];
+    $default = $data['default'][$returnKey]; //
+
+    $searchFor = strtolower($arraytagnames);
 
     foreach ($mapping as $key => $details) {
-        if (str_contains($key, '&&')) {
-            [$part1, $part2] = explode('&&', $key);
-            if (stristr($arraytagnames, $part1) !== false && stristr($arraytagnames, $part2) !== false) {
-                return $details['icon'];
+        $category = strtolower($details['category']);
+
+        if (preg_match_all('/\p{L}+/u', $searchFor, $matches)) {
+            $words = $matches[0]; // Enthält alle gefundenen Wörter
+            
+            // Prüfen, ob alle Wörter in $searchFor vorkommen
+            foreach ($words as $word) {
+                if (stristr($category, $word) === false) {
+                    // Mindestens ein Wort fehlt, daher Abbruch der schleife
+                    break;
+                } else {
+                    return $details[$returnKey];
+                }
             }
-        } elseif (stristr($arraytagnames, $key) !== false) {
-            return $details['icon'];
-        }
-    }
-
-    return $default;
-}
-
-/**
- * Zuordnung eines sprechenden Kategorienamens zu den Tags eines Posts.
- *
- * @param string $arraytagnames Die Tags des Posts als String.
- * @return string Die Kategorie des Posts als String.
- */
-function wp_postmap_get_cat($arraytagnames) {
-    $data = wp_postmap_load_category_mapping();
-    $mapping = $data['mapping'];
-    $default = $data['default']['category'];
-
-    foreach ($mapping as $key => $details) {
-        if (str_contains($key, '&&')) {
-            [$part1, $part2] = explode('&&', $key);
-            if (stristr($arraytagnames, $part1) !== false && stristr($arraytagnames, $part2) !== false) {
-                return $details['category'];
-            }
-        } elseif (stristr($arraytagnames, $key) !== false) {
-            return $details['category'];
+            
+        } elseif (stristr($searchFor, $category) !== false) {
+            return $details[$returnKey];
         }
     }
 
@@ -98,3 +87,32 @@ function wp_postmap_load_category_mapping( $file = null ) {
 
     return $data;
 }
+
+function wp_postmap_get_icon_cat($arraytagnames, $returnKey) {
+    $data = wp_postmap_load_category_mapping();
+    $mapping = $data['mapping'];
+    $default = $data['default'][$returnKey];
+
+    // Schlagwörter bereinigen und normalisieren
+    $searchWords = array_map('\mvbplugins\helpers\normalize_string', explode(',', $arraytagnames));
+
+    foreach ($mapping as $details) {
+        $normalizedCategory = normalize_string($details['category']);
+
+        // Prüfen, ob mindestens ein Suchwort als Teilstring in einer normalisierten Kategorie vorkommt
+        foreach ($searchWords as $word) {
+            if (!empty($word) && str_contains($normalizedCategory, $word)) {
+                return $details[$returnKey]; // Erste Übereinstimmung zurückgeben
+            }
+        }
+    }
+
+    return $default;
+}
+
+
+// Funktion zur Normalisierung: Entfernt alle Nicht-Buchstaben und wandelt in Kleinbuchstaben um
+function normalize_string($string) {
+    return strtolower(preg_replace('/[^\p{L}]+/u', '', $string));
+}
+

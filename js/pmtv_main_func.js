@@ -4,11 +4,11 @@ function mainLogic (window, document, undefined) {
     if (window.g_wp_postmap_path.number === "1" && php_touren.length > 0) {
       //let mobile = (/iphone|ipod|android|webos|ipad|iemobile|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
       let postmap_url = window.g_wp_postmap_path.path;
-      let hasMap = true;
-      let hasTable = false;
+      let hasTable = window.g_wp_postmap_path.hasTable == '1' ? true : false;
       let numberOfBoxes = 1;
       let allMaps = [ numberOfBoxes-1 ];
       let m = 0;
+      let tablePageSize = window.g_wp_postmap_path.tablePageSize ? window.g_wp_postmap_path.tablePageSize : 20;
         
       Promise.all([
         import('../settings/category_mapping.json'),
@@ -58,7 +58,7 @@ function mainLogic (window, document, undefined) {
           let found = false;
 
           for (let index = 0; index < allIcons.length; index++) {    
-              if (tour["category"] == allIcons[index][1]) {
+              if (tour["category"] == allIcons[index]['icon']) {
                   icn = myIcon[index];
                   grp = group[index];
                   nposts[index]++;
@@ -168,6 +168,13 @@ function mainLogic (window, document, undefined) {
         })
 
       }) // end Promise - then
+
+      if (hasTable) {
+        import('./tabulatorClass.js').then((MyTabulatorClass) => {
+          let tabulator = new MyTabulatorClass.MyTabulatorClass({});
+          tabulator.createTable("#post_table", tablePageSize);
+        });
+      } // end if hasTable
       
     } // end if numberOfBoxes
 };

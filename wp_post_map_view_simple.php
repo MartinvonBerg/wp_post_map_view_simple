@@ -26,8 +26,9 @@ include_once __DIR__ . '/inc/PostMapViewSimpleClass.php';
 
 function register_mapview_shortcode($atts) {
     // Die Klasse nur instanziieren, wenn der Shortcode genutzt wird.
+    if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes == 0) 
+        {return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_post_map();}
     \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
-    return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_post_map();
 }
 
 add_shortcode('mapview', 'mvbplugins\postmapviewsimple\register_mapview_shortcode');
