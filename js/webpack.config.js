@@ -10,6 +10,11 @@ module.exports = [
   entry: {
     main: './js/pmtv_main.js',
   },
+  resolve: {
+    fallback: {
+      "path": require.resolve("path-browserify")
+    }
+  },
   output: {
     filename: 'pmtv_[name].js',
     chunkFilename: 'pmtv_[name].js',
@@ -18,6 +23,16 @@ module.exports = [
   mode: _mode, 
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      },
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],

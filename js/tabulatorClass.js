@@ -9,7 +9,6 @@
 //import { Tabulator, EditModule, FilterModule, FormatModule, HtmlTableImportModule, InteractionModule, MenuModule, PageModule, SortModule } from 'tabulator-tables';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
-import { parseLocalizedInt as myParseFloat} from './parseNumber';
 
 // AccessorModule, AjaxModule, CalcComponent, CellComponent, ClipboardModule, ColumnCalcsModule, ColumnComponent, DataTreeModule, DownloadModule, EditModule, ExportModule, FilterModule, FormatModule, FrozenColumnsModule, FrozenRowsModule, GroupComponent, GroupRowsModule, HistoryModule, HtmlTableImportModule, ImportModule, InteractionModule, KeybindingsModule, MenuModule, Module, MoveColumnsModule, MoveRowsModule, MutatorModule, PageModule, PersistenceModule, PopupModule, PrintModule, PseudoRow, RangeComponent, ReactiveDataModule, Renderer, ResizeColumnsModule, ResizeRowsModule, ResizeTableModule, ResponsiveLayoutModule, RowComponent, SelectRangeModule, SelectRowModule, SheetComponent, SortModule, SpreadsheetModule, Tabulator, TabulatorFull, TooltipModule, ValidateModule
 // exports

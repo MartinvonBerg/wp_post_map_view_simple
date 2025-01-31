@@ -34,11 +34,7 @@ interface PostMapViewSimpleInterface {
 /**
  * main shortcode function to generate the html
  * 
- * TODO: add tabulator theme, tablepagesize as option and height
- * TODO: is it faster to provide an JSON with table data?
- * TODO: options or shortcodes for CSS map sizes (height, width, aspect ratio)
- * 
- * TODO: provide $post_type and $category as arrays
+ * ---TODO: is it faster to provide a JSON in PHP with table data? So not to parse HTML
  * TODO: finally add the functions similar to maps Marker pro!
  * 
  */
@@ -55,13 +51,19 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	// ---------- end of shortcode parameters ----------
 
     // ------------------- possible options -------------------
-    private $gpxfolder = 'gpx'; // option? or shortcode?
-    private $lenexcerpt = 150; // option? or shortcode?
-    private $useWPExcerptExtraction = false; // option? or shortcode?
-    private $titlelength = 80; // option? or shortcode?
-    private $useTileServer = true; // option? or shortcode?
-    private $convertTilesToWebp = true; // option? or shortcode?
-    private $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:']; // option? or shortcode?
+    private $gpxfolder = 'gpx'; // TODO: shortcode parameter
+    private $lenexcerpt = 150; // TODO: shortcode parameter
+    private $useWPExcerptExtraction = false; // TODO: shortcode parameter
+    private $titlelength = 80; // TODO: shortcode parameter
+    private $useTileServer = true; // TODO: shortcode parameter
+    private $convertTilesToWebp = true; // TODO: shortcode parameter
+    private $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:']; // TODO: shortcode parameter
+    private $tabulatorTheme = ''; // TODO: shortcode parameter : ! Das dynamische Laden des Themes funktioniert leider nicht
+    private $tablePageSize = 20; // TODO: shortcode parameter
+    private $tableHeight = 0; // TODO: shortcode parameter
+    private $mapHeight = 0; // TODO: shortcode parameter
+    private $mapWidth = 0; // TODO: shortcode parameter
+    private $mapAspectRatio = 0; // TODO: shortcode parameter
     // ------------------- end of possible options -------------------
 
     private $plugin_url;
@@ -82,24 +84,47 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		$this->gpx_dir = $this->up_dir . '/' . $this->gpxfolder . '/';    // gpx_dir
 		
 		// extract and handle shortcode parameters
+        //'post_status' => 'publish' ist get_posts voreingestellt.
 		$attr = shortcode_atts ( array ( 
 			'numberposts' => 100, 
-			'post_type'   => 'post',
+			'post_type'   => 'post', // laut doku geht das so : array( 'post', 'page', 'movie', 'book' ) post_types können mit array abgefragt werden
 			'showmap'     => 'true',
 			'showtable'   => 'true',
-			'category'    => 'all',
+			'category'    => 'all', // mehrere Kategorien können über den slug zur Kategorie abgefragt werden. Case Sensitiv. Childs werden mit abgefragt! Geht nur einzeln nicht mit category_name=cat1+cat2!
 			'headerhtml'  => '',
 		), $attr);
 
 		$this->numberposts = $attr['numberposts'];
-		$this->post_type = $attr['post_type'];
+		$this->post_type = $this->parseParameterToArray($attr['post_type']) ?? '';
 		$this->showmap = $attr['showmap'] === 'true';
 		$this->showtable = $attr['showtable'] === 'true';
-		$this->category = strtolower( $attr['category'] );
+		$this->category = $this->parseParameterToArray(strtolower( $attr['category'] ) );
 		$this->headerhtml = $attr['headerhtml'];
 
         $this->m = self::$numberShortcodes;
         $this->pageVarsForJs[$this->m] = [];
+    }
+    
+    private function parseParameterToArray(string $input): string|array {
+        // Entferne unnötige Anführungszeichen
+        $input = trim($input, '"');
+        
+        // Ersetze mögliche Trennzeichen durch Komma
+        $input = str_replace([';', ' '], ',', $input);
+        
+        // Zerlege den String in ein Array
+        $items = array_map('trim', explode(',', $input));
+        
+        // Entferne leere Einträge
+        $filteredItems = array_filter($items, fn($item) => $item !== '');
+        
+        // Wenn nur ein Element übrig bleibt, gib es als String zurück
+        if (count($filteredItems) === 1) {
+            return reset($filteredItems);
+        }
+        
+        // Ansonsten gib das Array zurück
+        return $filteredItems;
     }
 	
 	public function show_post_map() :string {
@@ -137,7 +162,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $args = array(
                 'numberposts' => $this->numberposts, 
                 'post_type'   => $this->post_type,
-                'post_status' => 'publish'
+                'post_status' => 'publish',
+                'category_name'    => $this->category
+                // Cusom field 'lat' and 'lon' must be set in the post. Add to the query if not set! geoaddress is optional!
             );
             
             // start processing of posts and prepara the data
@@ -207,9 +234,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
         // generate table with post data 
         foreach ($data2 as $data) {
-            $datacat = preg_replace("/[^a-zA-Z]+/", "", $data['wpcategory']); 
+            //$datacat = preg_replace("/[^a-zA-Z0-9]+/", "", $data['wpcategory']); 
     
-            if ( ($category === 'all') || ( $datacat == $category)) {
+            //if ( ($category === 'all') || ( $datacat == $category) || ( $this->is_category_or_child($datacat, $category) )) { // $datacat is in array $category, wenn das ein Array ist!
                 // get geo statistics
                 $geostatarr= \explode(' ', $data['geostat'] ); // gives strings of the values
                 
@@ -228,7 +255,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $table_out  .= '<td>' . $data['state'] . '</td>';
                 $table_out  .= '<td><a href="' . $googleurl . '" target="_blank" rel="noopener noreferrer">'. $data['address'] .'</a></td>';
                 $table_out  .= '</tr>';
-            }
+            //}
         }
     
         // finally close table
@@ -357,10 +384,25 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return compact('address', 'state', 'country');
     }
     
-    private function prepare_data( $args, $gpx_dir, $lenexcerpt ) {
+    private function prepare_data( $queryArgs, $gpx_dir, $lenexcerpt ) {
         $postArray = [];
         $data2 = [];
-        $custom_posts = get_posts($args);
+        $custom_posts = [];
+
+        if ( array_key_exists('category_name', $queryArgs) && $queryArgs['category_name'] === 'all' ) {
+            // remove category from queryAargs
+            unset( $queryArgs['category_name'] );
+        }
+
+        // get the different get_categories if $queryAargs['category'] is an array. Loop through the array and get the posts for each category and append them to $custom_posts
+        if ( array_key_exists('category_name', $queryArgs) && is_array($queryArgs['category_name'])) {
+            foreach ($queryArgs['category_name'] as $category) {
+                $queryAargs['category_name'] = $category;
+                $custom_posts = array_merge($custom_posts, get_posts($queryAargs));
+            }
+        } else {
+            $custom_posts = get_posts($queryArgs);
+        }
         $i = 0;
         
         // loop through all posts and fetch data for the output
