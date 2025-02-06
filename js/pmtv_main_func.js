@@ -55,6 +55,19 @@ function mainLogic (window, document, undefined) {
       document.head.appendChild(style);
     }
 
+    // Funktion zur Steuerung der Checkboxen
+    function toggleAllLayers(selectAll, table) {
+      document.querySelectorAll('.leaflet-control-layers-overlays input[type="checkbox"]').forEach(checkbox => {
+          if (checkbox.checked !== selectAll) {
+              checkbox.click(); // Simuliert ein Nutzer-Klick-Event
+          }
+      });
+
+      if (selectAll) {
+        table.clearFilter(true);
+      }
+    }
+
     function createMarkers(php_touren, allIcons, myIcon, group, nposts) {
           
       let marker = new Array();
@@ -110,6 +123,12 @@ function mainLogic (window, document, undefined) {
       let pageVars = window.pageVarsForJs[m];
       let table = {};
       let tableMapMoveSelector = 'Stadt'; // Mind: This might be i18n or other values
+      let LayerSupportGroup = {};
+      let allIcons = {};
+      let nposts = [];
+      let myIcon = new Array();
+      let group = new Array();
+      let bounds = {};
 
       updateCSS(pageVars);
         
@@ -121,52 +140,31 @@ function mainLogic (window, document, undefined) {
         allMaps[m] = new LeafletMap.LeafletMap(m, 'map10_img' );
                         
         // Icons definieren aus der Json variable übernehmen
-        let allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
-        let nposts = Array( allIcons.length ).fill(0);
-        
-        let myIcon = new Array();
-        allIcons.forEach( function(icon, iconindex) {
-          myIcon[iconindex] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png')
+        allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
+        nposts = Array( allIcons.length ).fill(0);
+        //let myIcon = new Array();
+        //let group = new Array();
+        // Creating markergroups ----------------------- 
+        LayerSupportGroup = L.markerClusterGroup.layerSupport();
+        LayerSupportGroup.addTo(allMaps[m].map);
+
+        allIcons.forEach( function(icon, index) {
+          myIcon[index] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png');
+          group[index] = L.layerGroup();
         }); 
         
-        // Creating markergroups ----------------------- 
-        let LayerSupportGroup = L.markerClusterGroup.layerSupport();
-        LayerSupportGroup.addTo(allMaps[m].map);
-        
         // Creating markers -----------------------
-        let group = new Array();
-        allIcons.forEach( function(sIcon, index) {
-            group[index] = L.layerGroup();
-        });
-        // -------------------------
-        let bounds = createMarkers(php_touren, allIcons, myIcon, group, nposts);
+        bounds = createMarkers(php_touren, allIcons, myIcon, group, nposts);
         allMaps[m].map.fitBounds(bounds, { padding: [50, 50] });
-        // -------------------------
 
         group.forEach( function(sgrp, index) {
             LayerSupportGroup.checkIn(group[index]);
+            group[index].addTo(allMaps[m].map);
         }); 
 
         allIcons.forEach( function(icon, index) {
           allMaps[m].controlLayer.addOverlay(group[index], '<img class="layerIcon" src="' + postmap_url + icon['icon-png'] + '"/> '+icon['category']+' (' + nposts[index] + ')');  
         });
-
-        group.forEach( function(sgrp, index) {
-          group[index].addTo(allMaps[m].map);
-        });
-
-        // Funktion zur Steuerung der Checkboxen
-        function toggleAllLayers(selectAll) {
-            document.querySelectorAll('.leaflet-control-layers-overlays input[type="checkbox"]').forEach(checkbox => {
-                if (checkbox.checked !== selectAll) {
-                    checkbox.click(); // Simuliert ein Nutzer-Klick-Event
-                }
-            });
-
-            if (selectAll) {
-              table.clearFilter(true);
-            }
-        }
 
         // Eigenes Element mit "Alles" und "Nichts" hinzufügen
         // Warten, bis Leaflet das Control gerendert hat
@@ -186,8 +184,8 @@ function mainLogic (window, document, undefined) {
               overlaysList.parentNode.insertBefore(selectButtons, overlaysList);
 
               // Event-Listener für die Buttons
-              document.getElementById('selectAllBtn').addEventListener('click', () => toggleAllLayers(true));
-              document.getElementById('deselectAllBtn').addEventListener('click', () => toggleAllLayers(false));
+              document.getElementById('selectAllBtn').addEventListener('click', () => toggleAllLayers(true, table));
+              document.getElementById('deselectAllBtn').addEventListener('click', () => toggleAllLayers(false, table));
 
               // CSS anpassen, damit die Buttons nur bei Hover sichtbar sind
               const style = document.createElement('style');
@@ -289,8 +287,23 @@ function mainLogic (window, document, undefined) {
           let tabulator = new MyTabulatorClass.MyTabulatorClass({});
           table = tabulator.createTable("#post_table", pageVars );
 
-          table.on("dataFiltered", function(filters, rows){
-            // TODO : filter markers in map
+          table.on("dataFiltered", function(filters, rows, event){
+            // TODO : filter markers in map, 
+            if (filters.length == 0) {
+              // show all markers again. TBD: What has to be done if this event appears on filtered data.
+              //LayerSupportGroup.removeLayers();
+              //LayerSupportGroup._layers = LayerSupportGroup.getLayers()
+              //bounds = createMarkers(php_touren, allIcons, myIcon, group, nposts);
+              //allMaps[m].map.fitBounds(bounds, { padding: [50, 50] });
+              //toggleAllLayers(true, table);
+              return;
+            }
+            //LayerSupportGroup.clearLayers();
+            // clearLayer : beachte dabei die möglichen wechselwirkungen
+            // filter php_touren to another Array
+            // show this array with createMarkers
+            // set bounds to the filtered subset of Markers
+            
           });
 
           // click auf die Reihe zentriert die Karte auf den Marker, zoom bleibt gleich

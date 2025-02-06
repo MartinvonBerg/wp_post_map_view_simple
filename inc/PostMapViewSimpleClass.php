@@ -34,7 +34,6 @@ interface PostMapViewSimpleInterface {
 /**
  * main shortcode function to generate the html
  * 
- * TODO: shortcode generates the same map on all usages, due to transients. This should be fixed.
  * TODO: finally add the functions similar to maps Marker pro!
  * 
  */
@@ -166,27 +165,29 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	public function show_post_map() :string {
 
         // check the transient set time and delete transient if post was published during that time
+        $wpid = get_the_ID();
+        $wpid = $wpid ? strval($wpid) : '';
         $transient_duration = \WEEK_IN_SECONDS;
-        $last_post_date = \get_lastpostdate('server', 'any'); // "2020-12-24 13:16:03.000000"
+        $last_post_date = \get_lastpostmodified('server', 'any'); // "2020-12-24 13:16:03.000000"
         $last_post_date = \strtotime( $last_post_date ); // now in seconds from 01.01.1970 00:00:00.000
-        $expires = (int) get_option( '_transient_timeout_post_map_html_output', 0 ); // int value 0 if not set
+        $expires = (int) get_option( '_transient_timeout_post_map_html_output_' . $wpid, 0 ); // int value 0 if not set
         $transient_set_time = $expires - $transient_duration;
 
         if ( ($last_post_date > $transient_set_time || $this->is_user_editing_overview_map() ) ) {
-            delete_transient( 'post_map_html_output' );
-            delete_transient( 'post_map_js_pageVars_output' );
-            $chunk_keys = get_option('post_map_array_chunk_keys', []);
+            delete_transient( 'post_map_html_output_' . $wpid );
+            delete_transient( 'post_map_js_pageVars_output_' . $wpid );
+            $chunk_keys = get_option('post_map_array_chunk_keys_' . $wpid, []);
             foreach ($chunk_keys as $chunk_key) {
                 delete_option($chunk_key);
             }
-            delete_option('post_map_array_chunk_keys');
+            delete_option('post_map_array_chunk_keys_' . $wpid );
         }
 
         // generate the output if not set in transient
-        $html = get_transient( 'post_map_html_output' );
-        $this->pageVarsForJs = get_transient( 'post_map_js_pageVars_output' );
+        $html = get_transient( 'post_map_html_output_' . $wpid );
+        $this->pageVarsForJs = get_transient( 'post_map_js_pageVars_output_' . $wpid );
 
-        $chunk_keys = get_option('post_map_array_chunk_keys', []);
+        $chunk_keys = get_option('post_map_array_chunk_keys_' . $wpid, []);
         foreach ($chunk_keys as $chunk_key) {
             $this->postArray = array_merge($this->postArray, json_decode(get_option($chunk_key, []), true ) );
         }
@@ -237,17 +238,17 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             }
 
             // end generation of html output: write the html-output in $string now as set_transient
-		    \set_transient('post_map_html_output', $html, $transient_duration);
-            \set_transient('post_map_js_pageVars_output', $this->pageVarsForJs, $transient_duration);
+		    \set_transient('post_map_html_output_' . $wpid, $html, $transient_duration);
+            \set_transient('post_map_js_pageVars_output_' . $wpid, $this->pageVarsForJs, $transient_duration);
 
 		    $chunks = array_chunk($this->postArray, $this->chunksize);
             $chunk_keys = [];
             foreach ($chunks as $index => $chunk) {
-                $chunk_key = "post_map_array_chunk_{$index}";
+                $chunk_key = "post_map_array_chunk_{$wpid}_{$index}";
                 $saved = update_option($chunk_key, wp_json_encode($chunk), false); // true = autoload, aber hier nicht nötig
                 $chunk_keys[] = $chunk_key;
             }
-            update_option('post_map_array_chunk_keys', $chunk_keys, false);
+            update_option('post_map_array_chunk_keys_' . $wpid, $chunk_keys, false);
         }
             
         // --- enqueue scripts
@@ -536,97 +537,98 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     
             //if ( is_numeric($lat) && is_numeric($lon) ) // breaking change : posts without lat lon are no longer shown!
             //{
-                $title = substr($post->post_title,0,$this->titlelength); // Länge des Titels beschränken, Anzahl Zeichen
-            
-                // tags des posts holen und in string umwandeln
-                $tag3 =  implode( ', ', wp_get_post_tags($post->ID, array('fields' => 'names')));
-                $icon = wp_postmap_get_icon_cat($tag3, 'icon'); 
-                $cat = wp_postmap_get_icon_cat($tag3, 'category'); 
-                $wpcat = \get_the_category( $post->ID );
-                $wpcat = count($wpcat) === 1 ? strtolower($wpcat[0]->name) : 'multiple';
-                $content = $post->post_content;
+            $title = substr($post->post_title,0,$this->titlelength); // Länge des Titels beschränken, Anzahl Zeichen
+        
+            // tags des posts holen und in string umwandeln
+            $tag3 =  implode( ', ', wp_get_post_tags($post->ID, array('fields' => 'names')));
+            $icon = wp_postmap_get_icon_cat($tag3, 'icon'); 
+            $cat = wp_postmap_get_icon_cat($tag3, 'category'); 
+            $wpcat = \get_the_category( $post->ID );
+            $wpcat = count($wpcat) === 1 ? strtolower($wpcat[0]->name) : 'multiple';
+            $content = $post->post_content;
 
-                // extract the gpxfile from the shortcode fo fotoramay if any
-                foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
-                    
-                    // extract the gpxfile from the shortcode
-                    $isshortcode = strpos($line,'[gpxview');	
-    
-                    if ( is_numeric($isshortcode) ) {
-                        $line = str_replace(' ', '', $line);
-                        $isgpxfile = strpos($line,'gpxfile'); // suche nicht nach dem shortcode, sondern ob ein gpxfile definiert wirde
-    
-                        if ( $isgpxfile) {
-                            $line = substr($line, $isgpxfile+9);
-                            $gpx = substr($line, 0, strpos($line, '"'));
-                            $morethanone = strpos($gpx, ',');
-                            if ($morethanone) {
-                                $gpxfilearr = explode(',', $gpx);
-                            } else {
-                                $gpxfilearr[] = $gpx;
-                            }
+            // extract the gpxfile from the shortcode fo fotoramay if any
+            foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
+                
+                // extract the gpxfile from the shortcode
+                $isshortcode = strpos($line,'[gpxview');	
+
+                if ( is_numeric($isshortcode) ) {
+                    $line = str_replace(' ', '', $line);
+                    $isgpxfile = strpos($line,'gpxfile'); // suche nicht nach dem shortcode, sondern ob ein gpxfile definiert wirde
+
+                    if ( $isgpxfile) {
+                        $line = substr($line, $isgpxfile+9);
+                        $gpx = substr($line, 0, strpos($line, '"'));
+                        $morethanone = strpos($gpx, ',');
+                        if ($morethanone) {
+                            $gpxfilearr = explode(',', $gpx);
+                        } else {
+                            $gpxfilearr[] = $gpx;
                         }
                     }
                 }
+            }
 
-                // Excerpt nur aus den Absätzen <p> herstellen! Schlüsselwörter entfernen, dürfen dann im Text nicht vorkommen
-                // Absätze mit [shortcodes] werden ignoriert.
-                // der html-code muss mit zeilenumbrüchen formatiert sein, sonst geht das nicht!
-                $excerpt = $this->generate_the_excerpt($post, $lenexcerpt);
-                $featimage = get_the_post_thumbnail_url($post->ID, $size='thumbnail'); 
-                $postlink = get_permalink($post->ID);
-                $i++;
+            // Excerpt nur aus den Absätzen <p> herstellen! Schlüsselwörter entfernen, dürfen dann im Text nicht vorkommen
+            // Absätze mit [shortcodes] werden ignoriert.
+            // der html-code muss mit zeilenumbrüchen formatiert sein, sonst geht das nicht!
+            $excerpt = $this->generate_the_excerpt($post, $lenexcerpt);
+            $featimage = get_the_post_thumbnail_url($post->ID, $size='thumbnail'); 
+            $postlink = get_permalink($post->ID);
+            $i++;
                 
-                $postArray[] = array(
-                    'img' => $featimage,
-                    'title' 	=> $title,
-                    'category'  	=> $icon,
-                    'coord'   	=> array( floatval($lat), floatval($lon) ),
-                    'link' 	=> $postlink,
-                    'excerpt' 	=> $excerpt,
-                    //'featimage' => $featimage,
-                    //'icon' => $icon,
-                    //'lat' => $lat,
-                    //'lon' => $lon,
+            $postArray[] = array(
+                'img' => $featimage,
+                'title' 	=> $title,
+                'category'  	=> $icon,
+                'coord'   	=> array( floatval($lat), floatval($lon) ),
+                'link' 	=> $postlink,
+                'excerpt' 	=> $excerpt,
+                'id' => $i,   // post with several gpx-files are 2.1 , 2.2 instead of 1, 2, 3....
+                //'featimage' => $featimage,
+                //'icon' => $icon,
+                //'lat' => $lat,
+                //'lon' => $lon,
+            );
+
+            // get the address corresponding to posts lat and lon customfield
+            $lat = number_format( floatval($lat), 6);
+            $lon = number_format( floatval($lon), 6);
+            
+            $geoaddresstest =  get_post_meta($post->ID,'geoadress', true) ?? '';
+            if ( !empty($geoaddresstest) ) {
+                $geoaddress = maybe_unserialize($geoaddresstest);	// type conversion to string 
+            } else {
+                // lat and lon have to be set always
+                $geoaddress = get_geoaddress($post->ID, $lat, $lon); // breaking change : this Plugin does not longer set the metadata!
+            }
+            // sanitize geoaddress
+            ['address' => $address, 'state' => $state, 'country' => $country] = $this->sanitize_geoaddress($geoaddress);
+
+            $gpxcount = 1;
+            if ( empty($gpxfilearr) ) $gpxfilearr = [''];
+
+            foreach ($gpxfilearr as $gpxfile) {
+
+                $geostat = $this->get_statistics_from_gpxfile( $gpx_dir . $gpxfile );
+
+                $data2[] = array(
+                    'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
+                    'lat' => $lat,
+                    'lon' => $lon,
+                    'title' => count($gpxfilearr) == 1 ? $title : $title . ' - ' . \str_replace('.gpx', '', $gpxfile),
+                    'category' => $cat,
+                    'link' => $postlink,
+                    'address' => $address,
+                    'country' => $country,
+                    'state' => $state,
+                    'gpxfile' => $gpxfile,
+                    'geostat' => $geostat,
+                    'wpcategory' => $wpcat,
                 );
-    
-                // get the address corresponding to posts lat and lon customfield
-                $lat = number_format( floatval($lat), 6);
-                $lon = number_format( floatval($lon), 6);
-                
-                $geoaddresstest =  get_post_meta($post->ID,'geoadress', true) ?? '';
-                if ( !empty($geoaddresstest) ) {
-                    $geoaddress = maybe_unserialize($geoaddresstest);	// type conversion to string 
-                } else {
-                    // lat and lon have to be set always
-                    $geoaddress = get_geoaddress($post->ID, $lat, $lon); // breaking change : this Plugin does not longer set the metadata!
-                }
-                // sanitize geoaddress
-                ['address' => $address, 'state' => $state, 'country' => $country] = $this->sanitize_geoaddress($geoaddress);
-    
-                $gpxcount = 1;
-                if ( empty($gpxfilearr) ) $gpxfilearr = [''];
-    
-                foreach ($gpxfilearr as $gpxfile) {
-    
-                    $geostat = $this->get_statistics_from_gpxfile( $gpx_dir . $gpxfile );
-    
-                    $data2[] = array(
-                        'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
-                        'lat' => $lat,
-                        'lon' => $lon,
-                        'title' => count($gpxfilearr) == 1 ? $title : $title . ' - ' . \str_replace('.gpx', '', $gpxfile),
-                        'category' => $cat,
-                        'link' => $postlink,
-                        'address' => $address,
-                        'country' => $country,
-                        'state' => $state,
-                        'gpxfile' => $gpxfile,
-                        'geostat' => $geostat,
-                        'wpcategory' => $wpcat,
-                    );
-                    $gpxcount++;
-                }
+                $gpxcount++;
+            }
             //}
         }
     
