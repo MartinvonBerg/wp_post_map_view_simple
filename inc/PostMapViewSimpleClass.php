@@ -34,7 +34,7 @@ interface PostMapViewSimpleInterface {
 /**
  * main shortcode function to generate the html
  * 
- * ---TODO: is it faster to provide a JSON in PHP with table data? So not to parse HTML
+ * TODO: shortcode generates the same map on all usages, due to transients. This should be fixed.
  * TODO: finally add the functions similar to maps Marker pro!
  * 
  */
@@ -42,7 +42,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
 	public static $numberShortcodes = 0;
     // ---------- shortcode parameters ----------
-    private $numberposts = 100; // is shortcode parameter
+    private $numberposts = 100; // is shortcode parameter. Max 1000 wg. PHP Memory Limit und max_allowed_packet bei MySQL.
     private $post_type = 'post'; // is shortcode parameter 
 	private $showmap = true; // is shortcode parameter
 	private $showtable = true; // is shortcode parameter
@@ -51,19 +51,19 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	// ---------- end of shortcode parameters ----------
 
     // ------------------- possible options -------------------
-    private $gpxfolder = 'gpx'; // TODO: shortcode parameter
-    private $lenexcerpt = 150; // TODO: shortcode parameter
-    private $useWPExcerptExtraction = false; // TODO: shortcode parameter
-    private $titlelength = 80; // TODO: shortcode parameter
-    private $useTileServer = true; // TODO: shortcode parameter
-    private $convertTilesToWebp = true; // TODO: shortcode parameter
-    private $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:']; // TODO: shortcode parameter
-    private $tabulatorTheme = ''; // TODO: shortcode parameter : ! Das dynamische Laden des Themes funktioniert leider nicht
-    private $tablePageSize = 20; // TODO: shortcode parameter
-    private $tableHeight = 0; // TODO: shortcode parameter
-    private $mapHeight = 0; // TODO: shortcode parameter
-    private $mapWidth = 0; // TODO: shortcode parameter
-    private $mapAspectRatio = 0; // TODO: shortcode parameter
+    private $gpxfolder = 'gpx';
+    private $lenexcerpt = 150;
+    private $useWPExcerptExtraction = false;
+    private $titlelength = 80;
+    private $useTileServer = true;
+    private $convertTilesToWebp = true;
+    private $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:'];
+    private $tabulatorTheme = '';
+    private $tablePageSize = 20;
+    private $tableHeight = 0;
+    private $mapHeight = ''; // shortcode parameter as string px or %
+    private $mapWidth = ''; // shortcode parameter as string px or %
+    private $mapAspectRatio = ''; // shortcode parameter as number (int or float)
     // ------------------- end of possible options -------------------
 
     private $plugin_url;
@@ -75,13 +75,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $htaccessTileServerIsOK = false;
     private $pageVarsForJs = [];
     private $m = null;
+    private $chunksize = 20;
 	
 	public function __construct( $attr ) {
-		
-		$this->plugin_url = plugin_dir_url(__DIR__);
-		$this->wp_postmap_url = $this->plugin_url . 'images/';
-		$this->up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
-		$this->gpx_dir = $this->up_dir . '/' . $this->gpxfolder . '/';    // gpx_dir
 		
 		// extract and handle shortcode parameters
         //'post_status' => 'publish' ist get_posts voreingestellt.
@@ -92,17 +88,57 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 			'showtable'   => 'true',
 			'category'    => 'all', // mehrere Kategorien können über den slug zur Kategorie abgefragt werden. Case Sensitiv. Childs werden mit abgefragt! Geht nur einzeln nicht mit category_name=cat1+cat2!
 			'headerhtml'  => '',
+            'gpxfolder'   => 'gpx',
+            'lenexcerpt'  => 150,
+            'usewpexcerpt' => 'false',
+            'titlelength' => 80,
+            'usetileserver' => 'true',
+            'converttiles'  => 'true',
+            'contentfilter' => 'Kurzbeschreibung:,Tourenbeschreibung:',
+            'tabulatortheme' => '',
+            'tablepagesize' => 20,
+            'tableheight' => 0,
+            'mapheight' => '',
+            'mapwidth' => '',
+            'mapaspectratio' => ''
 		), $attr);
 
+        $this->plugin_url = plugin_dir_url(__DIR__);
+		$this->wp_postmap_url = $this->plugin_url . 'images/';
+		$this->up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
+        $this->gpxfolder = $attr['gpxfolder'];
+		$this->gpx_dir = $this->up_dir . '/' . $this->gpxfolder . '/';    // gpx_dir
+		
 		$this->numberposts = $attr['numberposts'];
+        // fallback for great values, see above.
+        if ( $this->numberposts > 1000 ) $this->numberposts = 1000;
+
 		$this->post_type = $this->parseParameterToArray($attr['post_type']) ?? '';
 		$this->showmap = $attr['showmap'] === 'true';
 		$this->showtable = $attr['showtable'] === 'true';
 		$this->category = $this->parseParameterToArray(strtolower( $attr['category'] ) );
 		$this->headerhtml = $attr['headerhtml'];
+        $this->lenexcerpt = $attr['lenexcerpt'];
+        $this->useWPExcerptExtraction = $attr['usewpexcerpt'] === 'true';
+        $this->titlelength = $attr['titlelength'];
+        $this->useTileServer = $attr['usetileserver'] === 'true';
+        $this->convertTilesToWebp = $attr['converttiles'] === 'true';
+        $this->contentFilter = $this->parseParameterToArray($attr['contentfilter']);
+
+        $this->tabulatorTheme = $attr['tabulatortheme'];
+        $this->tablePageSize = $attr['tablepagesize'];
+        $this->tableHeight = $attr['tableheight'];
+        $this->mapHeight = $attr['mapheight'];
+        $this->mapWidth = $attr['mapwidth'];
+        $this->mapAspectRatio = $attr['mapaspectratio'];
 
         $this->m = self::$numberShortcodes;
         $this->pageVarsForJs[$this->m] = [];
+
+        // CSS loading for tabulator does only work here and not in 'show_post_map()'.
+        if ( $this->showtable ){
+            $this->enqueue_tabulator_Theme($this->tabulatorTheme);
+        }
     }
     
     private function parseParameterToArray(string $input): string|array {
@@ -138,26 +174,45 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         if ( ($last_post_date > $transient_set_time || $this->is_user_editing_overview_map() ) ) {
             delete_transient( 'post_map_html_output' );
-            delete_transient( 'post_map_js_postArray_output' );
             delete_transient( 'post_map_js_pageVars_output' );
+            $chunk_keys = get_option('post_map_array_chunk_keys', []);
+            foreach ($chunk_keys as $chunk_key) {
+                delete_option($chunk_key);
+            }
+            delete_option('post_map_array_chunk_keys');
         }
 
         // generate the output if not set in transient
         $html = get_transient( 'post_map_html_output' );
-        $this->postArray = get_transient( 'post_map_js_postArray_output' );
         $this->pageVarsForJs = get_transient( 'post_map_js_pageVars_output' );
 
-        if ( !$html || !$this->postArray || $this->is_user_editing_overview_map() ) {
+        $chunk_keys = get_option('post_map_array_chunk_keys', []);
+        foreach ($chunk_keys as $chunk_key) {
+            $this->postArray = array_merge($this->postArray, json_decode(get_option($chunk_key, []), true ) );
+        }
+        
+        if ( !$html || !$this->postArray || !$this->pageVarsForJs || $this->is_user_editing_overview_map() ) {
 
             // check htaccess for tileserver only here 
             if ( $this->useTileServer) {
                 $this->htaccessTileServerIsOK = $this->checkHtaccess();
                 !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
             }
+            
+            $this->pageVarsForJs = [];
+            $this->pageVarsForJs[$this->m] = [];
             $this->pageVarsForJs[$this->m]['useTileServer'] = $this->useTileServer ? 'true' : 'false';
             $this->pageVarsForJs[$this->m]['convertTilesToWebp'] = $this->convertTilesToWebp ? 'true' : 'false';
             $this->pageVarsForJs[$this->m]['htaccessTileServerIsOK'] = $this->htaccessTileServerIsOK ? 'true' : 'false';
             $this->pageVarsForJs[$this->m]['imagepath'] = $this->wp_postmap_url;
+
+            $this->pageVarsForJs[$this->m]['mapHeight'] = $this->mapHeight; //
+            $this->pageVarsForJs[$this->m]['mapWidth'] = $this->mapWidth; //
+            $this->pageVarsForJs[$this->m]['mapAspectRatio'] = $this->mapAspectRatio; //
+            
+            //$this->pageVarsForJs[$this->m]['tabulatorTheme'] = $this->tabulatorTheme;
+            $this->pageVarsForJs[$this->m]['tablePageSize'] = $this->tablePageSize;
+            $this->pageVarsForJs[$this->m]['tableHeight'] = strval($this->tableHeight) . 'px';
 
             $args = array(
                 'numberposts' => $this->numberposts, 
@@ -173,20 +228,26 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             // generate html for map with post data 
             $html = '';
             if ( $this->showmap ) {
-                //require_once __DIR__ . '/enqueue_map.php';
                 $html = $this->generate_map_html($this->postArray);
             }
             
             // generate html for table with post data
             if ( $this->showtable ){
-                //require_once __DIR__ . '/enqueue_tabulator.php';
                 $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray, $this->category );
             }
 
             // end generation of html output: write the html-output in $string now as set_transient
 		    \set_transient('post_map_html_output', $html, $transient_duration);
-		    \set_transient('post_map_js_postArray_output', $this->postArray, $transient_duration);
             \set_transient('post_map_js_pageVars_output', $this->pageVarsForJs, $transient_duration);
+
+		    $chunks = array_chunk($this->postArray, $this->chunksize);
+            $chunk_keys = [];
+            foreach ($chunks as $index => $chunk) {
+                $chunk_key = "post_map_array_chunk_{$index}";
+                $saved = update_option($chunk_key, wp_json_encode($chunk), false); // true = autoload, aber hier nicht nötig
+                $chunk_keys[] = $chunk_key;
+            }
+            update_option('post_map_array_chunk_keys', $chunk_keys, false);
         }
             
         // --- enqueue scripts
@@ -205,6 +266,38 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		return $html;
 	}
     // ---------------- pivate functions ----------------
+    private function enqueue_tabulator_Theme($theme) {
+        $plugin_url = plugin_dir_url(__DIR__);
+
+        $themes = [
+            'bootstrap3' => 'tabulator_bootstrap3.min.css',
+            'bootstrap4' => 'tabulator_bootstrap4.min.css',
+            'bootstrap5' => 'tabulator_bootstrap5.min.css',
+            'bulma' => 'tabulator_bulma.min.css',
+            'materialize' => 'tabulator_materialize.min.css',
+            'midnight'  => 'tabulator_midnight.min.css',
+            'modern' => 'tabulator_modern.min.css',
+            'semanticui' => 'tabulator_semanticui.min.css',
+            'simple' => 'tabulator_simple.min.css',
+            'site_dark' => 'tabulator_site_dark.min.css',
+            'site' => 'tabulator_site.min.css',
+            'default' => 'tabulator.min.css',
+            'standard ' => 'tabulator.min.css'
+        ];
+
+        // fallback to default theme if argument $theme is not in array $themes
+        if ( !array_key_exists($theme, $themes) ) {
+            $theme = '';
+        }
+
+        // Load default Styles
+        if ( $theme == '' ) {
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '0.5.0', 'all');
+        } else {
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '0.5.0', 'all');
+        }
+    }
+
     private function generate_table_html( $headerhtml, $data2, $category ) {
         if ( count($data2) === 0) return '';
 
@@ -213,10 +306,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $table_out  = '<h4>Tourenübersicht</h4>';
             $table_out  .= '<p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p>';
             $table_out  .= '<p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p>';
-        } else {
+        } else if ( $headerhtml == 'none' ) {
+            $table_out  = '';
+        } 
+        else {
             $headerhtml = str_replace(array("\r", "\n"), '', $headerhtml);
             $table_out  = $headerhtml;
-        }
+        } 
 
         //$table_out  .= '<button id="tablereset" type="button">Reset Filter</button>';
         $table_out  .= '<table id="post_table"><thead><tr>';
@@ -267,17 +363,17 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private function generate_map_html( $allposts ) {
         if ( count( $allposts) === 0) return '';
         
-        $string = '';
-        $string .= '<div class="box1">';
+        $string = '<div class="box1">';
         $string .= '<div id="map0"></div>'; // hier wird die Karte erzeugt!
-        $string .= '<div id="map10_img">';
+        //$string .= '<div id="map10_img">';
     
         // loop through all posts and fetch data for the output
         //foreach ($allposts as $post) {
         //    $string  .= '<a href="' . $post['featimage'] . '" data-title="'.$post['title'].'" data-icon="'. $post['icon']. '" data-geo="lat:' . $post['lat'] . ',lon:' . $post['lon'] . '" data-link="'. $post['link'] .'">' . $post['excerpt']. '</a>';
         //}
         // close divs for the map
-        $string  .= '</div></div>';
+        //$string  .= '</div>';
+        $string .= '</div>';
     
         return $string;
     }
@@ -389,20 +485,46 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $data2 = [];
         $custom_posts = [];
 
+        // add query for the custom fields 'lat' and 'lon' which should be numeric to the argument $queryAargs like WP_Query.
+        // breaking change : posts without lat lon are no longer shown!
+        
+        $queryArgs['meta_query'] = [
+            'relation' => 'AND', // Beide Bedingungen müssen erfüllt sein
+            [
+                'key'     => 'lat',
+                'compare' => 'BETWEEN', // Stellt sicher, dass das Feld existiert
+                'value'   => array(-90, 90),
+                'type'    => 'NUMERIC'
+            ],
+            [
+                'key'     => 'lon',
+                'compare' => 'BETWEEN', // Stellt sicher, dass das Feld existiert
+                'value'   => array(-180, 180),
+                'type'    => 'NUMERIC'
+            ],
+        ];
+        
         if ( array_key_exists('category_name', $queryArgs) && $queryArgs['category_name'] === 'all' ) {
-            // remove category from queryAargs
+            // remove category_name from queryAargs
             unset( $queryArgs['category_name'] );
         }
-
+        if ( array_key_exists('category_name', $queryArgs) && is_array($queryArgs['category_name'])) {
+            // convert array to comma separated string
+            $queryArgs['category_name'] = implode(',', $queryArgs['category_name']);
+        }
         // get the different get_categories if $queryAargs['category'] is an array. Loop through the array and get the posts for each category and append them to $custom_posts
+        // Voragabe Verwendung: $args['category_name'] = 'cat1,cat2'; // Komma als "OR"
+        /*
         if ( array_key_exists('category_name', $queryArgs) && is_array($queryArgs['category_name'])) {
             foreach ($queryArgs['category_name'] as $category) {
-                $queryAargs['category_name'] = $category;
-                $custom_posts = array_merge($custom_posts, get_posts($queryAargs));
+                $queryArgs['category_name'] = $category;
+                $custom_posts = array_merge($custom_posts, get_posts($queryArgs));
             }
         } else {
             $custom_posts = get_posts($queryArgs);
         }
+        */
+        $custom_posts = get_posts($queryArgs);
         $i = 0;
         
         // loop through all posts and fetch data for the output
@@ -412,8 +534,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $lon = get_post_meta($post->ID,'lon', true);
             $gpxfilearr = [];
     
-            if ( is_numeric($lat) && is_numeric($lon) ) // breaking change : posts without lat lon are no longer shown!
-            {
+            //if ( is_numeric($lat) && is_numeric($lon) ) // breaking change : posts without lat lon are no longer shown!
+            //{
                 $title = substr($post->post_title,0,$this->titlelength); // Länge des Titels beschränken, Anzahl Zeichen
             
                 // tags des posts holen und in string umwandeln
@@ -462,10 +584,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     'coord'   	=> array( floatval($lat), floatval($lon) ),
                     'link' 	=> $postlink,
                     'excerpt' 	=> $excerpt,
-                    'featimage' => $featimage,
-                    'icon' => $icon,
-                    'lat' => $lat,
-                    'lon' => $lon,
+                    //'featimage' => $featimage,
+                    //'icon' => $icon,
+                    //'lat' => $lat,
+                    //'lon' => $lon,
                 );
     
                 // get the address corresponding to posts lat and lon customfield
@@ -505,7 +627,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     );
                     $gpxcount++;
                 }
-            }
+            //}
         }
     
         return [$postArray, $data2];
@@ -528,7 +650,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 			$url = $path . 'testfile.webp';
             $context = stream_context_create( array(
                 'http'=>array(
-                    'timeout' => 5.0 // TODO : Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
+                    'timeout' => 5.0 // Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
                 )
             ), );
 

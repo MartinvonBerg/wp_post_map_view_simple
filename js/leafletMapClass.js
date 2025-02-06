@@ -304,6 +304,8 @@ class LeafletMap {
             'Exit fullscreen' : 'Vollbild beenden',
             "y: "				: "Höhe: ",
 			"x: "				: "Strecke: ",
+            "All" : "Alle",
+            "None" : "Keine",
         };
 
         let it = {
@@ -317,6 +319,8 @@ class LeafletMap {
             'Exit fullscreen' : 'Esci schermo intero',
             "y: "				: "Altitudine: ",
 			"x: "				: "Distanza: ",
+            "All" : "Tutti",
+            "None" : "Nessuno",
         };
 
         let fr = {
@@ -330,6 +334,8 @@ class LeafletMap {
             'Exit fullscreen' : 'Quitter le mode plein écran',
             "y: "				: "Altitude: ",
 			"x: "				: "Distance: ",
+            "All" : "Tout",
+            "None" : "Aucun",
         };
 
         let es = {
@@ -343,6 +349,8 @@ class LeafletMap {
             'Exit fullscreen' : 'Salir de pantalla completa',
             "y: "				: "Altura: ",
 			"x: "				: "Distancia: ",
+            "All" : "Todo",
+            "None" : "Nada",
         };
 
         let langs = {'de': de, 'it':it, 'fr':fr, 'es':es};

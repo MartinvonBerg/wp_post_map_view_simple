@@ -8,3 +8,4 @@ build/pmtv_main.js
 composer.lock
 build/*.png
 leaflet_map_tiles/*
+*LICENSE.txt

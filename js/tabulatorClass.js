@@ -8,7 +8,7 @@
 // imports
 //import { Tabulator, EditModule, FilterModule, FormatModule, HtmlTableImportModule, InteractionModule, MenuModule, PageModule, SortModule } from 'tabulator-tables';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
-import 'tabulator-tables/dist/css/tabulator.min.css';
+//import 'tabulator-tables/dist/css/tabulator.min.css';
 
 // AccessorModule, AjaxModule, CalcComponent, CellComponent, ClipboardModule, ColumnCalcsModule, ColumnComponent, DataTreeModule, DownloadModule, EditModule, ExportModule, FilterModule, FormatModule, FrozenColumnsModule, FrozenRowsModule, GroupComponent, GroupRowsModule, HistoryModule, HtmlTableImportModule, ImportModule, InteractionModule, KeybindingsModule, MenuModule, Module, MoveColumnsModule, MoveRowsModule, MutatorModule, PageModule, PersistenceModule, PopupModule, PrintModule, PseudoRow, RangeComponent, ReactiveDataModule, Renderer, ResizeColumnsModule, ResizeRowsModule, ResizeTableModule, ResponsiveLayoutModule, RowComponent, SelectRangeModule, SelectRowModule, SheetComponent, SortModule, SpreadsheetModule, Tabulator, TabulatorFull, TooltipModule, ValidateModule
 // exports
@@ -24,7 +24,7 @@ class MyTabulatorClass {
         this.locale = navigator.language.toLowerCase();
     }
 
-    HeaderFilter(headerValue, rowValue, rowData, filterParams){
+    HeaderFilter(headerValue, rowValue){
         //headerValue - the value of the header filter element
         //rowValue - the value of the column in this row
         //rowData - the data for the row being filtered
@@ -34,10 +34,14 @@ class MyTabulatorClass {
         return rowInt >= headerInt; //must return a boolean, true if it passes the filter.
     }
 
-    createTable(tableId, page_size=20) {
-        new Tabulator(tableId, {
-            layout:"fitData",
-            locale:true,
+    createTable(tableId, options={}){
+        let page_size = options.tablePageSize ? options.tablePageSize : 20;
+        let tableHeight = options.tableHeight ? options.tableHeight : '0px';
+
+        let tabulatorOptions = {
+            layout: "fitData",
+            locale: true,
+            height: tableHeight,
             langs:{
                 "de-de":{
                     "pagination":{
@@ -55,10 +59,10 @@ class MyTabulatorClass {
                     },
                 }
             },
-            pagination:"local",
+            pagination: "local",
             paginationSize: page_size,
             paginationSizeSelector:[5, 10, page_size, 50, true],
-            movableColumns:true,
+            movableColumns:false,
             columns:[
                 {title:"Nr", field:"Nr", },
                 {title:"Titel", field:"Titel", formatter:"html", headerFilter:"input"},
@@ -70,7 +74,12 @@ class MyTabulatorClass {
                 {title:"Region", field:"Region", headerFilter:"input"},
                 {title:"Stadt", field:"Stadt", formatter:"html", headerFilter:"input"},
             ],
-        });
+        };
+
+        if ( tableHeight == '0px' ) {
+            delete tabulatorOptions.height;
+        }
+        return new Tabulator(tableId, tabulatorOptions);
     }
 
 }
