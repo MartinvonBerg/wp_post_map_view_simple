@@ -113,7 +113,7 @@ function mainLogic (window, document, undefined) {
      * @param {array} markersArray - array of arrays with all markers grouped by their icon.
      * @param {array} [padding=[50, 50]] - padding between the map view and the markers.
      */
-    function fitMaptoMarkers(map, markersArray, padding = [50, 50]) {
+    function fitMaptoMarkers(map, markersArray, padding = [50, 50], checkZoom = false) {
       let bounds = L.latLngBounds();
       let marker = new Array();
       marker = markersArray.flat();
@@ -121,7 +121,13 @@ function mainLogic (window, document, undefined) {
           let lat_lng = m._latlng;
           bounds.extend(lat_lng);
       });
+      let zoomBefore = map.getZoom();
       map.fitBounds(bounds, { padding: padding });
+      let zoomAfter = map.getZoom();
+      let zoomDiff = zoomAfter - zoomBefore;  
+      if (checkZoom && zoomDiff > 1) {
+        map.setZoom(zoomBefore);
+      }
     }
 
     /**
@@ -162,6 +168,7 @@ function mainLogic (window, document, undefined) {
     if (window.g_wp_postmap_path.number === "1" && php_touren.length > 0) {
       let postmap_url = window.g_wp_postmap_path.path;
       let hasTable = window.g_wp_postmap_path.hasTable == '1' ? true : false;
+      let hasMap = window.g_wp_postmap_path.hasMap == '1' ? true : false;
       let numberOfBoxes = 1;
       let allMaps = [ numberOfBoxes-1 ];
       let m = 0;
@@ -201,155 +208,157 @@ function mainLogic (window, document, undefined) {
       }
       
       // --- Generate Map with Markers
-      Promise.all([
-        import('../settings/category_mapping.json'),
-        import('./leafletMapClass.js')
-      ]).then(([category_mapping, LeafletMap]) => {
+      if (hasMap) {
+        Promise.all([
+          import('../settings/category_mapping.json'),
+          import('./leafletMapClass.js')
+        ]).then(([category_mapping, LeafletMap]) => {
 
-        allMaps[m] = new LeafletMap.LeafletMap(m, 'map10_img' );
-                        
-        // Define Icons from imported json file
-        allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
-        nposts = Array( allIcons.length ).fill(0);
-        allIcons.forEach( function(icon, index) {
-          myIcon[index] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png'); 
-        }); 
-        
-        // Creating markers as an array of arrays -----------------
-        let markersInGroups = new Array(); // possible return value
-        markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
-        
-        // ---add the marker cluster group to map --------------
-        LayerSupportGroup = L.markerClusterGroup.layerSupport();
-        group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
-        
-        // get the bounds and Fit map to it
-        fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
+          allMaps[m] = new LeafletMap.LeafletMap(m, 'map10_img' );
+                          
+          // Define Icons from imported json file
+          allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
+          nposts = Array( allIcons.length ).fill(0);
+          allIcons.forEach( function(icon, index) {
+            myIcon[index] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png'); 
+          }); 
+          
+          // Creating markers as an array of arrays -----------------
+          let markersInGroups = new Array(); // possible return value
+          markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+          
+          // ---add the marker cluster group to map --------------
+          LayerSupportGroup = L.markerClusterGroup.layerSupport();
+          group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
+          
+          // get the bounds and Fit map to it
+          fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
 
-        // --- show the title of the included markers in the tooltip ---
-        LayerSupportGroup.on('clustermouseover', function (a) {
-          var children = a.layer.getAllChildMarkers();
-          var names = [];
-          var string = '';
-          var max = children.length;
-          if (max > 10) { max = 10 };
-          for (let i = 0; i < max; i++) {
-              names.push(children[i].options.title);
-              string = string + '- ' + children[i].options.title + '<br>';
+          // --- show the title of the included markers in the tooltip ---
+          LayerSupportGroup.on('clustermouseover', function (a) {
+            var children = a.layer.getAllChildMarkers();
+            var names = [];
+            var string = '';
+            var max = children.length;
+            if (max > 10) { max = 10 };
+            for (let i = 0; i < max; i++) {
+                names.push(children[i].options.title);
+                string = string + '- ' + children[i].options.title + '<br>';
 
-          }
-          if (children.length > max) { string = string + '...u.v.m....' }
-          a.propagatedFrom.bindTooltip(string).openTooltip();
-        });
-        // --- remove the tooltip ---
-        LayerSupportGroup.on('clustermouseout', function (a) {
-            a.propagatedFrom.bindTooltip('').closeTooltip();
-        });
-
-        // add a function to the control to get the active base layer
-        L.Control.Layers.include({
-          /**
-           * Retrieves the currently active base layer from the map.
-           * Iterates over all layers managed by the control to determine which base layer
-           * is currently present on the map, and returns its name.
-           * 
-           * @returns {string} The name of the active base layer.
-           */
-          getOverlays: function() {
-          // create hash to hold all layers
-          var control, layers, activemaplayer;
-          layers = {};
-          control = this;
-                  
-          // loop thru all layers in control
-          control._layers.forEach(function(obj) {
-              var layerName;
-      
-              // check if layer is not an overlay 
-              if (!obj.overlay) {
-              // get name of overlay
-              layerName = obj.name;
-              // store whether it's present on the map or not
-              layers[layerName] = control._map.hasLayer(obj.layer);
-              if (layers[layerName]) {activemaplayer = layerName};
-              }
+            }
+            if (children.length > max) { string = string + '...u.v.m....' }
+            a.propagatedFrom.bindTooltip(string).openTooltip();
           });
-          return activemaplayer;
-          }
-        });
+          // --- remove the tooltip ---
+          LayerSupportGroup.on('clustermouseout', function (a) {
+              a.propagatedFrom.bindTooltip('').closeTooltip();
+          });
+
+          // add a function to the control to get the active base layer
+          L.Control.Layers.include({
+            /**
+             * Retrieves the currently active base layer from the map.
+             * Iterates over all layers managed by the control to determine which base layer
+             * is currently present on the map, and returns its name.
+             * 
+             * @returns {string} The name of the active base layer.
+             */
+            getOverlays: function() {
+            // create hash to hold all layers
+            var control, layers, activemaplayer;
+            layers = {};
+            control = this;
+                    
+            // loop thru all layers in control
+            control._layers.forEach(function(obj) {
+                var layerName;
         
-        // set the background color of the map according to the base layer
-        allMaps[m].map.on('baselayerchange', function() {
-          let activeLayer =  allMaps[0].controlLayer.getOverlays();
-          switch (activeLayer) {
-              case 'OpenStreetMap':
-                document.querySelector('.leaflet-container').style.background = "#b9d3dc";
-                break;
-              case 'OpenTopoMap':
-                document.querySelector('.leaflet-container').style.background = "#97d2e3";
-                break;
-              case 'Bike-Hike-Map':
-                document.querySelector('.leaflet-container').style.background = "#c8e4fa";
-                break;
-              case 'Satellit':
-                document.querySelector('.leaflet-container').style.background = "#071e40";
-                break;
-              default:
-                document.querySelector('.leaflet-container').style.background = "lightgrey";
-                break;
-          }
-        });
+                // check if layer is not an overlay 
+                if (!obj.overlay) {
+                // get name of overlay
+                layerName = obj.name;
+                // store whether it's present on the map or not
+                layers[layerName] = control._map.hasLayer(obj.layer);
+                if (layers[layerName]) {activemaplayer = layerName};
+                }
+            });
+            return activemaplayer;
+            }
+          });
+          
+          // set the background color of the map according to the base layer
+          allMaps[m].map.on('baselayerchange', function() {
+            let activeLayer =  allMaps[0].controlLayer.getOverlays();
+            switch (activeLayer) {
+                case 'OpenStreetMap':
+                  document.querySelector('.leaflet-container').style.background = "#b9d3dc";
+                  break;
+                case 'OpenTopoMap':
+                  document.querySelector('.leaflet-container').style.background = "#97d2e3";
+                  break;
+                case 'Bike-Hike-Map':
+                  document.querySelector('.leaflet-container').style.background = "#c8e4fa";
+                  break;
+                case 'Satellit':
+                  document.querySelector('.leaflet-container').style.background = "#071e40";
+                  break;
+                default:
+                  document.querySelector('.leaflet-container').style.background = "lightgrey";
+                  break;
+            }
+          });
 
-        // set the initial bounds and add the buttons "All" & "None" to the control. The Button Text is defined in the json file
-        window.addEventListener("load", function() {
-          let newBounds = allMaps[m].map.getBounds();
-          allMaps[m].setBounds(newBounds);
+          // set the initial bounds and add the buttons "All" & "None" to the control. The Button Text is defined in the json file
+          window.addEventListener("load", function() {
+            let newBounds = allMaps[m].map.getBounds();
+            allMaps[m].setBounds(newBounds);
 
-          // Eigenes Element mit "Alles" und "Nichts" hinzufügen
-          // Warten, bis Leaflet das Control gerendert hat
-          const layersContainer = allMaps[m].controlLayer._container;
-          const overlaysList = layersContainer.querySelector('.leaflet-control-layers-overlays');
+            // Eigenes Element mit "Alles" und "Nichts" hinzufügen
+            // Warten, bis Leaflet das Control gerendert hat
+            const layersContainer = allMaps[m].controlLayer._container;
+            const overlaysList = layersContainer.querySelector('.leaflet-control-layers-overlays');
 
-          if (overlaysList) {
-              // Buttons für "Alles" & "Nichts" direkt über die Kategorien einfügen
-              const selectButtons = document.createElement('div');
-              selectButtons.className = "layer-select-buttons";
-              selectButtons.innerHTML = `
-                  <button type="button" id="selectAllBtn">` + allMaps[m].i18n('All') + `</button>
-                  <button type="button" id="deselectAllBtn">` + allMaps[m].i18n('None') + `</button>
-              `;
-              
-              overlaysList.parentNode.insertBefore(selectButtons, overlaysList);
+            if (overlaysList) {
+                // Buttons für "Alles" & "Nichts" direkt über die Kategorien einfügen
+                const selectButtons = document.createElement('div');
+                selectButtons.className = "layer-select-buttons";
+                selectButtons.innerHTML = `
+                    <button type="button" id="selectAllBtn">` + allMaps[m].i18n('All') + `</button>
+                    <button type="button" id="deselectAllBtn">` + allMaps[m].i18n('None') + `</button>
+                `;
+                
+                overlaysList.parentNode.insertBefore(selectButtons, overlaysList);
 
-              // Event-Listener für die Buttons
-              document.getElementById('selectAllBtn').addEventListener('click', () => toggleAllLayers(true, table));
-              document.getElementById('deselectAllBtn').addEventListener('click', () => toggleAllLayers(false, table));
+                // Event-Listener für die Buttons
+                document.getElementById('selectAllBtn').addEventListener('click', () => toggleAllLayers(true, table));
+                document.getElementById('deselectAllBtn').addEventListener('click', () => toggleAllLayers(false, table));
 
-              // CSS anpassen, damit die Buttons nur bei Hover sichtbar sind
-              const style = document.createElement('style');
-              style.innerHTML = `
-                  .leaflet-control-layers {
-                      transition: opacity 0.2s ease-in-out;
-                  }
-                  .leaflet-control-layers:not(:hover) .layer-select-buttons {
-                      display: inherit;
-                  }
-                  .layer-select-buttons {
-                      padding-bottom: 3px;
-                      text-align: center;
-                      background: rgba(255, 255, 255, 0.8);
-                      border-bottom: 1px solid #ccc;
-                  }
-                  .layer-select-buttons button {
-                      cursor: pointer;
-                      font-size: inherit;
-                  }
-              `;
-              document.head.appendChild(style);
-          }
-        })
+                // CSS anpassen, damit die Buttons nur bei Hover sichtbar sind
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .leaflet-control-layers {
+                        transition: opacity 0.2s ease-in-out;
+                    }
+                    .leaflet-control-layers:not(:hover) .layer-select-buttons {
+                        display: inherit;
+                    }
+                    .layer-select-buttons {
+                        padding-bottom: 3px;
+                        text-align: center;
+                        background: rgba(255, 255, 255, 0.8);
+                        border-bottom: 1px solid #ccc;
+                    }
+                    .layer-select-buttons button {
+                        cursor: pointer;
+                        font-size: inherit;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+          })
 
-      }) // end Promise - then
+        }) // end Promise - then
+      }
       
       // --- Generate the Table with Tabulator and Filter markers on the Map ---
       if (hasTable) {
@@ -357,105 +366,107 @@ function mainLogic (window, document, undefined) {
           let tabulator = new MyTabulatorClass.MyTabulatorClass({});
           table = tabulator.createTable("#post_table", pageVars );
 
-          table.on("dataFiltered", function(filters, rows){
-            
-            if (filters.length == 0 && (document.activeElement.id === 'selectAllBtn')) { // || document.activeElement.id === ''
-              return;
-            } 
-            /*
-            if (document.activeElement.type === 'search' && filters.length > 0 && rows.length == 0) {
-              // remove all layers
-              //console.log('remove all layers');
-              toggleGroup({op:'removeLayer'}, group);
+          if (hasMap) {
+            table.on("dataFiltered", function(filters, rows){
+              
+              if (filters.length == 0 && (document.activeElement.id === 'selectAllBtn')) { // || document.activeElement.id === ''
+                return;
+              } 
+              /*
+              if (document.activeElement.type === 'search' && filters.length > 0 && rows.length == 0) {
+                // remove all layers
+                //console.log('remove all layers');
+                toggleGroup({op:'removeLayer'}, group);
 
-            } else if (document.activeElement.type === 'search' && filters.length > 0 && rows.length > 0) {
-              //console.log('add filtered markers')
-              let filtered_touren = [];
-              php_touren.forEach(tour => {
-                rows.forEach(row => {
-                  if (parseInt(row._row.data.Nr) == tour['id']) {
-                    filtered_touren.push(tour);
-                    // remove the found row from rows array
-                    let index = rows.indexOf(row);
-                    rows.splice(index, 1);
-                  }
+              } else if (document.activeElement.type === 'search' && filters.length > 0 && rows.length > 0) {
+                //console.log('add filtered markers')
+                let filtered_touren = [];
+                php_touren.forEach(tour => {
+                  rows.forEach(row => {
+                    if (parseInt(row._row.data.Nr) == tour['id']) {
+                      filtered_touren.push(tour);
+                      // remove the found row from rows array
+                      let index = rows.indexOf(row);
+                      rows.splice(index, 1);
+                    }
+                  })
                 })
-              })
-              toggleGroup({op:'removeLayer'}, group);
-              nposts = Array( allIcons.length ).fill(0);
-              let markersInGroups = new Array(); // possible return value
-              markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
-              
-              // ---add the marker cluster group to map --------------
-              // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
-              LayerSupportGroup = L.markerClusterGroup.layerSupport();
-              group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
-              
-              // get the bounds and Fit map to it
-              fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
+                toggleGroup({op:'removeLayer'}, group);
+                nposts = Array( allIcons.length ).fill(0);
+                let markersInGroups = new Array(); // possible return value
+                markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
+                
+                // ---add the marker cluster group to map --------------
+                // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
+                LayerSupportGroup = L.markerClusterGroup.layerSupport();
+                group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
+                
+                // get the bounds and Fit map to it
+                fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
 
-            } else if (document.activeElement.type === 'search' && filters.length == 0 && rows.length > 0) {
-              //console.log('add all markers again');
-              // Creating markers as an array of arrays -----------------
-              toggleGroup({op:'removeLayer'}, group);
-              nposts = Array( allIcons.length ).fill(0);
-              let markersInGroups = new Array(); // possible return value
-              markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
-              
-              // ---add the marker cluster group to map --------------
-              // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
-              LayerSupportGroup = L.markerClusterGroup.layerSupport();
-              group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
-              
-              // get the bounds and Fit map to it
-              fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
-            }
-            */
-
-            if (document.activeElement.type === 'search') {
-              toggleGroup({ op: 'removeLayer' }, group); // Vorab alle Layer entfernen
-          
-              let markersInGroups = [];
-              nposts = Array(allIcons.length).fill(0);
-          
-              if (filters.length > 0 && rows.length > 0) {
-                  // Gefilterte Touren ermitteln
-                  let filtered_touren = php_touren.filter(tour =>
-                      rows.some(row => parseInt(row._row.data.Nr) === tour.id)
-                  );
-          
-                  // Marker für gefilterte Touren erstellen
-                  markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
-
-              } else if (filters.length === 0 && rows.length > 0) {
-                  // Alle Marker erneut hinzufügen
-                  markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
-
-              } else {
-                  return; // Keine Marker hinzuzufügen -> Abbrechen
+              } else if (document.activeElement.type === 'search' && filters.length == 0 && rows.length > 0) {
+                //console.log('add all markers again');
+                // Creating markers as an array of arrays -----------------
+                toggleGroup({op:'removeLayer'}, group);
+                nposts = Array( allIcons.length ).fill(0);
+                let markersInGroups = new Array(); // possible return value
+                markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+                
+                // ---add the marker cluster group to map --------------
+                // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
+                LayerSupportGroup = L.markerClusterGroup.layerSupport();
+                group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
+                
+                // get the bounds and Fit map to it
+                fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
               }
-          
-              // Clustergruppe neu erzeugen und hinzufügen
-              LayerSupportGroup = L.markerClusterGroup.layerSupport();
-              group = createMarkerClusterGroup(allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts);
-          
-              // Karte an neue Marker anpassen
-              fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
-            }
+              */
 
-          });
+              if (document.activeElement.type === 'search') {
+                toggleGroup({ op: 'removeLayer' }, group); // Vorab alle Layer entfernen
+            
+                let markersInGroups = [];
+                nposts = Array(allIcons.length).fill(0);
+            
+                if (filters.length > 0 && rows.length > 0) {
+                    // Gefilterte Touren ermitteln
+                    let filtered_touren = php_touren.filter(tour =>
+                        rows.some(row => parseInt(row._row.data.Nr) === tour.id)
+                    );
+            
+                    // Marker für gefilterte Touren erstellen
+                    markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
 
-          // click auf die Reihe zentriert die Karte auf den Marker, zoom bleibt gleich
-          table.on("rowClick", function(e, row, data){
-            let url = row._row.data[tableMapMoveSelector];
-            // get lat lon from google url which is like so "https://www.google.com/maps/place/47.607203,12.887333/@47.607203,12.887333,9z"
-            if (!url) return;
-            let match = url.match(/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-            let lat = parseFloat(match[1]);
-            let lng = parseFloat(match[2]);
-            if (lat === 0 || lng === 0) return;
-            allMaps[m].mapFlyTo([lat, lng]);
-          })
+                } else if (filters.length === 0 && rows.length > 0) {
+                    // Alle Marker erneut hinzufügen
+                    markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+
+                } else {
+                    return; // Keine Marker hinzuzufügen -> Abbrechen
+                }
+            
+                // Clustergruppe neu erzeugen und hinzufügen
+                LayerSupportGroup = L.markerClusterGroup.layerSupport();
+                group = createMarkerClusterGroup(allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts);
+            
+                // Karte an neue Marker anpassen
+                fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50] , true );
+              }
+
+            });
+
+            // click auf die Reihe zentriert die Karte auf den Marker, zoom bleibt gleich
+            table.on("rowClick", function(e, row, data){
+              let url = row._row.data[tableMapMoveSelector];
+              // get lat lon from google url which is like so "https://www.google.com/maps/place/47.607203,12.887333/@47.607203,12.887333,9z"
+              if (!url) return;
+              let match = url.match(/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+              let lat = parseFloat(match[1]);
+              let lng = parseFloat(match[2]);
+              if (lat === 0 || lng === 0) return;
+              allMaps[m].mapFlyTo([lat, lng]);
+            })
+          }
 
         });
       } // end if hasTable

@@ -259,7 +259,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '0.10.5', true);
 		
 		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
-		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 'path'  => $this->wp_postmap_url, 'number' => self::$numberShortcodes+1, 'hasTable' => $this->showtable) );
+		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
+            'path'  => $this->wp_postmap_url, 
+            'number' => self::$numberShortcodes+1, 
+            'hasTable' => $this->showtable, 
+            'hasMap' => $this->showmap));
         wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
 
 		// ----------------
