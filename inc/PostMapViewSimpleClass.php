@@ -283,7 +283,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'site_dark' => 'tabulator_site_dark.min.css',
             'site' => 'tabulator_site.min.css',
             'default' => 'tabulator.min.css',
-            'standard ' => 'tabulator.min.css'
+            'standard ' => 'tabulator.min.css',
+            'custom' => 'tabulator_custom.min.css'
         ];
 
         // fallback to default theme if argument $theme is not in array $themes
