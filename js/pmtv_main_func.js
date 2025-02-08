@@ -1,30 +1,15 @@
+/**
+ * Main logic function for the PostMapTableView plugin.
+ * 
+ * @param {Window} window - The global window object.
+ * @param {Document} document - The global document object.
+ * @param {undefined} undefined - An undefined value.
+ */
+import { isValidAspectRatio, isValidCssSize } from './libs/cssCheckLib.js';
+
 function mainLogic (window, document, undefined) {
     "use strict";
-
-    function isValidCssSize(value) {
-      if (typeof value !== 'string') return false;
   
-      // Regulärer Ausdruck für gültige CSS-Größenangaben mit Zahlen > 0
-      const cssSizePattern = /^(?!0(?:px|em|rem|vw|vh|vmin|vmax|%|))(\d*\.?\d+)(px|em|rem|vw|vh|vmin|vmax|%)|auto|inherit|initial|unset$/;
-      
-      const match = value.trim().match(cssSizePattern);
-      if (!match) return false;
-      
-      // Falls der Wert numerisch ist, prüfen, ob er größer als 0 ist
-      if (match[1] && parseFloat(match[1]) <= 0) return false;
-      
-      return true;
-    }
-  
-    function isValidAspectRatio(value) {
-        if (typeof value !== 'string') return false;
-        
-        // Regulärer Ausdruck für aspect-ratio: entweder ein Float oder zwei Integer mit Schrägstrich
-        const aspectRatioPattern = /^(\d+(\.\d+)?|\d+\/\d+)$/;
-        
-        return aspectRatioPattern.test(value.trim());
-    }  
-
     /**
     * update CSS rules that are used according to the options and client
     */
@@ -55,7 +40,12 @@ function mainLogic (window, document, undefined) {
       document.head.appendChild(style);
     }
 
-    // Funktion zur Steuerung der Checkboxen
+    /**
+     * Toggles all layers in the layer control on or off. If all layers are
+     * supposed to be shown, the header filter of the table is reset.
+     * @param {boolean} selectAll - Show all layers if true, hide all layers if false.
+     * @param {Object} table - The table object (not used yet).
+     */
     function toggleAllLayers(selectAll, table) {
       document.querySelectorAll('.leaflet-control-layers-overlays input[type="checkbox"]').forEach(checkbox => {
           if (checkbox.checked !== selectAll) {
@@ -64,57 +54,112 @@ function mainLogic (window, document, undefined) {
       });
 
       if (selectAll) {
-        table.clearFilter(true);
+        //table.clearHeaderFilter(true);
       }
     }
 
-    function createMarkers(php_touren, allIcons, myIcon, group, nposts) {
-          
-      let marker = new Array();
-      let j = 0;
-      let icn, grp;
-
-      php_touren.forEach(tour => { 
-        
+    /**
+     * Function to create markers from php_touren, allIcons, myIcon and nposts.
+     * @param {array} php_touren - the array of all posts with their gps data
+     * @param {array} allIcons - the array of all icons with their corresponding categories
+     * @param {array} myIcon - the array of all icons
+     * @param {array} nposts - the array to store the number of posts for each icon
+     * @returns {array} markersInGroups - an array of arrays with all markers grouped by their icon
+     */
+    function createMarkers(php_touren, allIcons, myIcon, nposts) {
+      let markersInGroups = new Array(); // possible return value
+      
+      php_touren.forEach(tour => {
+        let singleMarker;
         let found = false;
+        let grpIndex = 0;
+        let icn;
+        let allIconsLength = allIcons.length;
 
-        for (let index = 0; index < allIcons.length; index++) {    
+        for (let index = 0; index < allIconsLength; index++) {    
             if (tour["category"] == allIcons[index]['icon']) {
                 icn = myIcon[index];
-                grp = group[index];
                 nposts[index]++;
                 found = true;
+                grpIndex = index;
                 break;
             };
         };
 
         if ( ! found ) {
-            icn = myIcon[ allIcons.length-1 ];
-            grp = group[ allIcons.length-1];
-            nposts[ allIcons.length-1]++;
+            icn = myIcon[ allIconsLength-1 ];
+            nposts[ allIconsLength-1]++;
         }
+        singleMarker = new L.Marker(tour["coord"], { title: tour["title"], icon: icn });
 
-        marker.push(new L.Marker(tour["coord"], { title: tour["title"], icon: icn }));
         if (tour["img"] == false || tour["img"] == null || tour["img"] == '') {
-          marker[j].bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br>' + tour["excerpt"] + '</a>');
+          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br>' + tour["excerpt"] + '</a>');
         } else {
-          marker[j].bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br><img src="' + tour["img"] + '">' + tour["excerpt"] + '</a>');
+          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br><img src="' + tour["img"] + '">' + tour["excerpt"] + '</a>');
         }
-        marker[j].addTo(grp);
-        j++;
+    
+        if (markersInGroups[grpIndex] == undefined) {
+          markersInGroups[grpIndex] = new Array();
+        }
+        markersInGroups[grpIndex].push(singleMarker);
       });
 
+      return markersInGroups;
+    }
+
+    /**
+     * Set the map view to the bounds of all markers in the given array of marker groups.
+     * @param {L.Map} map - the map object
+     * @param {array} markersArray - array of arrays with all markers grouped by their icon.
+     * @param {array} [padding=[50, 50]] - padding between the map view and the markers.
+     */
+    function fitMaptoMarkers(map, markersArray, padding = [50, 50]) {
       let bounds = L.latLngBounds();
+      let marker = new Array();
+      marker = markersArray.flat();
       marker.forEach(m => {
           let lat_lng = m._latlng;
           bounds.extend(lat_lng);
       });
+      map.fitBounds(bounds, { padding: padding });
+    }
 
-      return bounds;
+    /**
+     * Create a marker cluster group for the given map and array of markers grouped by their icon.
+     * @param {object} mapClass - the map class object
+     * @param {array} markersInGroups - array of arrays with all markers grouped by their icon.
+     * @param {L.LayerSupport.Group} LayerSupportGroup - the layer support group to add the marker cluster group to.
+     * @param {array} allIcons - array of all icons.
+     * @param {string} iconUrl - the url of the icon folder.
+     * @param {array} nposts - array with the number of posts for each icon.
+     * @return {array} - array of layer groups with all markers grouped by their icon.
+     */
+    function createMarkerClusterGroup( mapClass, markersInGroups, LayerSupportGroup, allIcons, iconUrl, nposts ) {
+      // ---add the marker cluster group to map --------------
+      // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
+      let group = new Array();
+      
+      allIcons.forEach( function(icon, index) {
+        if (markersInGroups[index] != undefined) {
+          group[index] = L.layerGroup( markersInGroups[index]); // arrayOfMarkers fehlt hier
+        }	else {
+          group[index] = L.layerGroup();
+        }
+        mapClass.controlLayer.addOverlay(group[index], '<img class="layerIcon" src="' + iconUrl + icon['icon-png'] + '"/> '+icon['category']+' (' + nposts[index] + ')');  
+
+      });
+      LayerSupportGroup.addTo(mapClass.map);
+
+      group.forEach( function(sgrp, index) {
+        LayerSupportGroup.checkIn(group[index]);
+        group[index].addTo(mapClass.map);
+      });
+
+      return group;
     }
     
+    // main logic
     if (window.g_wp_postmap_path.number === "1" && php_touren.length > 0) {
-      //let mobile = (/iphone|ipod|android|webos|ipad|iemobile|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
       let postmap_url = window.g_wp_postmap_path.path;
       let hasTable = window.g_wp_postmap_path.hasTable == '1' ? true : false;
       let numberOfBoxes = 1;
@@ -128,10 +173,34 @@ function mainLogic (window, document, undefined) {
       let nposts = [];
       let myIcon = new Array();
       let group = new Array();
-      let bounds = {};
 
       updateCSS(pageVars);
-        
+
+      /**
+       * Removes all Marker Layers and the control layers 
+       * @param {Object} event - contains the operation op to perform
+       * @param {Array} groups - the groups to remove
+       * @global {Array} allMaps
+       * @global {Object} LayerSupportGroup
+       */
+      function toggleGroup(event, groups = null) {
+        let op = event.op;
+        if (groups == null) {
+          return;
+        }
+
+        if (op == 'removeLayer') { // removes all Marker Layers and the control layers 
+          groups.forEach( function(group, index) {
+            //console.log(op + " " + index);
+            LayerSupportGroup[op](group);
+            allMaps[m].map.removeLayer(groups[index]); // Entfernt den Layer von der Karte
+            allMaps[m].controlLayer.removeLayer(groups[index]); // Entfernt den Overlay-Eintrag
+          })
+      
+        }
+      }
+      
+      // --- Generate Map with Markers
       Promise.all([
         import('../settings/category_mapping.json'),
         import('./leafletMapClass.js')
@@ -139,36 +208,105 @@ function mainLogic (window, document, undefined) {
 
         allMaps[m] = new LeafletMap.LeafletMap(m, 'map10_img' );
                         
-        // Icons definieren aus der Json variable übernehmen
+        // Define Icons from imported json file
         allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
         nposts = Array( allIcons.length ).fill(0);
-        //let myIcon = new Array();
-        //let group = new Array();
-        // Creating markergroups ----------------------- 
-        LayerSupportGroup = L.markerClusterGroup.layerSupport();
-        LayerSupportGroup.addTo(allMaps[m].map);
-
         allIcons.forEach( function(icon, index) {
-          myIcon[index] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png');
-          group[index] = L.layerGroup();
+          myIcon[index] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png'); 
         }); 
         
-        // Creating markers -----------------------
-        bounds = createMarkers(php_touren, allIcons, myIcon, group, nposts);
-        allMaps[m].map.fitBounds(bounds, { padding: [50, 50] });
+        // Creating markers as an array of arrays -----------------
+        let markersInGroups = new Array(); // possible return value
+        markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+        
+        // ---add the marker cluster group to map --------------
+        LayerSupportGroup = L.markerClusterGroup.layerSupport();
+        group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
+        
+        // get the bounds and Fit map to it
+        fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
 
-        group.forEach( function(sgrp, index) {
-            LayerSupportGroup.checkIn(group[index]);
-            group[index].addTo(allMaps[m].map);
-        }); 
+        // --- show the title of the included markers in the tooltip ---
+        LayerSupportGroup.on('clustermouseover', function (a) {
+          var children = a.layer.getAllChildMarkers();
+          var names = [];
+          var string = '';
+          var max = children.length;
+          if (max > 10) { max = 10 };
+          for (let i = 0; i < max; i++) {
+              names.push(children[i].options.title);
+              string = string + '- ' + children[i].options.title + '<br>';
 
-        allIcons.forEach( function(icon, index) {
-          allMaps[m].controlLayer.addOverlay(group[index], '<img class="layerIcon" src="' + postmap_url + icon['icon-png'] + '"/> '+icon['category']+' (' + nposts[index] + ')');  
+          }
+          if (children.length > max) { string = string + '...u.v.m....' }
+          a.propagatedFrom.bindTooltip(string).openTooltip();
+        });
+        // --- remove the tooltip ---
+        LayerSupportGroup.on('clustermouseout', function (a) {
+            a.propagatedFrom.bindTooltip('').closeTooltip();
         });
 
-        // Eigenes Element mit "Alles" und "Nichts" hinzufügen
-        // Warten, bis Leaflet das Control gerendert hat
-        setTimeout(() => {
+        // add a function to the control to get the active base layer
+        L.Control.Layers.include({
+          /**
+           * Retrieves the currently active base layer from the map.
+           * Iterates over all layers managed by the control to determine which base layer
+           * is currently present on the map, and returns its name.
+           * 
+           * @returns {string} The name of the active base layer.
+           */
+          getOverlays: function() {
+          // create hash to hold all layers
+          var control, layers, activemaplayer;
+          layers = {};
+          control = this;
+                  
+          // loop thru all layers in control
+          control._layers.forEach(function(obj) {
+              var layerName;
+      
+              // check if layer is not an overlay 
+              if (!obj.overlay) {
+              // get name of overlay
+              layerName = obj.name;
+              // store whether it's present on the map or not
+              layers[layerName] = control._map.hasLayer(obj.layer);
+              if (layers[layerName]) {activemaplayer = layerName};
+              }
+          });
+          return activemaplayer;
+          }
+        });
+        
+        // set the background color of the map according to the base layer
+        allMaps[m].map.on('baselayerchange', function() {
+          let activeLayer =  allMaps[0].controlLayer.getOverlays();
+          switch (activeLayer) {
+              case 'OpenStreetMap':
+                document.querySelector('.leaflet-container').style.background = "#b9d3dc";
+                break;
+              case 'OpenTopoMap':
+                document.querySelector('.leaflet-container').style.background = "#97d2e3";
+                break;
+              case 'Bike-Hike-Map':
+                document.querySelector('.leaflet-container').style.background = "#c8e4fa";
+                break;
+              case 'Satellit':
+                document.querySelector('.leaflet-container').style.background = "#071e40";
+                break;
+              default:
+                document.querySelector('.leaflet-container').style.background = "lightgrey";
+                break;
+          }
+        });
+
+        // set the initial bounds and add the buttons "All" & "None" to the control. The Button Text is defined in the json file
+        window.addEventListener("load", function() {
+          let newBounds = allMaps[m].map.getBounds();
+          allMaps[m].setBounds(newBounds);
+
+          // Eigenes Element mit "Alles" und "Nichts" hinzufügen
+          // Warten, bis Leaflet das Control gerendert hat
           const layersContainer = allMaps[m].controlLayer._container;
           const overlaysList = layersContainer.querySelector('.leaflet-control-layers-overlays');
 
@@ -209,101 +347,102 @@ function mainLogic (window, document, undefined) {
               `;
               document.head.appendChild(style);
           }
-        }, 100);
-
-        LayerSupportGroup.on('clustermouseover', function (a) {
-          var children = a.layer.getAllChildMarkers();
-          var names = [];
-          var string = '';
-          var max = children.length;
-          if (max > 10) { max = 10 };
-          for (let i = 0; i < max; i++) {
-              names.push(children[i].options.title);
-              string = string + '- ' + children[i].options.title + '<br>';
-
-          }
-          if (children.length > max) { string = string + '...u.v.m....' }
-          a.propagatedFrom.bindTooltip(string).openTooltip();
-        });
-
-        LayerSupportGroup.on('clustermouseout', function (a) {
-            a.propagatedFrom.bindTooltip('').closeTooltip();
-        });
-
-        L.Control.Layers.include({
-          getOverlays: function() {
-          // create hash to hold all layers
-          var control, layers, activemaplayer;
-          layers = {};
-          control = this;
-                  
-          // loop thru all layers in control
-          control._layers.forEach(function(obj) {
-              var layerName;
-      
-              // check if layer is not an overlay 
-              if (!obj.overlay) {
-              // get name of overlay
-              layerName = obj.name;
-              // store whether it's present on the map or not
-              layers[layerName] = control._map.hasLayer(obj.layer);
-              if (layers[layerName]) {activemaplayer = layerName};
-              }
-          });
-          return activemaplayer;
-          }
-        });
-        
-        allMaps[m].map.on('baselayerchange', function() {
-          let activeLayer =  allMaps[0].controlLayer.getOverlays();
-          switch (activeLayer) {
-              case 'OpenStreetMap':
-                document.querySelector('.leaflet-container').style.background = "#b9d3dc";
-                break;
-              case 'OpenTopoMap':
-                document.querySelector('.leaflet-container').style.background = "#97d2e3";
-                break;
-              case 'Bike-Hike-Map':
-                document.querySelector('.leaflet-container').style.background = "#c8e4fa";
-                break;
-              case 'Satellit':
-                document.querySelector('.leaflet-container').style.background = "#071e40";
-                break;
-              default:
-                document.querySelector('.leaflet-container').style.background = "lightgrey";
-                break;
-          }
-        });
-
-        window.addEventListener("load", function() {
-          let newBounds = allMaps[m].map.getBounds();
-          allMaps[m].setBounds(newBounds);
         })
 
       }) // end Promise - then
-
+      
+      // --- Generate the Table with Tabulator and Filter markers on the Map ---
       if (hasTable) {
         import('./tabulatorClass.js').then((MyTabulatorClass) => {
           let tabulator = new MyTabulatorClass.MyTabulatorClass({});
           table = tabulator.createTable("#post_table", pageVars );
 
-          table.on("dataFiltered", function(filters, rows, event){
-            // TODO : filter markers in map, 
-            if (filters.length == 0) {
-              // show all markers again. TBD: What has to be done if this event appears on filtered data.
-              //LayerSupportGroup.removeLayers();
-              //LayerSupportGroup._layers = LayerSupportGroup.getLayers()
-              //bounds = createMarkers(php_touren, allIcons, myIcon, group, nposts);
-              //allMaps[m].map.fitBounds(bounds, { padding: [50, 50] });
-              //toggleAllLayers(true, table);
-              return;
-            }
-            //LayerSupportGroup.clearLayers();
-            // clearLayer : beachte dabei die möglichen wechselwirkungen
-            // filter php_touren to another Array
-            // show this array with createMarkers
-            // set bounds to the filtered subset of Markers
+          table.on("dataFiltered", function(filters, rows){
             
+            if (filters.length == 0 && (document.activeElement.id === 'selectAllBtn')) { // || document.activeElement.id === ''
+              return;
+            } 
+            /*
+            if (document.activeElement.type === 'search' && filters.length > 0 && rows.length == 0) {
+              // remove all layers
+              //console.log('remove all layers');
+              toggleGroup({op:'removeLayer'}, group);
+
+            } else if (document.activeElement.type === 'search' && filters.length > 0 && rows.length > 0) {
+              //console.log('add filtered markers')
+              let filtered_touren = [];
+              php_touren.forEach(tour => {
+                rows.forEach(row => {
+                  if (parseInt(row._row.data.Nr) == tour['id']) {
+                    filtered_touren.push(tour);
+                    // remove the found row from rows array
+                    let index = rows.indexOf(row);
+                    rows.splice(index, 1);
+                  }
+                })
+              })
+              toggleGroup({op:'removeLayer'}, group);
+              nposts = Array( allIcons.length ).fill(0);
+              let markersInGroups = new Array(); // possible return value
+              markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
+              
+              // ---add the marker cluster group to map --------------
+              // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
+              LayerSupportGroup = L.markerClusterGroup.layerSupport();
+              group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
+              
+              // get the bounds and Fit map to it
+              fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
+
+            } else if (document.activeElement.type === 'search' && filters.length == 0 && rows.length > 0) {
+              //console.log('add all markers again');
+              // Creating markers as an array of arrays -----------------
+              toggleGroup({op:'removeLayer'}, group);
+              nposts = Array( allIcons.length ).fill(0);
+              let markersInGroups = new Array(); // possible return value
+              markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+              
+              // ---add the marker cluster group to map --------------
+              // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
+              LayerSupportGroup = L.markerClusterGroup.layerSupport();
+              group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
+              
+              // get the bounds and Fit map to it
+              fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
+            }
+            */
+
+            if (document.activeElement.type === 'search') {
+              toggleGroup({ op: 'removeLayer' }, group); // Vorab alle Layer entfernen
+          
+              let markersInGroups = [];
+              nposts = Array(allIcons.length).fill(0);
+          
+              if (filters.length > 0 && rows.length > 0) {
+                  // Gefilterte Touren ermitteln
+                  let filtered_touren = php_touren.filter(tour =>
+                      rows.some(row => parseInt(row._row.data.Nr) === tour.id)
+                  );
+          
+                  // Marker für gefilterte Touren erstellen
+                  markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
+
+              } else if (filters.length === 0 && rows.length > 0) {
+                  // Alle Marker erneut hinzufügen
+                  markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+
+              } else {
+                  return; // Keine Marker hinzuzufügen -> Abbrechen
+              }
+          
+              // Clustergruppe neu erzeugen und hinzufügen
+              LayerSupportGroup = L.markerClusterGroup.layerSupport();
+              group = createMarkerClusterGroup(allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts);
+          
+              // Karte an neue Marker anpassen
+              fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
+            }
+
           });
 
           // click auf die Reihe zentriert die Karte auf den Marker, zoom bleibt gleich
@@ -321,7 +460,7 @@ function mainLogic (window, document, undefined) {
         });
       } // end if hasTable
       
-    } // end if numberOfBoxes
+    } // end if numberOfBoxes abd main Logic
 };
 
 // Export oder Nutzung im Backend
