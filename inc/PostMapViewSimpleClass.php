@@ -79,7 +79,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	public function __construct( $attr ) {
 		
 		// extract and handle shortcode parameters
-        //'post_status' => 'publish' ist get_posts voreingestellt.
+        //'post_status' => 'publish' ist voreingestellt.
 		$attr = shortcode_atts ( array ( 
 			'numberposts' => 100, 
 			'post_type'   => 'post', // laut doku geht das so : array( 'post', 'page', 'movie', 'book' ) post_types können mit array abgefragt werden
