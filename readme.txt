@@ -2,8 +2,8 @@
 Contributors: Martin von Berg
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CQA6XZ7LUMBJQ
 Tags: GPX, leaflet, Track, map, thumbnail, image, responsive, overview, marker, cluster
-Requires at least: 5.0
-Tested up to: 6.0
+Requires at least: 6.0
+Tested up to: 6.7
 Requires PHP: 8.0
 License: GPLv2
 Stable Tag: 0.10.5

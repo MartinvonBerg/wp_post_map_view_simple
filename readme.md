@@ -4,6 +4,8 @@
 
 This plugin displays all WordPress posts or pages containing GPX data (lat, lon) stored in custom fields on an OpenStreetMap map. Posts are categorized using tags, allowing filtering and custom icons. Additionally, a table with all posts is displayed.
 
+**Generation of JS with webpack has to be done by user!!!**
+
 **Shortcode:** `[mapview]` — Ready to use. Multiple options available, see table below! Use only once per Page or Post!
 
 The generated HTML is stored in transients for improved performance.
