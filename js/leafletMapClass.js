@@ -15,7 +15,7 @@ import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 import 'leaflet.fullscreen/Control.FullScreen.css';
 // local css
 import '../css/wp_post_map_view_simple.css';
-import './leafletMapClass.css';
+import '../css/leafletMapClass.css';
 
 import "leaflet"; 
 import 'leaflet.markercluster';

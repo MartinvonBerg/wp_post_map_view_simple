@@ -21,45 +21,6 @@ namespace mvbplugins\helpers;
 defined('ABSPATH') or die('Are you ok?');
 
 /**
- * Zuordnung eines Icons oder Kategorienamens für die Tags eines Posts.
- *
- * @param string $arraytagnames Die Tags des Posts als String.
- * @param string $returnKey Der Schlüssel des zurückzugebenden Wertes.
- * @return string Der Icon-Name als String.
- */
-function wp_postmap_get_icon_cat2($arraytagnames, $returnKey) {
-    
-    $data = wp_postmap_load_category_mapping();
-    $mapping = $data['mapping'];
-    $default = $data['default'][$returnKey]; //
-
-    $searchFor = strtolower($arraytagnames);
-
-    foreach ($mapping as $key => $details) {
-        $category = strtolower($details['category']);
-
-        if (preg_match_all('/\p{L}+/u', $searchFor, $matches)) {
-            $words = $matches[0]; // Enthält alle gefundenen Wörter
-            
-            // Prüfen, ob alle Wörter in $searchFor vorkommen
-            foreach ($words as $word) {
-                if (stristr($category, $word) === false) {
-                    // Mindestens ein Wort fehlt, daher Abbruch der schleife
-                    break;
-                } else {
-                    return $details[$returnKey];
-                }
-            }
-            
-        } elseif (stristr($searchFor, $category) !== false) {
-            return $details[$returnKey];
-        }
-    }
-
-    return $default;
-}
-
-/**
  * Lädt die category_mapping.json und gibt sie als Array zurück.
  *
  * @return array Das Mapping aus der JSON-Datei.
@@ -88,6 +49,13 @@ function wp_postmap_load_category_mapping( $file = null ) {
     return $data;
 }
 
+/**
+ * Zuordnung eines Icons oder Kategorienamens für die Tags eines Posts.
+ *
+ * @param string $arraytagnames Die Tags des Posts als String.
+ * @param string $returnKey Der Schlüssel des zurückzugebenden Wertes.
+ * @return string Der Icon-Name als String.
+ */
 function wp_postmap_get_icon_cat($arraytagnames, $returnKey) {
     $data = wp_postmap_load_category_mapping();
     $mapping = $data['mapping'];
@@ -109,7 +77,6 @@ function wp_postmap_get_icon_cat($arraytagnames, $returnKey) {
 
     return $default;
 }
-
 
 // Funktion zur Normalisierung: Entfernt alle Nicht-Buchstaben und wandelt in Kleinbuchstaben um
 function normalize_string($string) {

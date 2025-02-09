@@ -1,3 +1,5 @@
+import { isValidAspectRatio, isValidCssSize } from './libs/cssCheckLib.js';
+
 /**
  * Main logic function for the PostMapTableView plugin.
  * 
@@ -5,8 +7,6 @@
  * @param {Document} document - The global document object.
  * @param {undefined} undefined - An undefined value.
  */
-import { isValidAspectRatio, isValidCssSize } from './libs/cssCheckLib.js';
-
 function mainLogic (window, document, undefined) {
     "use strict";
   
@@ -53,9 +53,9 @@ function mainLogic (window, document, undefined) {
           }
       });
 
-      if (selectAll) {
+      //if (selectAll) {
         //table.clearHeaderFilter(true);
-      }
+      //}
     }
 
     /**
@@ -67,43 +67,24 @@ function mainLogic (window, document, undefined) {
      * @returns {array} markersInGroups - an array of arrays with all markers grouped by their icon
      */
     function createMarkers(php_touren, allIcons, myIcon, nposts) {
-      let markersInGroups = new Array(); // possible return value
+      let markersInGroups = [];
       
       php_touren.forEach(tour => {
-        let singleMarker;
-        let found = false;
-        let grpIndex = 0;
-        let icn;
-        let allIconsLength = allIcons.length;
-
-        for (let index = 0; index < allIconsLength; index++) {    
-            if (tour["category"] == allIcons[index]['icon']) {
-                icn = myIcon[index];
-                nposts[index]++;
-                found = true;
-                grpIndex = index;
-                break;
-            };
-        };
-
-        if ( ! found ) {
-            icn = myIcon[ allIconsLength-1 ];
-            nposts[ allIconsLength-1]++;
-        }
-        singleMarker = new L.Marker(tour["coord"], { title: tour["title"], icon: icn });
-
-        if (tour["img"] == false || tour["img"] == null || tour["img"] == '') {
-          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br>' + tour["excerpt"] + '</a>');
-        } else {
-          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br><img src="' + tour["img"] + '">' + tour["excerpt"] + '</a>');
-        }
-    
-        if (markersInGroups[grpIndex] == undefined) {
-          markersInGroups[grpIndex] = new Array();
-        }
-        markersInGroups[grpIndex].push(singleMarker);
+          let grpIndex = allIcons.findIndex(icon => icon.icon === tour.category);
+          grpIndex = grpIndex !== -1 ? grpIndex : allIcons.length - 1;
+          
+          nposts[grpIndex]++;
+          let icon = myIcon[grpIndex];
+          let marker = new L.Marker(tour.coord, { title: tour.title, icon });
+  
+          let popupContent = `<a href="${tour.link}"><b>${tour.title}</b><br>`;
+          if (tour.img) popupContent += `<img src="${tour.img}">`;
+          popupContent += `${tour.excerpt}</a>`;
+          marker.bindPopup(popupContent);
+  
+          (markersInGroups[grpIndex] ||= []).push(marker);
       });
-
+      
       return markersInGroups;
     }
 
@@ -126,7 +107,7 @@ function mainLogic (window, document, undefined) {
       let zoomAfter = map.getZoom();
       let zoomDiff = zoomAfter - zoomBefore;  
       if (checkZoom && zoomDiff > 1) {
-        map.setZoom(zoomBefore);
+        map.setZoom(zoomBefore+3);
       }
     }
 
@@ -142,7 +123,6 @@ function mainLogic (window, document, undefined) {
      */
     function createMarkerClusterGroup( mapClass, markersInGroups, LayerSupportGroup, allIcons, iconUrl, nposts ) {
       // ---add the marker cluster group to map --------------
-      // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
       let group = new Array();
       
       allIcons.forEach( function(icon, index) {
@@ -151,7 +131,9 @@ function mainLogic (window, document, undefined) {
         }	else {
           group[index] = L.layerGroup();
         }
-        mapClass.controlLayer.addOverlay(group[index], '<img class="layerIcon" src="' + iconUrl + icon['icon-png'] + '"/> '+icon['category']+' (' + nposts[index] + ')');  
+        if (nposts[index] > 0) {
+          mapClass.controlLayer.addOverlay(group[index], '<img class="layerIcon" src="' + iconUrl + icon['icon-png'] + '"/> '+icon['category']+' (' + nposts[index] + ')');
+        }
 
       });
       LayerSupportGroup.addTo(mapClass.map);
@@ -192,19 +174,18 @@ function mainLogic (window, document, undefined) {
        */
       function toggleGroup(event, groups = null) {
         let op = event.op;
-        if (groups == null) {
+        if (groups == null || op != 'removeLayer') {
           return;
         }
-
-        if (op == 'removeLayer') { // removes all Marker Layers and the control layers 
-          groups.forEach( function(group, index) {
-            //console.log(op + " " + index);
-            LayerSupportGroup[op](group);
-            allMaps[m].map.removeLayer(groups[index]); // Entfernt den Layer von der Karte
-            allMaps[m].controlLayer.removeLayer(groups[index]); // Entfernt den Overlay-Eintrag
-          })
-      
-        }
+        // removes all Marker Layers and the control layers 
+        //if (op == 'removeLayer') { 
+        groups.forEach( function(group, index) {
+          //console.log(op + " " + index);
+          LayerSupportGroup[op](group);
+          allMaps[m].map.removeLayer(groups[index]); // Entfernt den Layer von der Karte
+          allMaps[m].controlLayer.removeLayer(groups[index]); // Entfernt den Overlay-Eintrag
+        })
+        //}
       }
       
       // --- Generate Map with Markers
@@ -372,55 +353,6 @@ function mainLogic (window, document, undefined) {
               if (filters.length == 0 && (document.activeElement.id === 'selectAllBtn')) { // || document.activeElement.id === ''
                 return;
               } 
-              /*
-              if (document.activeElement.type === 'search' && filters.length > 0 && rows.length == 0) {
-                // remove all layers
-                //console.log('remove all layers');
-                toggleGroup({op:'removeLayer'}, group);
-
-              } else if (document.activeElement.type === 'search' && filters.length > 0 && rows.length > 0) {
-                //console.log('add filtered markers')
-                let filtered_touren = [];
-                php_touren.forEach(tour => {
-                  rows.forEach(row => {
-                    if (parseInt(row._row.data.Nr) == tour['id']) {
-                      filtered_touren.push(tour);
-                      // remove the found row from rows array
-                      let index = rows.indexOf(row);
-                      rows.splice(index, 1);
-                    }
-                  })
-                })
-                toggleGroup({op:'removeLayer'}, group);
-                nposts = Array( allIcons.length ).fill(0);
-                let markersInGroups = new Array(); // possible return value
-                markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
-                
-                // ---add the marker cluster group to map --------------
-                // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
-                LayerSupportGroup = L.markerClusterGroup.layerSupport();
-                group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
-                
-                // get the bounds and Fit map to it
-                fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
-
-              } else if (document.activeElement.type === 'search' && filters.length == 0 && rows.length > 0) {
-                //console.log('add all markers again');
-                // Creating markers as an array of arrays -----------------
-                toggleGroup({op:'removeLayer'}, group);
-                nposts = Array( allIcons.length ).fill(0);
-                let markersInGroups = new Array(); // possible return value
-                markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
-                
-                // ---add the marker cluster group to map --------------
-                // vars: allMaps[m].map, markersInGroups, LayerSupportGroup, allIcons
-                LayerSupportGroup = L.markerClusterGroup.layerSupport();
-                group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
-                
-                // get the bounds and Fit map to it
-                fitMaptoMarkers(allMaps[m].map, markersInGroups, [50, 50]);
-              }
-              */
 
               if (document.activeElement.type === 'search') {
                 toggleGroup({ op: 'removeLayer' }, group); // Vorab alle Layer entfernen
