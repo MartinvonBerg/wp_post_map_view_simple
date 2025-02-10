@@ -13,7 +13,7 @@ namespace mvbplugins\postmapviewsimple;
  * Author URI: https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * License: GPL-2.0
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
- * Version: 0.10.5
+ * Version: 1.0.0
  *
  * @package Post-Map-View-Simple
  */
@@ -29,6 +29,7 @@ use function mvbplugins\helpers\wp_postmap_get_icon_cat as wp_postmap_get_icon_c
 
 interface PostMapViewSimpleInterface {
 	public function show_post_map(): string;
+    public function show_tourmap(): string;
 }
 
 /**
@@ -47,9 +48,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	private $showtable = true; // is shortcode parameter
 	private $category = 'all'; // is shortcode parameter
 	private $headerhtml = ''; // is shortcode parameter
-	// ---------- end of shortcode parameters ----------
-
-    // ------------------- possible options -------------------
     private $gpxfolder = 'gpx';
     private $lenexcerpt = 150;
     private $useWPExcerptExtraction = false;
@@ -63,7 +61,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $mapHeight = ''; // shortcode parameter as string px or %
     private $mapWidth = ''; // shortcode parameter as string px or %
     private $mapAspectRatio = ''; // shortcode parameter as number (int or float)
-    // ------------------- end of possible options -------------------
+    private $tourfolder = '';
+    // ---------- end of shortcode parameters ----------
 
     private $plugin_url;
     private $wp_postmap_url;
@@ -99,7 +98,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'tableheight' => 0,
             'mapheight' => '',
             'mapwidth' => '',
-            'mapaspectratio' => ''
+            'mapaspectratio' => '',
+            'tourfolder'    => ''
 		), $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
@@ -138,6 +138,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( $this->showtable ){
             $this->enqueue_tabulator_Theme($this->tabulatorTheme);
         }
+
+        // extensions for tourmap
+        $this->tourfolder = $attr['tourfolder'];
     }
     
     private function parseParameterToArray(string $input): string|array {
@@ -256,7 +259,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         //if ( $this->showtable ){ require_once __DIR__ . '/enqueue_tabulator.php'; }
 		//require_once __DIR__ . '/wp_post_map_view_simple_enq.php';
         $plugin_url = plugin_dir_url(__DIR__);
-        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '0.10.5', true);
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.0.0', true);
 		
 		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
@@ -270,6 +273,80 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		
 		return $html;
 	}
+
+    public function show_tourmap(): string {
+        if ( $this->tourfolder === '') {
+            return '';
+        }
+        
+        $tourDir = $this->up_dir . '/' . $this->tourfolder;
+        $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
+
+        if ( !is_dir( $tourDir ) ) {
+            return '';
+        }
+
+        // get the geojson and gpx-file in the tourfolder and pass it to js.
+        $jsonFiles = glob($tourDir . '/*.json');
+        $gpxFiles = glob($tourDir . '/*.gpx');
+        if ( !$jsonFiles && !$gpxFiles ) {
+            return '';
+        }
+
+        // replace the path to the directory by the url in array_shift
+        $jsonFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
+            return str_replace($tourDir, $tourUrl, $file);
+        }, $jsonFiles);
+        $gpxFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
+            return str_replace($tourDir, $tourUrl, $file);
+        }, $gpxFiles);
+
+        // check htaccess for tileserver only here 
+        if ( $this->useTileServer) {
+            $this->htaccessTileServerIsOK = $this->checkHtaccess();
+            !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+        }
+        
+        $this->pageVarsForJs = [];
+        $this->pageVarsForJs[$this->m] = [];
+        $this->pageVarsForJs[$this->m]['useTileServer'] = $this->useTileServer ? 'true' : 'false';
+        $this->pageVarsForJs[$this->m]['convertTilesToWebp'] = $this->convertTilesToWebp ? 'true' : 'false';
+        $this->pageVarsForJs[$this->m]['htaccessTileServerIsOK'] = $this->htaccessTileServerIsOK ? 'true' : 'false';
+        $this->pageVarsForJs[$this->m]['imagepath'] = $this->wp_postmap_url;
+
+        $this->pageVarsForJs[$this->m]['mapHeight'] = $this->mapHeight; //
+        $this->pageVarsForJs[$this->m]['mapWidth'] = $this->mapWidth; //
+        $this->pageVarsForJs[$this->m]['mapAspectRatio'] = $this->mapAspectRatio; //
+        
+        //$this->pageVarsForJs[$this->m]['tabulatorTheme'] = $this->tabulatorTheme;
+        $this->pageVarsForJs[$this->m]['tablePageSize'] = $this->tablePageSize;
+        $this->pageVarsForJs[$this->m]['tableHeight'] = strval($this->tableHeight) . 'px';
+        $this->pageVarsForJs[$this->m]['geoJsonFile'] = $jsonFiles;
+        $this->pageVarsForJs[$this->m]['gpxFile'] = $gpxFiles;
+
+        // generate html for map with post data 
+        $html = '';
+        if ( $this->showmap ) {
+            $html = $this->generate_map_html([1,1,1]);
+        }
+
+        // generate html for table with post data
+        if ( $this->showtable ){
+            $html .= '<table id="post_table"></table>';
+        }
+
+        // --- enqueue scripts
+        $plugin_url = plugin_dir_url(__DIR__);
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.0.0', true);
+		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
+            'path'  => $this->wp_postmap_url, 
+            'number' => self::$numberShortcodes+1, 
+            'hasTable' => $this->showtable, 
+            'hasMap' => $this->showmap));
+        wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
+
+        return $html;
+    }
     // ---------------- pivate functions ----------------
     private function enqueue_tabulator_Theme($theme) {
         $plugin_url = plugin_dir_url(__DIR__);

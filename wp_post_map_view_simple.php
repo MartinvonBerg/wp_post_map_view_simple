@@ -10,7 +10,7 @@
  * Plugin Name:       Post Map Table View
  * Plugin URI:        https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
- * Version:           0.10.5
+ * Version:           1.0.0
  * Author:            Martin von Berg
  * Author URI:        https://www.berg-reise-foto.de/info/ueber-mich/
  * License:           GPL-2.0+
@@ -24,6 +24,7 @@ defined('ABSPATH') or die('Are you ok?');
 //include_once __DIR__ . '/inc/post_map_table.php';
 include_once __DIR__ . '/inc/PostMapViewSimpleClass.php';
 
+add_shortcode('mapview', 'mvbplugins\postmapviewsimple\register_mapview_shortcode');
 function register_mapview_shortcode($atts) {
     // Die Klasse nur instanziieren, wenn der Shortcode genutzt wird.
     if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes == 0) 
@@ -31,4 +32,11 @@ function register_mapview_shortcode($atts) {
     \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
 }
 
-add_shortcode('mapview', 'mvbplugins\postmapviewsimple\register_mapview_shortcode');
+add_shortcode('tourmap', 'mvbplugins\postmapviewsimple\register_tourmap_shortcode');
+function register_tourmap_shortcode($atts) {
+    // Die Klasse nur instanziieren, wenn der Shortcode genutzt wird.
+    // TODO: ist die beschränkung auf einen Shortcode notwendig?
+    if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes == 0) 
+        {return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_tourmap();}
+    \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
+}
