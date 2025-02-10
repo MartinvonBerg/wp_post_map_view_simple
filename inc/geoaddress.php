@@ -74,7 +74,7 @@ function get_geoaddress($postid, $lat, $lon) {
 
         // Adresse serialisieren und speichern
         $geoadressfield = maybe_serialize($geojson['address']);
-        update_post_meta($postid, 'geoadress', $geoadressfield); // Post-Meta aktualisieren
+        update_post_meta($postid, 'geoadress', $geoadressfield); // Post-Meta aktualisieren // TODO in die readme aufnehmen !
 
         return $geoadressfield;
     } catch (\Exception $e) {

@@ -6,6 +6,21 @@
     },
     "mapping": [
         {
+            "category": "Camping",
+            "icon": "camping",
+            "icon-png": "camping-2.png"
+        },
+        {
+            "category": "Stellplatz",
+            "icon": "campersite",
+            "icon-png": "flowers.png"
+        },
+        {
+            "category": "Besichtigung",
+            "icon": "sightseeing",
+            "icon-png": "coffee.png"
+        },
+        {
             "category": "Trekking",
             "icon": "hiking",
             "icon-png": "hiking.png"

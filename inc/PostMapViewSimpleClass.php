@@ -2,6 +2,9 @@
 
 namespace mvbplugins\postmapviewsimple;
 
+use DOMDocument;
+use DOMElement;
+
 /**
  * Main function or Class of Post-Map-View-Simple
  *
@@ -293,6 +296,44 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             return '';
         }
 
+        // parse geojseon files to php_touren array TODO: all files 
+        $json0 = file_get_contents($jsonFiles[0]);
+        if ( $json0 === false) {
+            //error handling
+        }
+        $gesojson = json_decode($json0);
+        if ($gesojson->type !== 'FeatureCollection' || count($gesojson->features) === 0) {
+            //error handling
+        }
+
+        foreach ($gesojson->features as $feature) {
+            // parse the points to php_touren
+            if ( strtolower($feature->geometry->type) !== 'point') {
+                break;
+            }
+            $parsed = $this->extractHTMLFromGeoJson($feature->properties->popup);
+            //$icon = wp_postmap_get_icon_cat($feature->properties->category, 'icon');
+             
+            $this->postArray[] = array(
+                'img' => $feature->properties->image ?? $parsed['image_link'], //
+                'title' 	=> $parsed['title'] ?? $feature->properties->name ?? $feature->properties->name ?? '',
+                'icon'  	=> $feature->properties->icon ?? wp_postmap_get_icon_cat('none', 'icon'),
+                'coord'   	=> $feature->geometry->coordinates,
+                'lat' => $feature->geometry->coordinates[0],
+                'lon' => $feature->geometry->coordinates[1],
+                'link' 	=> $parsed['link'] ?? $feature->properties->link, //
+                'excerpt' 	=> $parsed['text'] ?? $feature->properties->popup ?? $feature->properties->text ?? $feature->properties->description ?? '', //
+                'id' => $feature->properties->id,
+                'category' => $feature->properties->category ?? wp_postmap_get_icon_cat('none', 'category'),
+                'geostat' => 'a b c d e f g h i j k l m n',
+                'country' => '',
+                'state' => '',
+                'address' => ''
+            );
+        }
+
+
+
         // replace the path to the directory by the url in array_shift
         $jsonFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
             return str_replace($tourDir, $tourUrl, $file);
@@ -332,12 +373,14 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // generate html for table with post data
         if ( $this->showtable ){
-            $html .= '<table id="post_table"></table>';
+            //$html .= '<table id="post_table"></table>';
+            $html .= $this->generate_table_html($this->headerhtml, $this->postArray, '' );
         }
 
         // --- enqueue scripts
         $plugin_url = plugin_dir_url(__DIR__);
         wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.0.0', true);
+        wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
             'path'  => $this->wp_postmap_url, 
             'number' => self::$numberShortcodes+1, 
@@ -715,6 +758,104 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
     
         return [$postArray, $data2];
+    }
+    private function getTagStructure(\DOMNode $node, $depth =0) {
+        $structure = [];
+        $innerText = '';
+
+        $tagName = $node->nodeName;
+        $innerText .= $node->nodeValue;
+        //$structure[] = str_repeat(' ', $depth ) . $tagName;
+        $structure[] = $tagName;
+        
+
+        foreach ($node->childNodes as $childNode) {
+            if ( $childNode instanceof \DOMElement) {
+                [$structure, $innerText] = array_merge( $structure, $this->getTagStructure($childNode, $depth+1 ));
+            } 
+        }
+        return [$structure, $innerText];
+    }
+
+    private function getTagValues(\DOMNode $node, $depth =0) {
+        $structure = [];
+        $innerText = '';
+
+        $tagName = $node->nodeName;
+        $innerText .= $node->nodeValue;
+        //$structure[] = str_repeat(' ', $depth ) . $tagName;
+        $structure[] = $tagName;
+        
+
+        foreach ($node->childNodes as $childNode) {
+            if ( $childNode instanceof \DOMElement) {
+                $innerText .= $this->getTagValues($childNode);
+            } 
+        }
+        return $innerText;
+    }
+
+    private function extractTextFromHTMLwithoutStrong(\DOMNode $node) {
+        $texts = [];
+
+        if ($node instanceof DOMElement || $node instanceof DOMDocument ) {
+            if ($node->nodeName === 'strong') {
+                return $texts;
+            }
+            if(trim($node->textContent)) {
+                $texts[] = trim($node->textContent);
+            }
+            foreach ($node->childNodes as $childNode) {
+                $texts = array_merge($texts, $this->extractTextFromHTMLwithoutStrong( $childNode));
+            }
+        }
+        return $texts;
+    }
+
+    private function extractHTMLFromGeoJson( $html ) {
+        $result = [];
+
+        libxml_use_internal_errors(true);
+
+        $dom = new DOMDocument();
+        if (@$dom->loadHTML($html) === false) {
+            libxml_clear_errors();
+            return $result;
+        };
+        //$structure = $this->getTagValues($dom->documentElement);
+        $title = $dom->getElementsByTagName('strong')->item(0);
+        $result['title'] = $this->decodeUnicodeEscapes( trim($title->textContent) );
+
+        $text = trim($dom->documentElement->nodeValue);
+        $text = trim(str_replace($result['title'],'' ,$text));
+        $result['text'] = $this->decodeUnicodeEscapes($text);
+
+        $aTag = $dom->getElementsByTagName('a')->item(0);
+        if ($aTag) {
+            $result['link'] = $aTag->getAttribute('href');
+        } 
+        else {
+            $result['link'] = '';
+        }
+
+        $imgTag = $dom->getElementsByTagName('img')->item(0);
+        if ($imgTag) {
+            $result['image_link'] = $imgTag->getAttribute('src');
+        } 
+        else {
+            $result['image_link'] = '';
+        }
+
+        //if (isset( $data['link']) && isset( $data['text']) && isset( $data['image_link']) && !empty( $data['link']) && !empty( $data['test']) && !empty( $data['image_link']) ) {
+        //    return $result;
+        //} else 
+        return $result;
+    }
+
+    private function decodeUnicodeEscapes( $string) {
+        return preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', function($matches) {
+            return mb_convert_encoding('$#' . hexdec($matches[1]) .';', 'UTF-8' , 'HTML-ENTITIES' );
+        }, $string);
     }
 
     // ---- htaccess helper -----------------
