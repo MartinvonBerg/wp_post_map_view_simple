@@ -356,32 +356,23 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                         'id' => $idCounter, //$feature['properties']['id'],
                         'category' => $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
                         'categoryname'   => $catname,
-                        //'geostat' => 'a b c d e f g h i j k l m n',
-                        //'country' => '',
-                        //'state' => '',
-                        //'address' => ''
                     );
                 } else {
                     // extract data from other sources
-                    $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile) ?? 'Keiner';
+                    $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile);
                     
                     $this->postArray[] = array(
-                        'img'       => $feature['properties']['image'] ?? '', //
+                        'img'       => $feature['properties']['image'] ?? '',
                         'title' 	=> $feature['properties']['name'] ?? $feature['properties']['Name'] ?? $feature['properties']['title'] ?? '', //
                         'icon'  	=> $feature['properties']['icon'] ?? wp_postmap_get_icon_cat('none', 'icon', $pathSettingsFile),
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
                         'lat'       => $feature['geometry']['coordinates'][0],
                         'lon'       => $feature['geometry']['coordinates'][1],
-                        'link' 	    => $feature['properties']['link'] ?? '', //
-                        'excerpt' 	=> $feature['properties']['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['description'] ?? '', //
-                        'id'        => $idCounter, //$feature['properties']['id'],
-                        'category'  =>  $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
+                        'link' 	    => $feature['properties']['link'] ?? '',
+                        'excerpt' 	=> $feature['properties']['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['description'] ?? '',
+                        'id'        => $idCounter,
+                        'category'  =>  $feature['properties']['category'],
                         'categoryname'   => $catname,
-                        //'categoryname'   => 'Stellplatz',
-                        //'geostat' => 'a b c d e f g h i j k l m n',
-                        //'country' => '',
-                        //'state' => '',
-                        //'address' => ''
                     );
                 }
                 
