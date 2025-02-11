@@ -170,4 +170,4 @@ This plugin utilizes the following libraries and resources:
 - [Leaflet MarkerCluster](https://github.com/Leaflet/Leaflet.markercluster)
 - [Map Icons](https://mapicons.mapsmarker.com/)
 - [Tabulator](https://tabulator.info/)
-
+- [geojson.io]https://geojson.io/#new&map=8.78/48.2514/13.403 for generating geojson File with Points

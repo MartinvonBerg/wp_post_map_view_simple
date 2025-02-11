@@ -32,46 +32,61 @@ class GetIconCatTest extends TestCase
             'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'campingcar.png'],
             'mapping' => array(
                 0 => array(
+                    "category" => "Camping",
+                    "icon" => "camping",
+                    "icon-png" => "camping-2.png"
+                ),
+                1 => array(
+                    "category" => "Stellplatz",
+                    "icon" => "campersite",
+                    "icon-png" => "flowers.png"
+                ),
+                2 => array(
+                    "category" => "Besichtigung",
+                    "icon" => "sightseeing",
+                    "icon-png" => "coffee.png"
+                ),
+                3 => array(
                     "category" => "Trekking",
                     "icon" => "hiking",
                     "icon-png" => "hiking.png"
                 ),
-                1 => array(
+                4 => array(
                     "category" => "Bike-Hike",
                     "icon" => "bike-hike",
                     "icon-png" => "mountainbiking-3.png"
                 ),
-                2 => array(
+                5 => array(
                     "category" => "Radfahren",
                     "icon" => "cycling",
                     "icon-png" => "cycling.png"
                 ),
-                3 => array(
+                6 => array(
                     "category" => "MTB",
                     "icon" => "MTB",
                     "icon-png" => "MTB.png"
                 ),
-                4 => array(
+                7 => array(
                     "category" => "Wandern",
                     "icon" => "hiking",
                     "icon-png" => "hiking2.png"
                 ),
-                5 => array(
+                8 => array(
                     "category" => "Bergtour",
                     "icon" => "mountain",
                     "icon-png" => "peak2.png"
                 ),
-                6 => array(
+                9 => array(
                     "category" => "Skitour",
                     "icon" => "skiing",
                     "icon-png" => "skiing.png"
                 ),
-                7 => array(
+                10 => array(
                     "category" => "Paddeln",
                     "icon" => "kayaking",
                     "icon-png" => "kayaking2.png"
                 ),
-                8 => array(
+                11 => array(
                     "category" => "Reisebericht",
                     "icon" => "travel",
                     "icon-png" => "campingcar.png"
@@ -126,52 +141,67 @@ class GetIconCatTest extends TestCase
             $expected = [
                 'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'campingcar.png'],
                 'mapping' => array(
-                    0 => array(
-                        "category" => "Trekking",
-                        "icon" => "hiking",
-                        "icon-png" => "hiking.png"
-                    ),
-                    1 => array(
-                        "category" => "Bike-Hike",
-                        "icon" => "bike-hike",
-                        "icon-png" => "mountainbiking-3.png"
-                    ),
-                    2 => array(
-                        "category" => "Radfahren",
-                        "icon" => "cycling",
-                        "icon-png" => "cycling.png"
-                    ),
-                    3 => array(
-                        "category" => "MTB",
-                        "icon" => "MTB",
-                        "icon-png" => "MTB.png"
-                    ),
-                    4 => array(
-                        "category" => "Wandern",
-                        "icon" => "hiking",
-                        "icon-png" => "hiking2.png"
-                    ),
-                    5 => array(
-                        "category" => "Bergtour",
-                        "icon" => "mountain",
-                        "icon-png" => "peak2.png"
-                    ),
-                    6 => array(
-                        "category" => "Skitour",
-                        "icon" => "skiing",
-                        "icon-png" => "skiing.png"
-                    ),
-                    7 => array(
-                        "category" => "Paddeln",
-                        "icon" => "kayaking",
-                        "icon-png" => "kayaking2.png"
-                    ),
-                    8 => array(
-                        "category" => "Reisebericht",
-                        "icon" => "travel",
-                        "icon-png" => "campingcar.png"
-                    )
+                0 => array(
+                    "category" => "Camping",
+                    "icon" => "camping",
+                    "icon-png" => "camping-2.png"
+                ),
+                1 => array(
+                    "category" => "Stellplatz",
+                    "icon" => "campersite",
+                    "icon-png" => "flowers.png"
+                ),
+                2 => array(
+                    "category" => "Besichtigung",
+                    "icon" => "sightseeing",
+                    "icon-png" => "coffee.png"
+                ),
+                3 => array(
+                    "category" => "Trekking",
+                    "icon" => "hiking",
+                    "icon-png" => "hiking.png"
+                ),
+                4 => array(
+                    "category" => "Bike-Hike",
+                    "icon" => "bike-hike",
+                    "icon-png" => "mountainbiking-3.png"
+                ),
+                5 => array(
+                    "category" => "Radfahren",
+                    "icon" => "cycling",
+                    "icon-png" => "cycling.png"
+                ),
+                6 => array(
+                    "category" => "MTB",
+                    "icon" => "MTB",
+                    "icon-png" => "MTB.png"
+                ),
+                7 => array(
+                    "category" => "Wandern",
+                    "icon" => "hiking",
+                    "icon-png" => "hiking2.png"
+                ),
+                8 => array(
+                    "category" => "Bergtour",
+                    "icon" => "mountain",
+                    "icon-png" => "peak2.png"
+                ),
+                9 => array(
+                    "category" => "Skitour",
+                    "icon" => "skiing",
+                    "icon-png" => "skiing.png"
+                ),
+                10 => array(
+                    "category" => "Paddeln",
+                    "icon" => "kayaking",
+                    "icon-png" => "kayaking2.png"
+                ),
+                11 => array(
+                    "category" => "Reisebericht",
+                    "icon" => "travel",
+                    "icon-png" => "campingcar.png"
                 )
+            )
             ];
 
         $result = wp_postmap_load_category_mapping();
@@ -190,6 +220,12 @@ class GetIconCatTest extends TestCase
         
         $arraytagnames = 'Trekk';
         $expected = 'Trekking';
+
+        $result = wp_postmap_get_icon_cat($arraytagnames, 'category');
+        $this->assertEquals($expected, $result);
+
+        $arraytagnames = 'Besicht';
+        $expected = 'Besichtigung';
 
         $result = wp_postmap_get_icon_cat($arraytagnames, 'category');
         $this->assertEquals($expected, $result);

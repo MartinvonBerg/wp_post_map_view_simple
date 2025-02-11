@@ -32,7 +32,7 @@ function wp_postmap_load_category_mapping( $file = null ) {
     ];
 
     if ( $file === null ) {
-        $mapping_file = plugin_dir_path(__DIR__) . 'settings/category_mapping.json';
+        $mapping_file = plugin_dir_path(__DIR__) . 'settings/' . SETTINGS_FILE;
     } else {
         $mapping_file = $file;
     }
@@ -56,21 +56,21 @@ function wp_postmap_load_category_mapping( $file = null ) {
  * @param string $returnKey Der Schlüssel des zurückzugebenden Wertes.
  * @return string Der Icon-Name als String.
  */
-function wp_postmap_get_icon_cat($arraytagnames, $returnKey) {
-    $data = wp_postmap_load_category_mapping();
+function wp_postmap_get_icon_cat($arraytagnames, $returnKey, $file = null) {
+    $data = wp_postmap_load_category_mapping($file);
     $mapping = $data['mapping'];
     $default = $data['default'][$returnKey];
 
     // Schlagwörter bereinigen und normalisieren
     $searchWords = array_map('\mvbplugins\helpers\normalize_string', explode(',', $arraytagnames));
 
-    foreach ($mapping as $details) {
-        $normalizedCategory = normalize_string($details['category']);
+    foreach ($mapping as $singleEntry) {
+        $normalizedCategory = normalize_string($singleEntry['category']);
 
         // Prüfen, ob mindestens ein Suchwort als Teilstring in einer normalisierten Kategorie vorkommt
         foreach ($searchWords as $word) {
             if (!empty($word) && str_contains($normalizedCategory, $word)) {
-                return $details[$returnKey]; // Erste Übereinstimmung zurückgeben
+                return $singleEntry[$returnKey]; // Erste Übereinstimmung zurückgeben
             }
         }
     }

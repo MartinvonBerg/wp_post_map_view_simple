@@ -1,4 +1,5 @@
 import { isValidAspectRatio, isValidCssSize } from './libs/cssCheckLib.js';
+import { loadSettings } from './libs/loadJSON.js';
 
 /**
  * Main logic function for the PostMapTableView plugin.
@@ -163,6 +164,8 @@ function mainLogic (window, document, undefined) {
       let myIcon = new Array();
       let group = new Array();
 
+      pageVars.type = window.g_wp_postmap_path.type;
+
       updateCSS(pageVars);
 
       /**
@@ -191,13 +194,20 @@ function mainLogic (window, document, undefined) {
       // --- Generate Map with Markers
       if (hasMap) {
         Promise.all([
-          import('../settings/category_mapping.json'),
+          //import('../settings/category_mapping.json'),
           import('./leafletMapClass.js')
-        ]).then(([category_mapping, LeafletMap]) => {
+        ]).then( async ([LeafletMap]) => {
 
           allMaps[m] = new LeafletMap.LeafletMap(m, 'map10_img' );
                           
           // Define Icons from imported json file
+          let settingsUrl = '';
+          if (pageVars.settingsFile) {
+            settingsUrl = pageVars.settingsFile;
+          } else {
+            settingsUrl = postmap_url.replace('images/','') + 'settings/category_mapping.json';
+          }
+          let category_mapping = await loadSettings(settingsUrl);
           allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
           nposts = Array( allIcons.length ).fill(0);
           allIcons.forEach( function(icon, index) {

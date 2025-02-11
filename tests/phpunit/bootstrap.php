@@ -11,6 +11,10 @@ $plugin_rel_dir = 'wp-content/plugins/PostMapTableView';
 define( 'PLUGIN_PHPUNIT', true );
 define( 'WEEK_IN_SECONDS', 1 );
 
+if (!defined('SETTINGS_FILE')) {
+    define('SETTINGS_FILE', 'category_mapping.json');
+}
+
 // define fake ABSPATH
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', sys_get_temp_dir() );

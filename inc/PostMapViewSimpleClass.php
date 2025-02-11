@@ -24,6 +24,10 @@ use DOMElement;
 // Prevent direct access
 defined('ABSPATH') or die('Are you ok?');
 
+if (!defined('SETTINGS_FILE')) {
+    define('SETTINGS_FILE', 'category_mapping.json');
+}
+
 require_once __DIR__ . '/geoaddress.php';
 use function mvbplugins\helpers\get_geoaddress as get_geoaddress;
 
@@ -38,7 +42,10 @@ interface PostMapViewSimpleInterface {
 /**
  * main shortcode function to generate the html
  * 
- * TODO: finally add the functions similar to maps Marker pro!
+ * TODO: load and show gpx files
+ * TODO: update readme and versions
+ * 
+ * @return string
  * 
  */
 final class PostMapViewSimple implements PostMapViewSimpleInterface {
@@ -240,7 +247,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
             // generate html for table with post data
             if ( $this->showtable ){
-                $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray, $this->category );
+                $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray );
             }
 
             // end generation of html output: write the html-output in $string now as set_transient
@@ -269,7 +276,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'path'  => $this->wp_postmap_url, 
             'number' => self::$numberShortcodes+1, 
             'hasTable' => $this->showtable, 
-            'hasMap' => $this->showmap));
+            'hasMap' => $this->showmap,
+            'type' => 'standard',));
         wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
 
 		// ----------------
@@ -284,55 +292,103 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
         $tourDir = $this->up_dir . '/' . $this->tourfolder;
         $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
+        $pathSettingsFile = null;
 
         if ( !is_dir( $tourDir ) ) {
             return '';
         }
 
         // get the geojson and gpx-file in the tourfolder and pass it to js.
-        $jsonFiles = glob($tourDir . '/*.json');
+        $jsonFiles = glob($tourDir . '/*.{json,geojson}', GLOB_BRACE);
+        // check if settings file is in $tourDir, if so exclude it from $jsonFiles and return the full url to the settings file
+        if ( file_exists($tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE) ) {
+            //$jsonFiles = array_diff($jsonFiles, [$tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE]);
+            $jsonFiles = array_filter($jsonFiles, function($item) {
+                if ( !str_contains($item, SETTINGS_FILE)) {
+                    return $item;
+                }
+            });
+            $pathSettingsFile = $tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE;
+        }
         $gpxFiles = glob($tourDir . '/*.gpx');
         if ( !$jsonFiles && !$gpxFiles ) {
             return '';
         }
 
-        // parse geojseon files to php_touren array TODO: all files 
-        $json0 = file_get_contents($jsonFiles[0]);
-        if ( $json0 === false) {
-            //error handling
-        }
-        $gesojson = json_decode($json0);
-        if ($gesojson->type !== 'FeatureCollection' || count($gesojson->features) === 0) {
-            //error handling
-        }
+        // ------ parse geojseon files to php_touren array
+        $idCounter = 0;
+        foreach ( $jsonFiles as $jsonfile ) {
+            
+            $json0 = file_get_contents($jsonfile);
+            $json0 = mb_convert_encoding($json0, 'UTF-8', 'auto');
+            if ( $json0 === false) { break; }
+            $geojson = json_decode($json0, true);
+                //array_walk_recursive($geojson, function (&$value) {
+                //    $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+                //});
+            if ($geojson['type'] !== 'FeatureCollection' || count($geojson['features']) === 0) { break; }
+            
+            foreach ( $geojson['features'] as $feature) {
+                
+                // parse the points to php_touren
+                if ( strtolower($feature['geometry']['type']) !== 'point' || count($feature['properties']) === 0) { break; }
 
-        foreach ($gesojson->features as $feature) {
-            // parse the points to php_touren
-            if ( strtolower($feature->geometry->type) !== 'point') {
-                break;
+                // check whether from kml, maps-marker-pro or other source like manually generated
+                $hasPopupInHTML = false;
+                if (key_exists('popup', $feature['properties'] ) ) {
+                    $test = $feature['properties']['popup'];
+                    $hasPopupInHTML = $test !== strip_tags($test);
+                }
+                if ($hasPopupInHTML) { 
+                    // extract from maps marker pro geojson
+                    $parsed = $this->extractHTMLFromGeoJson($feature['properties']['popup'] );
+                    $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile) ?? 'Keiner';
+                    
+                    $this->postArray[] = array(
+                        'img' => $feature['properties']['image'] ?? $parsed['image_link'], //
+                        'title' 	=> $parsed['title'] ?? $feature['properties']['name'] ?? $feature['properties']['title'] ?? '', //
+                        'icon'  	=> $feature['properties']['icon'] ?? wp_postmap_get_icon_cat('none', 'icon', $pathSettingsFile),
+                        'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
+                        'lat' => $feature['geometry']['coordinates'][0],
+                        'lon' => $feature['geometry']['coordinates'][1],
+                        'link' 	=> $parsed['link'] ?? $feature['properties']['link'], //
+                        'excerpt' 	=> $parsed['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['text'] ?? $feature['properties']['description'] ?? '', //
+                        'id' => $idCounter, //$feature['properties']['id'],
+                        'category' => $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
+                        'categoryname'   => $catname,
+                        //'geostat' => 'a b c d e f g h i j k l m n',
+                        //'country' => '',
+                        //'state' => '',
+                        //'address' => ''
+                    );
+                } else {
+                    // extract data from other sources
+                    $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile) ?? 'Keiner';
+                    
+                    $this->postArray[] = array(
+                        'img'       => $feature['properties']['image'] ?? '', //
+                        'title' 	=> $feature['properties']['name'] ?? $feature['properties']['Name'] ?? $feature['properties']['title'] ?? '', //
+                        'icon'  	=> $feature['properties']['icon'] ?? wp_postmap_get_icon_cat('none', 'icon', $pathSettingsFile),
+                        'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
+                        'lat'       => $feature['geometry']['coordinates'][0],
+                        'lon'       => $feature['geometry']['coordinates'][1],
+                        'link' 	    => $feature['properties']['link'] ?? '', //
+                        'excerpt' 	=> $feature['properties']['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['description'] ?? '', //
+                        'id'        => $idCounter, //$feature['properties']['id'],
+                        'category'  =>  $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
+                        'categoryname'   => $catname,
+                        //'categoryname'   => 'Stellplatz',
+                        //'geostat' => 'a b c d e f g h i j k l m n',
+                        //'country' => '',
+                        //'state' => '',
+                        //'address' => ''
+                    );
+                }
+                
+                $idCounter++;
             }
-            $parsed = $this->extractHTMLFromGeoJson($feature->properties->popup);
-            //$icon = wp_postmap_get_icon_cat($feature->properties->category, 'icon');
-             
-            $this->postArray[] = array(
-                'img' => $feature->properties->image ?? $parsed['image_link'], //
-                'title' 	=> $parsed['title'] ?? $feature->properties->name ?? $feature->properties->name ?? '',
-                'icon'  	=> $feature->properties->icon ?? wp_postmap_get_icon_cat('none', 'icon'),
-                'coord'   	=> $feature->geometry->coordinates,
-                'lat' => $feature->geometry->coordinates[0],
-                'lon' => $feature->geometry->coordinates[1],
-                'link' 	=> $parsed['link'] ?? $feature->properties->link, //
-                'excerpt' 	=> $parsed['text'] ?? $feature->properties->popup ?? $feature->properties->text ?? $feature->properties->description ?? '', //
-                'id' => $feature->properties->id,
-                'category' => $feature->properties->category ?? wp_postmap_get_icon_cat('none', 'category'),
-                'geostat' => 'a b c d e f g h i j k l m n',
-                'country' => '',
-                'state' => '',
-                'address' => ''
-            );
         }
-
-
+        // ---------- end loop array generation
 
         // replace the path to the directory by the url in array_shift
         $jsonFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
@@ -341,6 +397,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $gpxFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
             return str_replace($tourDir, $tourUrl, $file);
         }, $gpxFiles);
+        if ( $pathSettingsFile !== null ) { $pathSettingsFile = str_replace($tourDir, $tourUrl, $pathSettingsFile); }
+        else { $pathSettingsFile = ''; }
 
         // check htaccess for tileserver only here 
         if ( $this->useTileServer) {
@@ -364,6 +422,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->pageVarsForJs[$this->m]['tableHeight'] = strval($this->tableHeight) . 'px';
         $this->pageVarsForJs[$this->m]['geoJsonFile'] = $jsonFiles;
         $this->pageVarsForJs[$this->m]['gpxFile'] = $gpxFiles;
+        $this->pageVarsForJs[$this->m]['settingsFile'] = $pathSettingsFile;
 
         // generate html for map with post data 
         $html = '';
@@ -374,7 +433,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // generate html for table with post data
         if ( $this->showtable ){
             //$html .= '<table id="post_table"></table>';
-            $html .= $this->generate_table_html($this->headerhtml, $this->postArray, '' );
+            $html .= $this->generate_table_html($this->headerhtml, $this->postArray, 'tourmap');
         }
 
         // --- enqueue scripts
@@ -385,7 +444,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'path'  => $this->wp_postmap_url, 
             'number' => self::$numberShortcodes+1, 
             'hasTable' => $this->showtable, 
-            'hasMap' => $this->showmap));
+            'hasMap' => $this->showmap,
+            'type' => 'tourmap'));
         wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
 
         return $html;
@@ -424,7 +484,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
     }
 
-    private function generate_table_html( $headerhtml, $data2, $category ) {
+    private function generate_table_html( $headerhtml, $data2, $caller = '') {
         if ( count($data2) === 0) return '';
 
         // generate table with post data: generate the header
@@ -446,19 +506,20 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $table_out  .= '<th>Nr</th>';
         $table_out  .= '<th>Titel</th>';
         $table_out  .= '<th>Kategorie</th>';
-        $table_out  .= '<th>Distanz</th>';
-        $table_out  .= '<th>Aufstieg</th>';
-        $table_out  .= '<th>Abstieg</th>';
-        $table_out  .= '<th>Land</th>';
-        $table_out  .= '<th>Region</th>';
-        $table_out  .= '<th>Stadt</th>';
+        if ( $caller !== 'tourmap' ) {
+            $table_out  .= '<th>Distanz</th>';
+            $table_out  .= '<th>Aufstieg</th>';
+            $table_out  .= '<th>Abstieg</th>';
+            $table_out  .= '<th>Land</th>';
+            $table_out  .= '<th>Region</th>';
+            $table_out  .= '<th>Stadt</th>';
+        }
         $table_out  .= '</tr></thead><tbody>';
         
         // generate table with post data 
-        foreach ($data2 as $data) {
-            //$datacat = preg_replace("/[^a-zA-Z0-9]+/", "", $data['wpcategory']); 
-    
-            //if ( ($category === 'all') || ( $datacat == $category) || ( $this->is_category_or_child($datacat, $category) )) { // $datacat is in array $category, wenn das ein Array ist!
+        if ( $caller !== 'tourmap' ) {
+            foreach ($data2 as $data) {
+                
                 // get geo statistics
                 $geostatarr= \explode(' ', $data['geostat'] ); // gives strings of the values
                 
@@ -477,9 +538,25 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $table_out  .= '<td>' . $data['state'] . '</td>';
                 $table_out  .= '<td><a href="' . $googleurl . '" target="_blank" rel="noopener noreferrer">'. $data['address'] .'</a></td>';
                 $table_out  .= '</tr>';
-            //}
-        }
-    
+            }
+        } else {
+            foreach ($data2 as $data) {
+                
+                // define google url
+                $googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
+                
+                // define the table row 
+                $table_out  .= '<tr>';
+                $table_out  .= '<td>' . $data['id'] . '</td>';
+                if ($data['link'] == '') {
+                    $table_out  .= '<td>' . $data['title'] . '</td>';
+                } else {
+                    $table_out  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
+                }
+                $table_out  .= '<td>' . $data['categoryname'] . '</td>'; // category gehört hier rein!
+                $table_out  .= '</tr>';
+            }
+        };
         // finally close table
         $table_out  .= '</tbody></table>';
         
@@ -770,7 +847,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
 
         foreach ($node->childNodes as $childNode) {
-            if ( $childNode instanceof \DOMElement) {
+            if ( $childNode instanceof DOMElement) {
                 [$structure, $innerText] = array_merge( $structure, $this->getTagStructure($childNode, $depth+1 ));
             } 
         }
@@ -788,7 +865,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
 
         foreach ($node->childNodes as $childNode) {
-            if ( $childNode instanceof \DOMElement) {
+            if ( $childNode instanceof DOMElement) {
                 $innerText .= $this->getTagValues($childNode);
             } 
         }
@@ -818,37 +895,26 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         libxml_use_internal_errors(true);
 
         $dom = new DOMDocument();
-        if (@$dom->loadHTML($html) === false) {
+        $html = '<?xml encoding="UTF-8">' . $html;
+
+        if (@$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD) === false) {
             libxml_clear_errors();
             return $result;
         };
-        //$structure = $this->getTagValues($dom->documentElement);
+        
         $title = $dom->getElementsByTagName('strong')->item(0);
-        $result['title'] = $this->decodeUnicodeEscapes( trim($title->textContent) );
+        $result['title'] = trim($title->textContent);
 
         $text = trim($dom->documentElement->nodeValue);
         $text = trim(str_replace($result['title'],'' ,$text));
-        $result['text'] = $this->decodeUnicodeEscapes($text);
+        $result['text'] = $text;
 
         $aTag = $dom->getElementsByTagName('a')->item(0);
-        if ($aTag) {
-            $result['link'] = $aTag->getAttribute('href');
-        } 
-        else {
-            $result['link'] = '';
-        }
+        $result['link'] = $aTag ? $aTag->getAttribute('href') : '';
 
         $imgTag = $dom->getElementsByTagName('img')->item(0);
-        if ($imgTag) {
-            $result['image_link'] = $imgTag->getAttribute('src');
-        } 
-        else {
-            $result['image_link'] = '';
-        }
+        $result['image_link'] = $imgTag ? $imgTag->getAttribute('src') : '';
 
-        //if (isset( $data['link']) && isset( $data['text']) && isset( $data['image_link']) && !empty( $data['link']) && !empty( $data['test']) && !empty( $data['image_link']) ) {
-        //    return $result;
-        //} else 
         return $result;
     }
 
