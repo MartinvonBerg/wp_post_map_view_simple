@@ -38,10 +38,11 @@ class MyTabulatorClass {
         let page_size = options.tablePageSize ? options.tablePageSize : 20;
         let tableHeight = options.tableHeight ? options.tableHeight : '0px';
         let tabulatorOptions = {};
+        let tableMapMoveSelector = window.g_wp_postmap_path.tableMapMoveSelector;
 
         if (options.type === 'tourmap') {
             tabulatorOptions = {
-                layout: "fitData",
+                layout: "fitDataStretch",
                 locale: true,
                 height: tableHeight,
                 langs:{
@@ -69,6 +70,7 @@ class MyTabulatorClass {
                     {title:"Nr", field:"Nr", },
                     {title:"Titel", field:"Titel", formatter:"html", headerFilter:"input"},
                     {title:"Kategorie", field:"Kategorie", headerFilter:"input"},
+                    {title:tableMapMoveSelector, field:tableMapMoveSelector, formatter:"html"},
                 ],
             };
         } else {
@@ -106,7 +108,7 @@ class MyTabulatorClass {
                     {title:"Abstieg", field:"Abstieg", hozAlign:"right",headerFilterPlaceholder:">...Hm", headerFilter:"input", headerFilterFunc:this.HeaderFilter, headerFilterFuncParams:{Distanz:0}},
                     {title:"Land", field:"Land", headerFilter:"input"},
                     {title:"Region", field:"Region", headerFilter:"input"},
-                    {title:"Stadt", field:"Stadt", formatter:"html", headerFilter:"input"},
+                    {title:tableMapMoveSelector, field:tableMapMoveSelector, formatter:"html", headerFilter:"input"},
                 ],
             };
         }

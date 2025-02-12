@@ -44,6 +44,7 @@ interface PostMapViewSimpleInterface {
  * 
  * TODO: load and show gpx files
  * TODO: update readme and versions
+ * TODO: Icons auswählen
  * 
  * @return string
  * 
@@ -84,6 +85,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $pageVarsForJs = [];
     private $m = null;
     private $chunksize = 20;
+    private $tableMapMoveSelector = '';
 	
 	public function __construct( $attr ) {
 		
@@ -177,6 +179,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	
 	public function show_post_map() :string {
 
+        $this->tableMapMoveSelector = 'Stadt';
         // check the transient set time and delete transient if post was published during that time
         $wpid = get_the_ID();
         $wpid = $wpid ? strval($wpid) : '';
@@ -277,7 +280,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'number' => self::$numberShortcodes+1, 
             'hasTable' => $this->showtable, 
             'hasMap' => $this->showmap,
-            'type' => 'standard',));
+            'type' => 'standard',
+            'tableMapMoveSelector' => $this->tableMapMoveSelector ));
         wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
 
 		// ----------------
@@ -289,7 +293,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( $this->tourfolder === '') {
             return '';
         }
-        
+        $this->tableMapMoveSelector = 'Google';
         $tourDir = $this->up_dir . '/' . $this->tourfolder;
         $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
         $pathSettingsFile = null;
@@ -349,8 +353,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                         'title' 	=> $parsed['title'] ?? $feature['properties']['name'] ?? $feature['properties']['title'] ?? '', //
                         'icon'  	=> wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile),
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
-                        'lat' => $feature['geometry']['coordinates'][0],
-                        'lon' => $feature['geometry']['coordinates'][1],
+                        'lat' => $feature['geometry']['coordinates'][1],
+                        'lon' => $feature['geometry']['coordinates'][0],
                         'link' 	=> $parsed['link'] ?? $feature['properties']['link'], //
                         'excerpt' 	=> $parsed['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['text'] ?? $feature['properties']['description'] ?? '', //
                         'id' => $idCounter, //$feature['properties']['id'],
@@ -366,13 +370,14 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                         'title' 	=> $feature['properties']['name'] ?? $feature['properties']['Name'] ?? $feature['properties']['title'] ?? '', //
                         'icon'  	=> wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile),
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
-                        'lat'       => $feature['geometry']['coordinates'][0], //
-                        'lon'       => $feature['geometry']['coordinates'][1], //
+                        'lat'       => $feature['geometry']['coordinates'][1], //
+                        'lon'       => $feature['geometry']['coordinates'][0], //
                         'link' 	    => $feature['properties']['link'] ?? '', //
                         'excerpt' 	=> $feature['properties']['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['description'] ?? '',
                         'id'        => $idCounter, //
                         //'category'  =>  $feature['properties']['category'],
-                        'category'   => $catname, // TODO Die 'category' wird in PHP für den Klarnamen der Kategorie benutzt. Im JS jedoch zur Auswahl des Icons. Das ist nicht konsistent und nicht nachvollziehbar.
+                        'category'   => $catname, // Die 'category' wird in PHP für den Klarnamen der Kategorie in der Tabelle benutzt. 
+                        //Im JS jedoch zur Auswahl des Icons UND der Klarnamens. Das ist nicht konsistent und nicht nachvollziehbar.
                     );
                 }
                 
@@ -436,7 +441,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'number' => self::$numberShortcodes+1, 
             'hasTable' => $this->showtable, 
             'hasMap' => $this->showmap,
-            'type' => 'tourmap'));
+            'type' => 'tourmap',
+            'tableMapMoveSelector' => $this->tableMapMoveSelector ));
         wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
 
         return $html;
@@ -503,7 +509,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $table_out  .= '<th>Abstieg</th>';
             $table_out  .= '<th>Land</th>';
             $table_out  .= '<th>Region</th>';
-            $table_out  .= '<th>Stadt</th>';
+            $table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
+        } else {
+            $table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         }
         $table_out  .= '</tr></thead><tbody>';
         
@@ -545,6 +553,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     $table_out  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
                 }
                 $table_out  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
+                $table_out  .= '<td><a href="' . $googleurl . '" target="_blank" rel="noopener noreferrer">&#8811;&#8811;&#8811;</a></td>';
                 $table_out  .= '</tr>';
             }
         };

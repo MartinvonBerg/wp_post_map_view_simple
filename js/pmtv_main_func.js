@@ -42,8 +42,7 @@ function mainLogic (window, document, undefined) {
     }
 
     /**
-     * Toggles all layers in the layer control on or off. If all layers are
-     * supposed to be shown, the header filter of the table is reset.
+     * Toggles all layers in the layer control on or off. 
      * @param {boolean} selectAll - Show all layers if true, hide all layers if false.
      * @param {Object} table - The table object (not used yet).
      */
@@ -67,25 +66,31 @@ function mainLogic (window, document, undefined) {
      * @param {array} nposts - the array to store the number of posts for each icon
      * @returns {array} markersInGroups - an array of arrays with all markers grouped by their icon
      */
-    function createMarkers(php_touren, allIcons, myIcon, nposts) {
+    function createMarkers(php_touren, allIcons, myIcon, nposts, shortcodeType) {
       let markersInGroups = [];
-      /*
+      
       php_touren.forEach(tour => {
-          let grpIndex = allIcons.findIndex(icon => icon.icon === tour.category);
+          let grpIndex = allIcons.findIndex(icon => 
+            shortcodeType === 'tourmap' ? icon.category === tour.category : icon.icon === tour.category
+          ); // Die Auswahl muss von der Art des Shortcodes abhängen, da die category unterschiedlich verwendet wird.!
           grpIndex = grpIndex !== -1 ? grpIndex : allIcons.length - 1;
           
           nposts[grpIndex]++;
           let icon = myIcon[grpIndex];
           let marker = new L.Marker(tour.coord, { title: tour.title, icon });
   
-          let popupContent = `<a href="${tour.link}"><b>${tour.title}</b><br>`;
+          let popupContent = '';
+          if (tour.link) popupContent += `<a href="${tour.link}">`;
+          popupContent += ` <b>${tour.title}</b><br>`;
           if (tour.img) popupContent += `<img src="${tour.img}">`;
-          popupContent += `${tour.excerpt}</a>`;
+          popupContent += `${tour.excerpt}`
+          if (tour.link) popupContent += `</a>`;
+
           marker.bindPopup(popupContent);
   
           (markersInGroups[grpIndex] ||= []).push(marker);
       });
-      */
+      /*
       php_touren.forEach(tour => {
         let singleMarker;
         let found = false;
@@ -103,23 +108,27 @@ function mainLogic (window, document, undefined) {
             };
         };
 
-        if ( ! found ) { // sollte eigentlich der Default sein
+        if ( ! found ) { // this sets the icon / icn to the default value which was added at the end of allIcons
             icn = myIcon[ allIconsLength-1 ];
             nposts[ allIconsLength-1]++;
         }
         singleMarker = new L.Marker(tour["coord"], { title: tour["title"], icon: icn });
 
-        if (tour["img"] == false || tour["img"] == null || tour["img"] == '') {
-          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br>' + tour["excerpt"] + '</a>');
-        } else {
-          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br><img src="' + tour["img"] + '">' + tour["excerpt"] + '</a>');
-        }
+        let popupContent = '';
+        if (tour.link) popupContent += `<a href="${tour.link}">`;
+        popupContent += ` <b>${tour.title}</b><br>`;
+        if (tour.img) popupContent += `<img src="${tour.img}">`;
+        popupContent += `${tour.excerpt}`
+        if (tour.link) popupContent += `</a>`;
+
+        singleMarker.bindPopup(popupContent);
     
         if (markersInGroups[grpIndex] == undefined) {
           markersInGroups[grpIndex] = new Array();
         }
         markersInGroups[grpIndex].push(singleMarker);
       });
+      */
       return markersInGroups;
     }
 
@@ -191,7 +200,7 @@ function mainLogic (window, document, undefined) {
       let m = 0;
       let pageVars = window.pageVarsForJs[m];
       let table = {};
-      let tableMapMoveSelector = 'Stadt'; // Mind: This might be i18n or other values
+      let tableMapMoveSelector = window.g_wp_postmap_path.tableMapMoveSelector; // This is set by PHP, where it is not an option but hardcoded. 
       let LayerSupportGroup = {};
       let allIcons = {};
       let nposts = [];
@@ -242,8 +251,8 @@ function mainLogic (window, document, undefined) {
             settingsUrl = postmap_url.replace('images/','') + 'settings/category_mapping.json';
           }
           let category_mapping = await loadSettings(settingsUrl);
-          allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
-          // append the default from the json to allIcons array
+          allIcons = category_mapping['mapping'];
+          // append the default from the json at the end of allIcons array
           allIcons.push(category_mapping['default']);
           
           nposts = Array( allIcons.length ).fill(0);
@@ -252,8 +261,8 @@ function mainLogic (window, document, undefined) {
           }); 
           
           // Creating markers as an array of arrays -----------------
-          let markersInGroups = new Array(); // possible return value
-          markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+          let markersInGroups = [];
+          markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts, pageVars.type);
           
           // ---add the marker cluster group to map --------------
           LayerSupportGroup = L.markerClusterGroup.layerSupport();
@@ -414,11 +423,11 @@ function mainLogic (window, document, undefined) {
                     );
             
                     // Marker für gefilterte Touren erstellen
-                    markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts);
+                    markersInGroups = createMarkers(filtered_touren, allIcons, myIcon, nposts, pageVars.type);
 
                 } else if (filters.length === 0 && rows.length > 0) {
                     // Alle Marker erneut hinzufügen
-                    markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts);
+                    markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts, pageVars.type);
 
                 } else {
                     return; // Keine Marker hinzuzufügen -> Abbrechen
