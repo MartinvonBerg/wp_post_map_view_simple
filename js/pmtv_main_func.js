@@ -69,7 +69,7 @@ function mainLogic (window, document, undefined) {
      */
     function createMarkers(php_touren, allIcons, myIcon, nposts) {
       let markersInGroups = [];
-      
+      /*
       php_touren.forEach(tour => {
           let grpIndex = allIcons.findIndex(icon => icon.icon === tour.category);
           grpIndex = grpIndex !== -1 ? grpIndex : allIcons.length - 1;
@@ -85,7 +85,41 @@ function mainLogic (window, document, undefined) {
   
           (markersInGroups[grpIndex] ||= []).push(marker);
       });
-      
+      */
+      php_touren.forEach(tour => {
+        let singleMarker;
+        let found = false;
+        let grpIndex = 0;
+        let icn;
+        let allIconsLength = allIcons.length;
+
+        for (let index = 0; index < allIconsLength; index++) {    
+            if (tour["category"] == allIcons[index]['icon']) {
+                icn = myIcon[index];
+                nposts[index]++;
+                found = true;
+                grpIndex = index;
+                break;
+            };
+        };
+
+        if ( ! found ) { // sollte eigentlich der Default sein
+            icn = myIcon[ allIconsLength-1 ];
+            nposts[ allIconsLength-1]++;
+        }
+        singleMarker = new L.Marker(tour["coord"], { title: tour["title"], icon: icn });
+
+        if (tour["img"] == false || tour["img"] == null || tour["img"] == '') {
+          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br>' + tour["excerpt"] + '</a>');
+        } else {
+          singleMarker.bindPopup('<a href="' + tour["link"] + '"><b>' + tour["title"] + '</b><br><img src="' + tour["img"] + '">' + tour["excerpt"] + '</a>');
+        }
+    
+        if (markersInGroups[grpIndex] == undefined) {
+          markersInGroups[grpIndex] = new Array();
+        }
+        markersInGroups[grpIndex].push(singleMarker);
+      });
       return markersInGroups;
     }
 
@@ -209,6 +243,9 @@ function mainLogic (window, document, undefined) {
           }
           let category_mapping = await loadSettings(settingsUrl);
           allIcons = category_mapping['mapping']; // allIcons ist ident zu dem was aus json kommt
+          // append the default from the json to allIcons array
+          allIcons.push(category_mapping['default']);
+          
           nposts = Array( allIcons.length ).fill(0);
           allIcons.forEach( function(icon, index) {
             myIcon[index] = allMaps[m].setIcon(postmap_url,icon['icon-png'],'marker-shadow.png'); 

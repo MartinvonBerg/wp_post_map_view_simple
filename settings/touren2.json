@@ -41,7 +41,7 @@
                 "icon": "http://localhost/wordpress/wp-content/plugins/PostMapTableView/images/hiking.png",
                 "popup": "<p><a href=\"https://www.berg-reise-foto.de/tourenbericht-wanderung/wanderung-zum-castello-ruffo-bei-amendolea-in-kalabrien/?swcfpc=1\"><strong>Wanderung zum Castello Ruffo bei Amendolea in Kalabrien</strong><br />\n<img class=\"alignleft\" src=\"https://www.berg-reise-foto.de/smrtzl/uploads/Alben_Website/Italien/Wanderung-Castello-Ruffo-Amendolea/Wanderung-Castello-Ruffo-Amendolea-916_DxO-200x150.webp\" width=\"109\" height=\"82\" />Einfache, aber steile Wanderung zum Castello Ruffo bei Amendolea im tiefsten Kalabrien.</a></p>\n<div id=\"mouseposition-extension-element-full-container\" style=\"position: fixed;z-index: 2147483647;font-weight: 400\">\n<div id=\"mouseposition-extension-element-rect-display\" style=\"display: none;position: absolute;font-size: 12px;z-index: 2147483647;justify-content: center;align-items: center;cursor: default;color: #000000;font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;width: 0px;height: 0px\">\n<pre style=\"flex: 1 1 0%;text-align: center;color: #000000;min-width: 42px;min-height: 12px\"></pre>\n</div>\n<pre id=\"mouseposition-extension-element-coordinate-display\" style=\"position: absolute;display: none;background: #ffffff;font-size: 12px;line-height: 14px;border-radius: 3px;border-width: 1px;border-color: #222222 black #333333;border-style: solid;padding: 3px;z-index: 2147483647;color: #222222;cursor: default;font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif\"></pre>\n</div>\n",
                 "link": "",
-                "category": "hiking",
+                "category": "Wander",
                 "maps": [
                     "2"
                 ]

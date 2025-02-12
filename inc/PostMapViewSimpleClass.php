@@ -347,32 +347,32 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     $this->postArray[] = array(
                         'img' => $feature['properties']['image'] ?? $parsed['image_link'], //
                         'title' 	=> $parsed['title'] ?? $feature['properties']['name'] ?? $feature['properties']['title'] ?? '', //
-                        'icon'  	=> $feature['properties']['icon'] ?? wp_postmap_get_icon_cat('none', 'icon', $pathSettingsFile),
+                        'icon'  	=> wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile),
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
                         'lat' => $feature['geometry']['coordinates'][0],
                         'lon' => $feature['geometry']['coordinates'][1],
                         'link' 	=> $parsed['link'] ?? $feature['properties']['link'], //
                         'excerpt' 	=> $parsed['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['text'] ?? $feature['properties']['description'] ?? '', //
                         'id' => $idCounter, //$feature['properties']['id'],
-                        'category' => $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
-                        'categoryname'   => $catname,
+                        //'category' => $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
+                        'category'   => $catname,
                     );
                 } else {
                     // extract data from other sources
                     $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile);
                     
                     $this->postArray[] = array(
-                        'img'       => $feature['properties']['image'] ?? '',
+                        'img'       => $feature['properties']['image'] ?? '', //
                         'title' 	=> $feature['properties']['name'] ?? $feature['properties']['Name'] ?? $feature['properties']['title'] ?? '', //
-                        'icon'  	=> $feature['properties']['icon'] ?? wp_postmap_get_icon_cat('none', 'icon', $pathSettingsFile),
+                        'icon'  	=> wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile),
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
-                        'lat'       => $feature['geometry']['coordinates'][0],
-                        'lon'       => $feature['geometry']['coordinates'][1],
-                        'link' 	    => $feature['properties']['link'] ?? '',
+                        'lat'       => $feature['geometry']['coordinates'][0], //
+                        'lon'       => $feature['geometry']['coordinates'][1], //
+                        'link' 	    => $feature['properties']['link'] ?? '', //
                         'excerpt' 	=> $feature['properties']['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['description'] ?? '',
-                        'id'        => $idCounter,
-                        'category'  =>  $feature['properties']['category'],
-                        'categoryname'   => $catname,
+                        'id'        => $idCounter, //
+                        //'category'  =>  $feature['properties']['category'],
+                        'category'   => $catname, // TODO Die 'category' wird in PHP für den Klarnamen der Kategorie benutzt. Im JS jedoch zur Auswahl des Icons. Das ist nicht konsistent und nicht nachvollziehbar.
                     );
                 }
                 
@@ -544,7 +544,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 } else {
                     $table_out  .= '<td><a href="' . $data['link']. '" target="_blank">' . $data['title'] . '</a></td>';
                 }
-                $table_out  .= '<td>' . $data['categoryname'] . '</td>'; // category gehört hier rein!
+                $table_out  .= '<td>' . $data['category'] . '</td>'; // category gehört hier rein!
                 $table_out  .= '</tr>';
             }
         };
