@@ -9,3 +9,4 @@ composer.lock
 build/*.png
 leaflet_map_tiles/*
 *LICENSE.txt
+release*

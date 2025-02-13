@@ -1,24 +1,27 @@
-# WP-Post-Map-View-Simple
+# Post-Map-Table-View
 
 ## Description
 
 This plugin displays all WordPress posts or pages containing GPX data (lat, lon) stored in custom fields on an OpenStreetMap map. Posts are categorized using tags, allowing filtering and custom icons. Additionally, a table with all posts is displayed.
 
-**Generation of JS with webpack has to be done by user!!!**
+Alternatively a descriptive JSON-File in a seperate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
+There is no Admin-Panel to control the plugin. Everything is defined by shortcoder parameters oder settings in JSON-Files.
 
-**Shortcode:** `[mapview]` — Ready to use. Multiple options available, see table below! Use only once per Page or Post!
 
-The generated HTML is stored in transients for improved performance.
 
-The Map Tiles for Leaflet may be stored locally on your server!
+**Shortcodes:** `[mapview]` — Ready to use. Multiple options available, see table below! Use only once per Page or Post! The generated HTML is stored in transients for improved performance.
+
+`[tourmap tourfolder=<folder relative to upload directory with json-file>]` Will show a nice map and table with all markers you defined in the JSON. This shortocdes requires work with JSON-Files and uploading these with FileZilla. If you don't feel comfortable with that this Plugins is not for you.
+
+For both the Map Tiles for Leaflet may be stored locally on your server!
 
 ## Screenshots
 
 There are no screenshots yet. See an example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersichtskarte/)
 
-## Usage
+## Usage of [mapview]
 
-### 1. Preparing Posts
+### 1. Preparing Posts for the Post-Map shown by [mapview]
 #### Add Custom Fields:
 - **Lat:** Latitude (use a decimal point as separator)
 - **Lon:** Longitude
@@ -28,9 +31,10 @@ There are no screenshots yet. See an example of the plugin in action: [Demo](htt
     ```json 
     a:7:{s:7:"village";s:6:"Marktl";s:12:"municipality";s:13:"Marktl (VGem)";s:6:"county";s:20:"Landkreis Altötting";s:5:"state";s:6:"Bayern";s:14:"ISO3166-2-lvl4";s:5:"DE-BY";s:7:"country";s:11:"Deutschland";s:12:"country_code";s:2:"de";}
     ```  
+    By using [mapview] the retrieved **geoadress** will be stored as updated metadate to your post.
 
 #### Check Category and Icon Mapping:
-Categories are now defined in a JSON file. Below is the mapping:
+Categories are now defined in a JSON file. So it is fully customizable by changing the file. The Icon-PNGs are expected in `/Plugin-Folder/images/` Below is the mapping:
 
 | Tag in Post | Category | Icon |
 |------------|----------|---------------|
@@ -45,13 +49,59 @@ Categories are now defined in a JSON file. Below is the mapping:
 | (Default) | Travel | campingcar.png |
 
 It is case sensitive!
-Simple translate or change according to your site, e.g. translate Tag 'Radfahren' to 'Cycling'. Or Add 'Painting' / 'painting' / 'painting.png'
+Simple translate or change according to your site, e.g. translate Tag 'Radfahren' to 'Cycling'. Or Add 'Painting' / 'painting' / 'painting.png'. 
 
 ### 2. Displaying the Map
 Insert the `[mapview]` shortcode on any page. Use only once per Page or Post!
 
-### 3. Set Shortcode Parameters
-The following parameters are available.
+## Usage of [tourmap]
+### 1. Generate JSON-File(s) locally
+If you used MapsMarkerPro before: 
+- Download the geojson File(s) for the Map. Add at least a 'category' according to the 'category' in file `./settings/category_mapping.json`. Alternatively you might change the file `category_mapping.json` to your tourfolder. If available, this 'local' file will be used for the tourmap.
+
+Write your geojson-File from the scratch. The geojson for ONE Point is like so:
+```json
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    16.7,
+                    39.9
+                ]
+            },
+            "properties": {
+                "id": "1",
+                "name": "Campingplatz im Nationalpark Pollino",
+                "text": "Einen Campingplatz im Nationalpark Pollino haben wir nicht gefunden. Das ist schade. Einen Campingplatz im Nationalpark Pollino haben wir nicht gefunden. Das ist schade.",
+                "link": "https://www.berg-reise-foto.de/tourenbericht-wanderung/wandern-im-nationalpark-pollino",
+                "category": "Stellplatz",
+                "image": "https://www.berg-reise-foto.de/smrtzl/uploads/Alben_Website/Wanderung-Gole-del-Raganello/Italien_2018_12-1013-200x150.jpg"
+            }
+        }
+    ]
+}
+
+```
+I recommend to use [geojson.io](https://geojson.io/#new&map=8.78/48.2514/13.403) to generate the structure of the geojson especially define the coordinates with an interactive map. The required fields in the properties section might be added in the table and content added manually. Additionally you might change the file `category_mapping.json` to your tourfolder. If available, this 'local' file will be used for the tourmap.
+
+### 2. Prepare one GPX-File
+Donwload from your Track-Cloud / Provider and reduce to the usefull size and content.
+### 3. Upload Files to your WordPress-Site
+The upload has to be done 'manually' by FileZilla or so. Is you prepare the Files locally you will have a backup automatically. 
+
+I recommend to donwload the file `./settings/category_mapping.json` from the Plugin-Folder if you intend any changes in future. This file will be overwritten with every plugin update.
+
+### 4. Add shortcode to page
+Use it like so `[tourmap tourfolder=<folder relative to upload directory with json-file>]` .
+
+For other parameters see table below.
+
+## Set Shortcode Parameters
+The following parameters are available for both shortcodes (where not all will be used by tourmap).
 | Parameter | Default Value | Description | Example |
 |-----------|---------------|-------------|---------|
 | `numberposts` | 100 | Number of posts to display |
@@ -66,16 +116,19 @@ The following parameters are available.
 | `titlelength` | 80 | Max title length |
 | `usetileserver` | true | Use tile server |
 | `converttiles` | true | Convert tiles to *.webp |
-| `contentfilter` | "Kurzbeschreibung:,Tourenbeschreibung:" | Content filter keywords which are removed from the excerpt |
+| `contentfilter` | "Kurzbeschreibung:, Tourenbeschreibung:" | Content filter keywords which are removed from the excerpt |
 | `tabulatortheme` | tabulator.min.css | Tabulator.js theme from folder ./css. Available are: bootstrap3, bootstrap4, bootstrap5, bulma, materialize, midnight, modern, semanticui, simple, site_dark, site, custom in tabulator_custom.min.css (change this according to your needs) |
 | `tablepagesize` | 20 | Number of rows per table page |
 | `tableheight` | 0 | Height of the table. 0 is ignored. Used to improve Table load time |
 | `mapheight` | "" | Map height |
 | `mapwidth` | "" | Map width |
 | `mapaspectratio` | "" | Map aspect ratio |
+|-|-|-|-|
+| `tourfolder` | tourfolder=tourmap/Italy-2022 | The folder with JSON-Files relative to the WordPress-Uploads-Folder. Used by shortcode [tourmap] only |
 
-### 4. Check Tile Server Settings in .htaccess
-#### Tile Server for Leaflet Map Tiles
+## Check Tile Server Settings in .htaccess
+Used by both shortcodes.
+### Tile Server for Leaflet Map Tiles
 Since version 1.0.0, it is also possible to cache the leaflet tiles locally on your own server. This procedure conforms to the guidelines of the osmfoundation (https://operations.osmfoundation.org/policies/tiles/). There is no bulk download and the maps are stored locally. The Http referrer of the current request is used as the Http referrer. 
 In addition the visitor's IP is NOT forwarded to the map server. This ensures that the use of maps from OpenStreeMap complies with the General Data Protection Regulation EC 2016/679. Therefore, no notice is required in the privacy policy of the website. This option can be set via shortcode parameter. Furthermore, the conversion of the tiles into webp file format can be chosen in order to meet Google Pagespeed requirements.
 Note: The file ./the-plugin-folder/leaflet_map_tiles/.htacces has to be changed for the correct path and the admin panel will show if the Redirection by the .htaccess is successful:
@@ -90,21 +143,22 @@ Drawback: No fileage clean-up implemented. So, once stored, the tiles are used f
 ## Upgrade Notice
 
 Upgrade is recommended. Preparation of Release is still missing.
+**ATTENTION** Your changes in category_mapping.json will be overwritten! Safe this file locally proir to updating.
 
 ## Installation
 
-1. Zip the plugin directory (`*.zip`).
+1. Download the Release. Do not use the zip of the repository. This won't work (due to webpack transpilation).
 2. Install via the standard WP method (Upload zip in Admin Dashboard).
    - If already installed, remove the old version first! No additional directories or database entries will be deleted.
 3. Activate the plugin through the "Plugins" menu in WordPress.
 4. Done! No further settings required.
 
 ## Deinstallation
-- Use the standard way of WordPress.
+- Use the standard method of WordPress.
 
 ## Changelog
 
-### 1.0.0 (9.03.2025)
+### 1.0.0 (14.02.2025)
 - TBD, see github changelog.
 
 ### 0.10.5 (14.05.2022)
@@ -170,4 +224,4 @@ This plugin utilizes the following libraries and resources:
 - [Leaflet MarkerCluster](https://github.com/Leaflet/Leaflet.markercluster)
 - [Map Icons](https://mapicons.mapsmarker.com/)
 - [Tabulator](https://tabulator.info/)
-- [geojson.io]https://geojson.io/#new&map=8.78/48.2514/13.403 for generating geojson File with Points
+- [geojson.io](https://geojson.io/#new&map=8.78/48.2514/13.403) for generating geojson File with Points

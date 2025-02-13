@@ -43,7 +43,6 @@ interface PostMapViewSimpleInterface {
  * main shortcode function to generate the html
  * 
  * TODO: load and show gpx files
- * TODO: update readme and versions
  * TODO: Icons auswählen
  * 
  * @return string
@@ -390,9 +389,19 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $jsonFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
             return str_replace($tourDir, $tourUrl, $file);
         }, $jsonFiles);
+
+        /*
         $gpxFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
             return str_replace($tourDir, $tourUrl, $file);
         }, $gpxFiles);
+        */
+        $tracks = [];
+        foreach( $gpxFiles as $index => $file){
+            $url = str_replace($tourDir, $tourUrl, $file);
+            $tracks['track_' . $index]['url'] = $url;
+            $tracks['track_' . $index]['info'] = '';
+        }
+
         if ( $pathSettingsFile !== null ) { $pathSettingsFile = str_replace($tourDir, $tourUrl, $pathSettingsFile); }
         else { $pathSettingsFile = ''; }
 
@@ -417,8 +426,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->pageVarsForJs[$this->m]['tablePageSize'] = $this->tablePageSize;
         $this->pageVarsForJs[$this->m]['tableHeight'] = strval($this->tableHeight) . 'px';
         $this->pageVarsForJs[$this->m]['geoJsonFile'] = $jsonFiles;
-        $this->pageVarsForJs[$this->m]['gpxFile'] = $gpxFiles;
+        //$this->pageVarsForJs[$this->m]['gpxFile'] = $gpxFiles;
         $this->pageVarsForJs[$this->m]['settingsFile'] = $pathSettingsFile;
+        $this->pageVarsForJs[$this->m]['ngpxfiles'] = count($gpxFiles);
+        $this->pageVarsForJs[$this->m]['tracks'] = $tracks;
+       
 
         // generate html for map with post data 
         $html = '';
@@ -475,9 +487,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // Load default Styles
         if ( $theme == '' ) {
-            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '0.5.0', 'all');
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '1.0.0', 'all');
         } else {
-            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '0.5.0', 'all');
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '1.0.0', 'all');
         }
     }
 

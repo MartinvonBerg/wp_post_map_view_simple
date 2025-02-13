@@ -189,6 +189,29 @@ function mainLogic (window, document, undefined) {
 
       return group;
     }
+
+    function setGlobalsForLeafletGpxJsClass(number) {
+      /* @global pageVarsForJs[number].sw_options.trackcolour
+      * @global this.pageVariables.ngpxfiles
+      * @global this.pageVariables.tracks, 
+      *            this.pageVariables.tracks[track_x].url
+      * @global {object} pageVarsForJs[number]
+      *            pageVariables.sw_options.gpx_distsmooth
+      *            pageVariables.sw_options.gpx_elesmooth
+      *            this.pageVariables.imagepath
+      *            this.pageVariables.tracks['track_<number>'].info
+      *            this.pageVariables.sw_options.trackwidth
+      * @global {object} pageVarsForJs[number].tracks_polyline_options */
+
+      let glob = window.pageVarsForJs[number];
+      //glob.imagepath = ''; is already defined.
+      
+      glob.sw_options = [];
+      glob.sw_options.trackcolour = '#ff0000';
+      glob.sw_options.gpx_distsmooth = 20;
+      glob.sw_options.gpx_elesmooth = 4;
+      glob.sw_options.trackwidth = 3;
+    }
     
     // main logic
     if (window.g_wp_postmap_path.number === "1" && php_touren.length > 0) {
@@ -238,10 +261,11 @@ function mainLogic (window, document, undefined) {
       if (hasMap) {
         Promise.all([
           //import('../settings/category_mapping.json'),
-          import('./leafletMapClass.js')
-        ]).then( async ([LeafletMap]) => {
-
-          allMaps[m] = new LeafletMap.LeafletMap(m, 'map10_img' );
+          import('./leafletGpxJs/leafletGpxJsClass.js')
+        ]).then( async ([LeafletGpxJs]) => {
+          // set global pageVariables for LeafletGpxJs
+          setGlobalsForLeafletGpxJsClass(m);
+          allMaps[m] = new LeafletGpxJs.LeafletGpxJs(m, 'map10_img' );
                           
           // Define Icons from imported json file
           let settingsUrl = '';
@@ -399,7 +423,7 @@ function mainLogic (window, document, undefined) {
       
       // --- Generate the Table with Tabulator and Filter markers on the Map ---
       if (hasTable) {
-        import('./tabulatorClass.js').then((MyTabulatorClass) => {
+        import('./tabulator/tabulatorClass.js').then((MyTabulatorClass) => {
           let tabulator = new MyTabulatorClass.MyTabulatorClass({});
           table = tabulator.createTable("#post_table", pageVars );
 
