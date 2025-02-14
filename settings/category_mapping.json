@@ -2,23 +2,23 @@
     "default": {
         "category": "Reisebericht",
         "icon": "travel",
-        "icon-png": "campingcar.png"
+        "icon-png": "travel.png"
     },
     "mapping": [
         {
             "category": "Camping",
             "icon": "camping",
-            "icon-png": "camping-2.png"
+            "icon-png": "campingground.png"
         },
         {
             "category": "Stellplatz",
             "icon": "campersite",
-            "icon-png": "flowers.png"
+            "icon-png": "campingcar.png"
         },
         {
             "category": "Besichtigung",
             "icon": "sightseeing",
-            "icon-png": "coffee.png"
+            "icon-png": "sightseeing.png"
         },
         {
             "category": "Trekking",
@@ -63,8 +63,7 @@
         {
             "category": "Reisebericht",
             "icon": "travel",
-            "icon-png": "campingcar.png"
+            "icon-png": "travel.png"
         }
     ]
-    
 }

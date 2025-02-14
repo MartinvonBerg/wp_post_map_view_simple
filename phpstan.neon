@@ -1,7 +1,7 @@
 parameters:
 	level: 5
 	scanFiles:
-		- wp_post_map_view_simple_enq.php
-		- enqueue_map.php
-		- enqueue_tabulator.php
+		- wp_post_map_view_simple.php
+		
 	scanDirectories:
+		- inc

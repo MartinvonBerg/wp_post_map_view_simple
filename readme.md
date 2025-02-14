@@ -14,6 +14,7 @@ There is no Admin-Panel to control the plugin. Everything is defined by shortcod
 `[tourmap tourfolder=<folder relative to upload directory with json-file>]` Will show a nice map and table with all markers you defined in the JSON. This shortocdes requires work with JSON-Files and uploading these with FileZilla. If you don't feel comfortable with that this Plugins is not for you.
 
 For both the Map Tiles for Leaflet may be stored locally on your server!
+**NOTE:** Both shortcodes might be used once only per page or post!
 
 ## Screenshots
 
@@ -90,15 +91,14 @@ I recommend to use [geojson.io](https://geojson.io/#new&map=8.78/48.2514/13.403)
 
 ### 2. Prepare one GPX-File
 Donwload from your Track-Cloud / Provider and reduce to the usefull size and content.
+
 ### 3. Upload Files to your WordPress-Site
 The upload has to be done 'manually' by FileZilla or so. Is you prepare the Files locally you will have a backup automatically. 
 
 I recommend to donwload the file `./settings/category_mapping.json` from the Plugin-Folder if you intend any changes in future. This file will be overwritten with every plugin update.
 
 ### 4. Add shortcode to page
-Use it like so `[tourmap tourfolder=<folder relative to upload directory with json-file>]` .
-
-For other parameters see table below.
+Use it like so `[tourmap tourfolder=<folder relative to upload directory with json-file>]`. Use only once per Page or Post! For other parameters see table below.
 
 ## Set Shortcode Parameters
 The following parameters are available for both shortcodes (where not all will be used by tourmap).

@@ -42,8 +42,7 @@ interface PostMapViewSimpleInterface {
 /**
  * main shortcode function to generate the html
  * 
- * TODO: load and show gpx files
- * TODO: Icons auswählen
+ * TODO: update PHPunit-Tests for PostMapViewSimple....php
  * 
  * @return string
  * 

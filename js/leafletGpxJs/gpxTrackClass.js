@@ -6,7 +6,7 @@
 // load gpx tracks and provide data, name and statistics
 
 //import './gpx.js'
-import { leafletGpxWrapper } from './leaflet-gpx/leafletGpxWrapper.js';
+import { leafletGpxWrapper } from './leafletGpxWrapper.js';
 import { calculateEquallyDistributedColors } from '../libs/colorLib.js'
 import { calcDist, calcDist3D } from '../libs/gpxCalcLib.js';
 

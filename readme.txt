@@ -22,6 +22,7 @@ There is no Admin-Panel to control the plugin. Everything is defined by shortcod
 [tourmap tourfolder=<folder relative to upload directory with json-file>] Will show a nice map and table with all markers you defined in the JSON. This shortocdes requires work with JSON-Files and uploading these with FileZilla. If you don't feel comfortable with that this Plugins is not for you.
 
 The Map Tiles for Leaflet may be stored locally on your server!
+NOTE: Both shortcodes might be used once only per page or post!
 
 == Screenshots ==
 
@@ -29,4 +30,4 @@ There are no screenshots yet, see : https://www.berg-reise-foto.de/uebersichtska
 
 
 == Usage ==
-See, the github repository for detailed description. (TODO: add link)
+See, the github repository for detailed description: https://github.com/MartinvonBerg/wp_post_map_view_simple

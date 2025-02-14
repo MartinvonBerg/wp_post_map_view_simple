@@ -1,7 +1,7 @@
 // webpack.config.js is the configuration file for webpack. It is a JavaScript file that exports an object with configuration options.
 
 const path = require('path');
-let _mode = 'development';
+let _mode = 'production';
 
 // create bundle for fotorama
 module.exports = [

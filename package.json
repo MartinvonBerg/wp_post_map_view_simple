@@ -23,6 +23,7 @@
 	"dependencies": {
 		"leaflet": "^1.9.4",
 		"leaflet-gesture-handling": "^1.2.2",
+		"leaflet-gpx": "^2.1.2",
 		"leaflet.fullscreen": "^3.0.2",
 		"leaflet.markercluster": "^1.5.3",
 		"leaflet.markercluster.layersupport": "^2.0.1",

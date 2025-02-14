@@ -35,8 +35,10 @@ class LeafletGpxJs extends LeafletMap {
         if (preload !== null) {
           this.preload = preload;
         }
-
-        this.createTrackOnMap();
+        
+        if (this.pageVariables.ngpxfiles > 0) {
+          this.createTrackOnMap();
+        }
     };
 
     /**
