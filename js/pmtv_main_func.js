@@ -171,7 +171,7 @@ function mainLogic (window, document, undefined) {
       
       allIcons.forEach( function(icon, index) {
         if (markersInGroups[index] != undefined) {
-          group[index] = L.layerGroup( markersInGroups[index]); // arrayOfMarkers fehlt hier
+          group[index] = L.layerGroup( markersInGroups[index]);
         }	else {
           group[index] = L.layerGroup();
         }
@@ -207,10 +207,11 @@ function mainLogic (window, document, undefined) {
       //glob.imagepath = ''; is already defined.
       
       glob.sw_options = [];
-      glob.sw_options.trackcolour = '#ff0000';
-      glob.sw_options.gpx_distsmooth = 20;
-      glob.sw_options.gpx_elesmooth = 4;
-      glob.sw_options.trackwidth = 3;
+      glob.sw_options.trackcolour = glob.trackcolour;
+      glob.sw_options.trackwidth = glob.trackwidth;
+
+      glob.sw_options.gpx_distsmooth = 20; // unused
+      glob.sw_options.gpx_elesmooth = 4; // unused
     }
     
     // main logic
@@ -290,6 +291,45 @@ function mainLogic (window, document, undefined) {
           
           // ---add the marker cluster group to map --------------
           LayerSupportGroup = L.markerClusterGroup.layerSupport();
+          // -------------
+          if (pageVars.myMarkerIcons) {
+            
+            LayerSupportGroup = L.markerClusterGroup.layerSupport({
+              
+              iconCreateFunction: function (cluster) {
+                  // possible options: size, colors, color-limits, usage
+                  let count = cluster.getChildCount();
+                  //let size = count < 100 ? 40 : count < 500 ? 50 : 60; // Dynamische Größe
+                  let size = 35;
+          
+                  // Farbverlauf bestimmen
+                  let color = count < 5 ? '#61ea0b' :  // Grün
+                              count < 10 ? '#FFA600' :  // Gelb
+                              count < 50 ? '#d915ad' : 
+                              '#f70413';               // Rot
+          
+                  return new L.DivIcon({
+                      html: `<div style="
+                          background-color: ${color};
+                          color: black;
+                          width: ${size}px;
+                          height: ${size}px;
+                          border-radius: 50%;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 14px;
+                          font-weight: bold;
+                          box-shadow: 0px 0px 9px 1px #000000ed;
+                      ">${count}</div>`,
+                      className: 'custom-cluster-icon',
+                      iconSize: new L.Point(size, size)
+                  });
+              }
+            });
+
+          }
+          // -------------
           group = createMarkerClusterGroup( allMaps[m], markersInGroups, LayerSupportGroup, allIcons, postmap_url, nposts)
           
           // get the bounds and Fit map to it

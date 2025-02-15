@@ -124,7 +124,11 @@ The following parameters are available for both shortcodes (where not all will b
 | `mapwidth` | "" | Map width |
 | `mapaspectratio` | "" | Map aspect ratio |
 |-|-|-|-|
-| `tourfolder` | tourfolder=tourmap/Italy-2022 | The folder with JSON-Files relative to the WordPress-Uploads-Folder. Used by shortcode [tourmap] only |
+| `tourfolder` | tourfolder=tourmap/Italy-2022 | The folder with JSON-Files relative to the WordPress-Uploads-Folder. Used by shortcode [tourmap] only | |
+| `trackcolour`| #ff0000 | The colour of the gpx-track on the map, if any| red |
+| `trackwidth` | 3 | The width in px of the gpx-track on the map, if any| 3px |
+| `mapselector` | OpenStreeMap | The preselecte Map | - |
+| `mymarkericons` | false | Use another styling for the marker icons if true | - |
 
 ## Check Tile Server Settings in .htaccess
 Used by both shortcodes.

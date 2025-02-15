@@ -28,14 +28,14 @@ robocopy .\build $path *.* /s /NFL /NDL /NJH /NJS
 ## ./css copy all images
 $path = ".\release"
 $path = "$($path)\css"
-robocopy .\css $path *.png /s /NFL /NDL /NJH /NJS
+robocopy .\css $path *.css /s /NFL /NDL /NJH /NJS
 
 ## ./css copy only all minified css files
-$path = ".\release"
-$path = "$($path)\js"
-robocopy .\js $path *.min.css /xf Control* /xf leaflet* /NFL /NDL /NJH /NJS
+#$path = ".\release"
+#$path = "$($path)\js"
+#robocopy .\js $path *.js /xf Control* /xf leaflet* /NFL /NDL /NJH /NJS
 
-# ./images
+# ./images -all icons
 $path = ".\release"
 $path = "$($path)\images"
 robocopy .\images $path *.* /s /NFL /NDL /NJH /NJS
@@ -55,10 +55,10 @@ $path = ".\release"
 $path = "$($path)\leaflet_map_tiles"
 robocopy .\leaflet_map_tiles $path *.* /NFL /NDL /NJH /NJS
 
-# ./leaflet_map_tiles - without the subdirectories
+# ./settings - all
 $path = ".\release"
 $path = "$($path)\settings"
-robocopy .\leaflet_map_tiles $path *.* /NFL /NDL /NJH /NJS
+robocopy .\settings $path *.* /NFL /NDL /NJH /NJS
 
 # Finally write a warning that CSS-Files should have been minified before
 Write-Warning "War webpack auf production gesetzt?"

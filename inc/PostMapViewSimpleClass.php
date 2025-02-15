@@ -57,7 +57,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	private $showtable = true; // is shortcode parameter
 	private $category = 'all'; // is shortcode parameter
 	private $headerhtml = ''; // is shortcode parameter
-    private $gpxfolder = 'gpx';
+    private $gpxfolder = 'gpx'; // to retrieve the gpx files added to posts with fotorama
     private $lenexcerpt = 150;
     private $useWPExcerptExtraction = false;
     private $titlelength = 80;
@@ -70,7 +70,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $mapHeight = ''; // shortcode parameter as string px or %
     private $mapWidth = ''; // shortcode parameter as string px or %
     private $mapAspectRatio = ''; // shortcode parameter as number (int or float)
-    private $tourfolder = '';
+    private $tourfolder  = '';
+    private $trackwidth	 = '3';
+    private $trackcolour = '#ff0000';
+    private $mapselector = 'OpenStreeMap';
+    private $myMarkerIcons = false;
     // ---------- end of shortcode parameters ----------
 
     private $plugin_url;
@@ -109,7 +113,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'mapheight' => '',
             'mapwidth' => '',
             'mapaspectratio' => '',
-            'tourfolder'    => ''
+            'tourfolder'    => '',
+            'trackwidth'		=> '3',
+		    'trackcolour'		=> '#ff0000',
+            'mapselector'       => 'OpenStreeMap',
+            'mymarkericons'     => 'false'
 		), $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
@@ -151,6 +159,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // extensions for tourmap
         $this->tourfolder = $attr['tourfolder'];
+        $this->trackwidth = $attr['trackwidth'];
+        $this->trackcolour = $attr['trackcolour'];
+        $this->mapselector = $attr['mapselector'];
+        $this->myMarkerIcons = $attr['mymarkericons'] === 'true';
     }
     
     private function parseParameterToArray(string $input): string|array {
@@ -429,6 +441,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->pageVarsForJs[$this->m]['settingsFile'] = $pathSettingsFile;
         $this->pageVarsForJs[$this->m]['ngpxfiles'] = count($gpxFiles);
         $this->pageVarsForJs[$this->m]['tracks'] = $tracks;
+        $this->pageVarsForJs[$this->m]['trackcolour'] = $this->trackcolour;
+        $this->pageVarsForJs[$this->m]['trackwidth'] = $this->trackwidth;
+        $this->pageVarsForJs[$this->m]['mapselector'] = $this->mapselector;
+        $this->pageVarsForJs[$this->m]['myMarkerIcons'] = $this->myMarkerIcons;
        
 
         // generate html for map with post data 
