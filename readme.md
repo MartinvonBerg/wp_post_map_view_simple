@@ -103,7 +103,7 @@ Use it like so `[tourmap tourfolder=<folder relative to upload directory with js
 ### 5. Screenshot / Demo
 ![tourmap_example](./assets/tourmap-example.png)
 
-Live-Demo on my Site: 
+Live-Demo on my Site: https://www.berg-reise-foto.de/reisebericht-italien/uebersicht-wohnmobilreise-sueditalien-winter-2022/
 
 ## Set Shortcode Parameters
 The following parameters are available for both shortcodes (where not all will be used by tourmap).
