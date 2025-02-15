@@ -100,6 +100,11 @@ I recommend to donwload the file `./settings/category_mapping.json` from the Plu
 ### 4. Add shortcode to page
 Use it like so `[tourmap tourfolder=<folder relative to upload directory with json-file>]`. Use only once per Page or Post! For other parameters see table below.
 
+### 5. Screenshot / Demo
+![tourmap_example](./assets/tourmap-example.png)
+
+Live-Demo on my Site: 
+
 ## Set Shortcode Parameters
 The following parameters are available for both shortcodes (where not all will be used by tourmap).
 | Parameter | Default Value | Description | Example |
