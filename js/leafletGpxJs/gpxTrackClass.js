@@ -163,28 +163,7 @@ class gpxTrackClass {
         let coords = [];
         let elevs = [];
         let layers = [];
-        /*
-        const trackLayer = new L.LayerGroup();
-        const routeLayer = new L.LayerGroup();
-        const wptLayer = new L.LayerGroup();
-
-        function onEachFeature(feature, layer) {
-            switch (feature.geometry.type) {
-                // TODO: how to differ tracks and routes?
-                case 'Point':
-                    wptLayer.addLayer(layer);
-                    break;
-                case 'LineString':
-                    trackLayer.addLayer(layer);
-                    break;
-                default: //case 'Point':
-                    routeLayer.addLayer(layer);
-                    break;
-            }
-        }
-        */
-        // showGeoJson(); on the map
-        //L.Icon.Default.prototype.options.imagePath = this.pageVariables.imagepath;
+        
         this.gpxTracks = new L.geoJSON(this.trackurl, { // loads from url or parses xml directly
            // options 
            //onEachFeature: onEachFeature,
