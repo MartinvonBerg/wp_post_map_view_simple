@@ -266,7 +266,7 @@ function mainLogic (window, document, undefined) {
         ]).then( async ([LeafletGpxJs]) => {
           // set global pageVariables for LeafletGpxJs
           setGlobalsForLeafletGpxJsClass(m);
-          allMaps[m] = new LeafletGpxJs.LeafletGpxJs(m, 'map10_img' );
+          allMaps[m] = new LeafletGpxJs.LeafletGpxJs(m, 'map0' );
                           
           // Define Icons from imported json file
           let settingsUrl = '';

@@ -125,9 +125,9 @@ The following parameters are available for both shortcodes (where not all will b
 | `tabulatortheme` | tabulator.min.css | Tabulator.js theme from folder ./css. Available are: bootstrap3, bootstrap4, bootstrap5, bulma, materialize, midnight, modern, semanticui, simple, site_dark, site, custom in tabulator_custom.min.css (change this according to your needs) |
 | `tablepagesize` | 20 | Number of rows per table page |
 | `tableheight` | 0 | Height of the table. 0 is ignored. Used to improve Table load time |
-| `mapheight` | "" | Map height |
-| `mapwidth` | "" | Map width |
-| `mapaspectratio` | "" | Map aspect ratio |
+| `mapheight` | "" | Map height in valid CSS units | 800px |
+| `mapwidth` | "" | Map width in valid CSS units | 600px |
+| `mapaspectratio` | "" | Map aspect ratio as valid CSS | 3/2 |
 |-|-|-|-|
 | `tourfolder` | tourfolder=tourmap/Italy-2022 | The folder with JSON-Files relative to the WordPress-Uploads-Folder. Used by shortcode [tourmap] only | |
 | `trackcolour`| #ff0000 | The colour of the gpx-track on the map, if any| red |
@@ -166,6 +166,9 @@ Upgrade is recommended. Preparation of Release is still missing.
 - Use the standard method of WordPress.
 
 ## Changelog
+
+### 1.0.1 (16.02.2025)
+- CSS-File Clean-up: small main css is loaded in PHP. Reason for red clusters removed. grid prepared but not used.
 
 ### 1.0.0 (14.02.2025)
 - TBD, see github changelog.

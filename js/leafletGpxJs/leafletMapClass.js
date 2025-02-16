@@ -14,7 +14,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 import 'leaflet.fullscreen/Control.FullScreen.css';
 // local css
-import '../../css/wp_post_map_view_simple.css';
+//import '../../css/wp_post_map_view_simple.css'; // is no loaded on PHP
 import '../../css/leafletMapClass.css';
 
 import "leaflet"; 
