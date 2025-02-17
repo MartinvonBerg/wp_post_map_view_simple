@@ -42,9 +42,13 @@ class MyTabulatorClass {
 
         if (options.type === 'tourmap') {
             tabulatorOptions = {
-                layout: "fitDataStretch",
+                layout: "fitDataTable",
+                //autoColumns: true,
                 locale: true,
                 height: tableHeight,
+                columnDefaults: {
+                    widthShrink: 1, // Passt Spalten flexibel an, aber nicht größer als nötig
+                },
                 langs:{
                     "de-de":{
                         "pagination":{

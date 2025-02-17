@@ -260,7 +260,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
             // generate html for table with post data
             if ( $this->showtable ){
+                $html .= '<div id="post_table_wrapper">';
                 $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray );
+                $html .= '</div>';
             }
 
             // end generation of html output: write the html-output in $string now as set_transient
@@ -456,7 +458,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // generate html for table with post data
         if ( $this->showtable ){
             //$html .= '<table id="post_table"></table>';
+            $html .= '<div id="post_table_wrapper">';
             $html .= $this->generate_table_html($this->headerhtml, $this->postArray, 'tourmap');
+            $html .= '</div>';
         }
         //$html .= '</div>';
 

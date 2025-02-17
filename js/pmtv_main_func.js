@@ -27,7 +27,7 @@ function mainLogic (window, document, undefined) {
 
       // build CSS rules
       const heightString = isValidCssSize(pageVars.mapHeight) ? `height: ${pageVars.mapHeight};` : '';
-      const widthString = isValidCssSize(pageVars.mapWidth) > 0 ? `width: ${pageVars.mapWidth};` : '';
+      const widthString = isValidCssSize(pageVars.mapWidth) > 0 ? `max-width: ${pageVars.mapWidth};` : '';
       const aspectString = isValidAspectRatio(pageVars.mapAspectRatio) ? `aspect-ratio: ${pageVars.mapAspectRatio};` : '';
 
       // set width and height to the current window size

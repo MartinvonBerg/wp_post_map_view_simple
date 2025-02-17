@@ -9,6 +9,13 @@
     padding: 5px 5px 5px 5px;
     border-bottom: 1px solid lightslategray;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+[id="post_table_wrapper"] {
+    display: flex;
+    justify-content: center;
 }
 
 [id="map0"] {
