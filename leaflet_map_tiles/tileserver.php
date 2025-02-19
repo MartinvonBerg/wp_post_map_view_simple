@@ -2,7 +2,7 @@
 namespace mvbplugins\fotoramamulti;
 
 /**
- * Summary Tileserver to provide leaflet map tiles from a locals server.
+ * Summary: Tileserver to provide leaflet map tiles from a locals server.
  * 
  * Assuming that map tiles and other files are in <plugin>/leaflet_map_tiles:
  * Provide a .htaccess file that points to above folder. This path has to be complete after your wordpress installation path.
@@ -19,7 +19,7 @@ namespace mvbplugins\fotoramamulti;
  */
 
 // TODO: cache fileage solution. What to do if files are too old?
-// Note: Do notconvert to avif because performance will be worse than webp.
+// Note: Do not convert to avif because performance will be worse than webp.
 
 // get the directory ot this file which is the cachedir and define other variables
 $cacheDir = __DIR__;

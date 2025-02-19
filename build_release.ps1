@@ -30,11 +30,6 @@ $path = ".\release"
 $path = "$($path)\css"
 robocopy .\css $path *.css /s /NFL /NDL /NJH /NJS
 
-## ./css copy only all minified css files
-#$path = ".\release"
-#$path = "$($path)\js"
-#robocopy .\js $path *.js /xf Control* /xf leaflet* /NFL /NDL /NJH /NJS
-
 # ./images -all icons
 $path = ".\release"
 $path = "$($path)\images"
