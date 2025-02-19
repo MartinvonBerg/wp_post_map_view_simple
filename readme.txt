@@ -35,3 +35,6 @@ See, the github repository for detailed description: https://github.com/Martinvo
 == Notes ==
 Use git clean -xdn to perform a dry run and see what will be removed.
 Then use git clean -xdf to execute it.
+
+https://www.heise.de/ratgeber/Automatische-Foto-Verschlagwortung-mit-Grafikkartenunterstuetzung-beschleunigen-10276286.html?seite=all
+https://www.heise.de/hintergrund/Fotos-in-einer-Sammlung-finden-Multimodale-KI-in-Python-einbinden-und-befragen-10276083.html?seite=all
