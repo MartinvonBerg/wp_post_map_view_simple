@@ -29,22 +29,22 @@ class GetIconCatTest extends TestCase
     {
         $file = WP_PLUGIN_DIR . '/PostMapTableView/settings/category_mapping.json';
         $expected = [
-            'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'campingcar.png'],
+            'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'travel.png'],
             'mapping' => array(
                 0 => array(
                     "category" => "Camping",
                     "icon" => "camping",
-                    "icon-png" => "camping-2.png"
+                    "icon-png" => "campingground.png"
                 ),
                 1 => array(
                     "category" => "Stellplatz",
                     "icon" => "campersite",
-                    "icon-png" => "flowers.png"
+                    "icon-png" => "campingcar.png"
                 ),
                 2 => array(
                     "category" => "Besichtigung",
                     "icon" => "sightseeing",
-                    "icon-png" => "coffee.png"
+                    "icon-png" => "sightseeing.png"
                 ),
                 3 => array(
                     "category" => "Trekking",
@@ -67,7 +67,7 @@ class GetIconCatTest extends TestCase
                     "icon-png" => "MTB.png"
                 ),
                 7 => array(
-                    "category" => "Wandern",
+                    "category" => "Wanderung",
                     "icon" => "hiking",
                     "icon-png" => "hiking2.png"
                 ),
@@ -89,7 +89,7 @@ class GetIconCatTest extends TestCase
                 11 => array(
                     "category" => "Reisebericht",
                     "icon" => "travel",
-                    "icon-png" => "campingcar.png"
+                    "icon-png" => "travel.png"
                 )
             )
         ];
