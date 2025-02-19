@@ -43,6 +43,7 @@ interface PostMapViewSimpleInterface {
  * main shortcode function to generate the html
  * 
  * TODO: update PHPunit-Tests for PostMapViewSimple....php
+ * TODO: the category mapping is inconsistent. Currently the tags are decisive. and not the WP categories )
  * 
  * @return string
  * 
@@ -260,9 +261,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
             // generate html for table with post data
             if ( $this->showtable ){
-                $html .= '<div id="post_table_wrapper">';
+                //$html .= '<div id="post_table_wrapper">';
                 $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray );
-                $html .= '</div>';
+                //$html .= '</div>';
             }
 
             // end generation of html output: write the html-output in $string now as set_transient
@@ -458,9 +459,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // generate html for table with post data
         if ( $this->showtable ){
             //$html .= '<table id="post_table"></table>';
-            $html .= '<div id="post_table_wrapper">';
+            $html .= '<div id="post_table_wrapper"><div>'; // hier 2x div, da sonst mit Headerhtml eine flex-Tabelle angezeigt wird.
             $html .= $this->generate_table_html($this->headerhtml, $this->postArray, 'tourmap');
-            $html .= '</div>';
+            $html .= '</div></div>';
         }
         //$html .= '</div>';
 

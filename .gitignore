@@ -2,7 +2,6 @@ vendor*
 *cache*
 archive*
 node_modules*
-package-lock.json
 build/*.js
 build/pmtv_main.js
 composer.lock
