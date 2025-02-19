@@ -31,3 +31,7 @@ There are no screenshots yet, see : https://www.berg-reise-foto.de/uebersichtska
 
 == Usage ==
 See, the github repository for detailed description: https://github.com/MartinvonBerg/wp_post_map_view_simple
+
+== Notes ==
+Use git clean -xdn to perform a dry run and see what will be removed.
+Then use git clean -xdf to execute it.
