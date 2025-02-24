@@ -16,7 +16,12 @@
             "name": "Listen for XDebug",
             "type": "php",
             "request": "launch",
-            "port": 9003
+            "port": 9003,
+            "ignore": [
+                	//"**/wp-includes/**",
+                    "**/wordpress-seo/**",
+                    "**/codepress-admin-columns/**",
+            ]
         },
         {
             "name": "Launch currently open script",

@@ -3,7 +3,6 @@
 namespace mvbplugins\postmapviewsimple;
 
 use DOMDocument;
-use DOMElement;
 
 /**
  * Main function or Class of Post-Map-View-Simple
@@ -32,7 +31,7 @@ require_once __DIR__ . '/geoaddress.php';
 use function mvbplugins\helpers\get_geoaddress as get_geoaddress;
 
 require_once __DIR__ . '/get_icon_cat.php';
-use function mvbplugins\helpers\wp_postmap_get_icon_cat as wp_postmap_get_icon_cat;
+use function mvbplugins\helpers\find_best_category_match as find_best_category_match;
 
 interface PostMapViewSimpleInterface {
 	public function show_post_map(): string;
@@ -43,7 +42,8 @@ interface PostMapViewSimpleInterface {
  * main shortcode function to generate the html
  * 
  * TODO: update PHPunit-Tests for PostMapViewSimple....php
- * TODO: the category mapping is inconsistent. Currently the tags are decisive. and not the WP categories )
+ * TODO: i18n solution ??? use the solution from fotoramamulti as settings + translation. Mind to use for tabulator options in js too!
+ *        But: the local settings will be overwritten. So the backup of the settings like in fs-lightbox will be necessary!
  * 
  * @return string
  * 
@@ -76,6 +76,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $trackcolour = '#ff0000';
     private $mapselector = 'OpenStreeMap';
     private $myMarkerIcons = false;
+
+    private $categoryFilter = [];
     // ---------- end of shortcode parameters ----------
 
     private $plugin_url;
@@ -118,7 +120,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'trackwidth'		=> '3',
 		    'trackcolour'		=> '#ff0000',
             'mapselector'       => 'OpenStreeMap',
-            'mymarkericons'     => 'false'
+            'mymarkericons'     => 'false',
+            'categoryfilter'    => 'Reisebericht,Tourenbericht',
 		), $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
@@ -164,33 +167,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->trackcolour = $attr['trackcolour'];
         $this->mapselector = $attr['mapselector'];
         $this->myMarkerIcons = $attr['mymarkericons'] === 'true';
-    }
-    
-    private function parseParameterToArray(string $input): string|array {
-        // Entferne unnötige Anführungszeichen
-        $input = trim($input, '"');
-        
-        // Ersetze mögliche Trennzeichen durch Komma
-        $input = str_replace([';', ' '], ',', $input);
-        
-        // Zerlege den String in ein Array
-        $items = array_map('trim', explode(',', $input));
-        
-        // Entferne leere Einträge
-        $filteredItems = array_filter($items, fn($item) => $item !== '');
-        
-        // Wenn nur ein Element übrig bleibt, gib es als String zurück
-        if (count($filteredItems) === 1) {
-            return reset($filteredItems);
-        }
-        
-        // Ansonsten gib das Array zurück
-        return $filteredItems;
+        $this->categoryFilter = $this->parseParameterToArray($attr['categoryfilter']);
     }
 	
-	public function show_post_map() :string {
+	public function show_post_map(): string {
 
-        $this->tableMapMoveSelector = 'Stadt';
+        $this->tableMapMoveSelector = 'Stadt'; // I18n
         // check the transient set time and delete transient if post was published during that time
         $wpid = get_the_ID();
         $wpid = $wpid ? strval($wpid) : '';
@@ -294,8 +276,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'type' => 'standard',
             'tableMapMoveSelector' => $this->tableMapMoveSelector ));
         wp_localize_script('wp_pmtv_main_js', 'pageVarsForJs', $this->pageVarsForJs);
-
-		// ----------------
 		
 		return $html;
 	}
@@ -304,7 +284,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( $this->tourfolder === '') {
             return '';
         }
-        $this->tableMapMoveSelector = 'Google';
+        $this->tableMapMoveSelector = 'Google'; // I18n
         $tourDir = $this->up_dir . '/' . $this->tourfolder;
         $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
         $pathSettingsFile = null;
@@ -354,41 +334,42 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     $test = $feature['properties']['popup'];
                     $hasPopupInHTML = $test !== strip_tags($test);
                 }
+                // Die 'category' wird in PHP für den Klarnamen der Kategorie in der Tabelle benutzt. 
+                //Im JS jedoch zur Auswahl des Icons UND der Klarnamens im ControlLayer. Das ist nicht konsistent und nicht nachvollziehbar.
+                //$catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile);
+                //$iconpng = wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile);
+                [$catname, $icon, $iconpng] = find_best_category_match($feature['properties']['category'], $this->categoryFilter ); 
+
                 if ($hasPopupInHTML) { 
                     // extract from maps marker pro geojson
                     $parsed = $this->extractHTMLFromGeoJson($feature['properties']['popup'] );
-                    $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile) ?? 'Keiner';
                     
                     $this->postArray[] = array(
-                        'img' => $feature['properties']['image'] ?? $parsed['image_link'], //
+                        'id'        => $idCounter, 
+                        'img'       => $feature['properties']['image'] ?? $parsed['image_link'] ?? '', //
                         'title' 	=> $parsed['title'] ?? $feature['properties']['name'] ?? $feature['properties']['title'] ?? '', //
-                        'icon'  	=> wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile),
+                        'category'  => $catname,
+                        //'iconpng'  	=> $iconpng,
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
                         'lat' => $feature['geometry']['coordinates'][1],
                         'lon' => $feature['geometry']['coordinates'][0],
-                        'link' 	=> $parsed['link'] ?? $feature['properties']['link'], //
-                        'excerpt' 	=> $parsed['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['text'] ?? $feature['properties']['description'] ?? '', //
-                        'id' => $idCounter, //$feature['properties']['id'],
-                        //'category' => $feature['properties']['category'] ?? wp_postmap_get_icon_cat('none', 'category', $pathSettingsFile),
-                        'category'   => $catname,
+                        'link' 	    => $parsed['link'] ?? $feature['properties']['link'] ?? '', //
+                        'excerpt' 	=> $parsed['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['text'] ?? $feature['properties']['description'] ?? '', // 
                     );
                 } else {
                     // extract data from other sources
-                    $catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile);
                     
                     $this->postArray[] = array(
+                        'id'        => $idCounter, //
                         'img'       => $feature['properties']['image'] ?? '', //
                         'title' 	=> $feature['properties']['name'] ?? $feature['properties']['Name'] ?? $feature['properties']['title'] ?? '', //
-                        'icon'  	=> wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile),
+                        'category'  => $catname,
+                        //'iconpng'  	=> $iconpng,
                         'coord'   	=> [ $feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0] ],
                         'lat'       => $feature['geometry']['coordinates'][1], //
                         'lon'       => $feature['geometry']['coordinates'][0], //
                         'link' 	    => $feature['properties']['link'] ?? '', //
                         'excerpt' 	=> $feature['properties']['text'] ?? $feature['properties']['popop'] ?? $feature['properties']['description'] ?? '',
-                        'id'        => $idCounter, //
-                        //'category'  =>  $feature['properties']['category'],
-                        'category'   => $catname, // Die 'category' wird in PHP für den Klarnamen der Kategorie in der Tabelle benutzt. 
-                        //Im JS jedoch zur Auswahl des Icons UND der Klarnamens. Das ist nicht konsistent und nicht nachvollziehbar.
                     );
                 }
                 
@@ -482,6 +463,28 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $html;
     }
     // ---------------- pivate functions ----------------
+    private function parseParameterToArray(string $input): string|array {
+        // Entferne unnötige Anführungszeichen
+        $input = trim($input, '"');
+        
+        // Ersetze mögliche Trennzeichen durch Komma
+        $input = str_replace([';', ' '], ',', $input);
+        
+        // Zerlege den String in ein Array
+        $items = array_map('trim', explode(',', $input));
+        
+        // Entferne leere Einträge
+        $filteredItems = array_filter($items, fn($item) => $item !== '');
+        
+        // Wenn nur ein Element übrig bleibt, gib es als String zurück
+        if (count($filteredItems) === 1) {
+            return reset($filteredItems);
+        }
+        
+        // Ansonsten gib das Array zurück
+        return $filteredItems;
+    }
+    
     private function enqueue_tabulator_Theme($theme) {
         $plugin_url = plugin_dir_url(__DIR__);
 
@@ -534,15 +537,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         //$table_out  .= '<button id="tablereset" type="button">Reset Filter</button>';
         $table_out  .= '<table id="post_table"><thead><tr>';
                             
-        $table_out  .= '<th>Nr</th>';
-        $table_out  .= '<th>Titel</th>';
-        $table_out  .= '<th>Kategorie</th>';
+        $table_out  .= '<th>Nr</th>'; // I18n
+        $table_out  .= '<th>Titel</th>'; //'<th>'. __('Title-Text', 'postmapviewsimple') .'</th>'; // I18n
+        $translated = __('Table-Title-Text', 'postmapviewsimple');
+        $translated .= $translated;
+        //$table_out  .= '<th>'.$translated.'</th>'; // I18n
+        //$table_out  .= '<th>'. __('Title-Text', 'postmapviewsimple') .'</th>'; // I18n
+        $table_out  .= '<th>Kategorie</th>'; // I18n
+        $translated = __('Table-Category-Text', 'postmapviewsimple');
+        $translated .= $translated;
         if ( $caller !== 'tourmap' ) {
-            $table_out  .= '<th>Distanz</th>';
-            $table_out  .= '<th>Aufstieg</th>';
-            $table_out  .= '<th>Abstieg</th>';
-            $table_out  .= '<th>Land</th>';
-            $table_out  .= '<th>Region</th>';
+            $table_out  .= '<th>Distanz</th>'; // I18n
+            $table_out  .= '<th>Aufstieg</th>'; // I18n
+            $table_out  .= '<th>Abstieg</th>'; // I18n
+            $table_out  .= '<th>Land</th>'; // I18n
+            $table_out  .= '<th>Region</th>'; // I18n
             $table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         } else {
             $table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
@@ -721,10 +730,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $postArray = [];
         $data2 = [];
         $custom_posts = [];
-
-        // add query for the custom fields 'lat' and 'lon' which should be numeric to the argument $queryAargs like WP_Query.
-        // breaking change : posts without lat lon are no longer shown!
         
+        // add lat and lon to queryArgs
         $queryArgs['meta_query'] = [
             'relation' => 'AND', // Beide Bedingungen müssen erfüllt sein
             [
@@ -741,49 +748,42 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             ],
         ];
         
+        // remove category_name from queryAargs if it is 'all'
         if ( array_key_exists('category_name', $queryArgs) && $queryArgs['category_name'] === 'all' ) {
-            // remove category_name from queryAargs
             unset( $queryArgs['category_name'] );
         }
+        // convert category_name array to comma separated string
         if ( array_key_exists('category_name', $queryArgs) && is_array($queryArgs['category_name'])) {
-            // convert array to comma separated string
+            
             $queryArgs['category_name'] = implode(',', $queryArgs['category_name']);
         }
-        // get the different get_categories if $queryAargs['category'] is an array. Loop through the array and get the posts for each category and append them to $custom_posts
-        // Voragabe Verwendung: $args['category_name'] = 'cat1,cat2'; // Komma als "OR"
-        /*
-        if ( array_key_exists('category_name', $queryArgs) && is_array($queryArgs['category_name'])) {
-            foreach ($queryArgs['category_name'] as $category) {
-                $queryArgs['category_name'] = $category;
-                $custom_posts = array_merge($custom_posts, get_posts($queryArgs));
-            }
-        } else {
-            $custom_posts = get_posts($queryArgs);
-        }
-        */
+        
+        // query all custom posts
         $custom_posts = get_posts($queryArgs);
         $i = 0;
         
-        // loop through all posts and fetch data for the output
+        // loop through all posts and fetch data for the output. breaking change : posts without lat lon are no longer shown!
         foreach ($custom_posts as $post) { 
-            
-            $lat = get_post_meta($post->ID,'lat', true);
-            $lon = get_post_meta($post->ID,'lon', true);
-            $gpxfilearr = [];
-    
-            //if ( is_numeric($lat) && is_numeric($lon) ) // breaking change : posts without lat lon are no longer shown!
-            //{
-            $title = substr($post->post_title,0,$this->titlelength); // Länge des Titels beschränken, Anzahl Zeichen
         
             // tags des posts holen und in string umwandeln
-            $tag3 =  implode( ', ', wp_get_post_tags($post->ID, array('fields' => 'names')));
-            $icon = wp_postmap_get_icon_cat($tag3, 'icon'); 
-            $cat = wp_postmap_get_icon_cat($tag3, 'category'); 
+            $tag_names = wp_get_post_tags($post->ID, array('fields' => 'names'));
+            
             $wpcat = \get_the_category( $post->ID );
-            $wpcat = count($wpcat) === 1 ? strtolower($wpcat[0]->name) : 'multiple';
-            $content = $post->post_content;
+            $wpcat_names = [];
+            foreach ($wpcat as $onecat) {
+                // skip if category is uncategorized
+                if ( $onecat->name === 'Uncategorized' ) continue;
+                $wpcat_names[] = $onecat->name;
+            }
 
+            $all_names = implode(',',array_merge($tag_names, $wpcat_names) );
+            [$cat, $icon, $iconPng] = find_best_category_match($all_names, $this->categoryFilter ); 
+            
+            //$wpcat = count($wpcat) === 1 ? strtolower($wpcat[0]->name) : 'multiple'; // z.b ""Tourenbericht - Wanderung"
+            
             // extract the gpxfile from the shortcode fo fotoramay if any
+            $content = $post->post_content;
+            $gpxfilearr = [];
             foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
                 
                 // extract the gpxfile from the shortcode
@@ -809,28 +809,29 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             // Excerpt nur aus den Absätzen <p> herstellen! Schlüsselwörter entfernen, dürfen dann im Text nicht vorkommen
             // Absätze mit [shortcodes] werden ignoriert.
             // der html-code muss mit zeilenumbrüchen formatiert sein, sonst geht das nicht!
+            $lat = floatval( get_post_meta($post->ID,'lat', true) );
+            $lon = floatval( get_post_meta($post->ID,'lon', true) );
+            $title = substr($post->post_title,0,$this->titlelength); // Länge des Titels beschränken, Anzahl Zeichen
             $excerpt = $this->generate_the_excerpt($post, $lenexcerpt);
             $featimage = get_the_post_thumbnail_url($post->ID, $size='thumbnail'); 
             $postlink = get_permalink($post->ID);
             $i++;
                 
             $postArray[] = array(
+                'id' => $i,   // post with several gpx-files are 2.1 , 2.2 instead of 1, 2, 3....
                 'img' => $featimage,
                 'title' 	=> $title,
-                'category'  	=> $icon,
-                'coord'   	=> array( floatval($lat), floatval($lon) ),
+                'category'  	=> $cat,
+                //'iconpng' => $iconPng,
+                'coord'   	=> [ $lat, $lon ],
                 'link' 	=> $postlink,
                 'excerpt' 	=> $excerpt,
-                'id' => $i,   // post with several gpx-files are 2.1 , 2.2 instead of 1, 2, 3....
-                //'featimage' => $featimage,
-                //'icon' => $icon,
-                //'lat' => $lat,
-                //'lon' => $lon,
+                
             );
 
             // get the address corresponding to posts lat and lon customfield
-            $lat = number_format( floatval($lat), 6);
-            $lon = number_format( floatval($lon), 6);
+            $lat = number_format( $lat, 6);
+            $lon = number_format( $lon, 6);
             
             $geoaddresstest =  get_post_meta($post->ID,'geoadress', true) ?? '';
             if ( !empty($geoaddresstest) ) {
@@ -861,7 +862,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     'state' => $state,
                     'gpxfile' => $gpxfile,
                     'geostat' => $geostat,
-                    'wpcategory' => $wpcat,
                 );
                 $gpxcount++;
             }
@@ -869,58 +869,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
     
         return [$postArray, $data2];
-    }
-    private function getTagStructure(\DOMNode $node, $depth =0) {
-        $structure = [];
-        $innerText = '';
-
-        $tagName = $node->nodeName;
-        $innerText .= $node->nodeValue;
-        //$structure[] = str_repeat(' ', $depth ) . $tagName;
-        $structure[] = $tagName;
-        
-
-        foreach ($node->childNodes as $childNode) {
-            if ( $childNode instanceof DOMElement) {
-                [$structure, $innerText] = array_merge( $structure, $this->getTagStructure($childNode, $depth+1 ));
-            } 
-        }
-        return [$structure, $innerText];
-    }
-
-    private function getTagValues(\DOMNode $node, $depth =0) {
-        $structure = [];
-        $innerText = '';
-
-        $tagName = $node->nodeName;
-        $innerText .= $node->nodeValue;
-        //$structure[] = str_repeat(' ', $depth ) . $tagName;
-        $structure[] = $tagName;
-        
-
-        foreach ($node->childNodes as $childNode) {
-            if ( $childNode instanceof DOMElement) {
-                $innerText .= $this->getTagValues($childNode);
-            } 
-        }
-        return $innerText;
-    }
-
-    private function extractTextFromHTMLwithoutStrong(\DOMNode $node) {
-        $texts = [];
-
-        if ($node instanceof DOMElement || $node instanceof DOMDocument ) {
-            if ($node->nodeName === 'strong') {
-                return $texts;
-            }
-            if(trim($node->textContent)) {
-                $texts[] = trim($node->textContent);
-            }
-            foreach ($node->childNodes as $childNode) {
-                $texts = array_merge($texts, $this->extractTextFromHTMLwithoutStrong( $childNode));
-            }
-        }
-        return $texts;
     }
 
     private function extractHTMLFromGeoJson( $html ) {
@@ -950,12 +898,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $result['image_link'] = $imgTag ? $imgTag->getAttribute('src') : '';
 
         return $result;
-    }
-
-    private function decodeUnicodeEscapes( $string) {
-        return preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', function($matches) {
-            return mb_convert_encoding('$#' . hexdec($matches[1]) .';', 'UTF-8' , 'HTML-ENTITIES' );
-        }, $string);
     }
 
     // ---- htaccess helper -----------------

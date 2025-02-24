@@ -63,16 +63,18 @@ function mainLogic (window, document, undefined) {
      * @param {array} php_touren - the array of all posts with their gps data
      * @param {array} allIcons - the array of all icons with their corresponding categories
      * @param {array} myIcon - the array of all icons
-     * @param {array} nposts - the array to store the number of posts for each icon
+     * @param {array} nposts - the array to store the number of posts for each icon, passed by reference. So it will be updated in the main function.
+     * @param {string} shortcodeType - the type of the shortcode
      * @returns {array} markersInGroups - an array of arrays with all markers grouped by their icon
      */
     function createMarkers(php_touren, allIcons, myIcon, nposts, shortcodeType) {
       let markersInGroups = [];
       
       php_touren.forEach(tour => {
+          // find the index of the icon in allIcons that matches the category of the tour
           let grpIndex = allIcons.findIndex(icon => 
-            shortcodeType === 'tourmap' ? icon.category === tour.category : icon.icon === tour.category
-          ); // Die Auswahl muss von der Art des Shortcodes abhängen, da die category unterschiedlich verwendet wird.!
+            icon.category === tour.category
+          ); 
           grpIndex = grpIndex !== -1 ? grpIndex : allIcons.length - 1;
           
           nposts[grpIndex]++;

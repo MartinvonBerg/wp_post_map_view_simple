@@ -26,8 +26,9 @@ defined('ABSPATH') or die('Are you ok?');
  * @return array Das Mapping aus der JSON-Datei.
  */
 function wp_postmap_load_category_mapping( $file = null ) {
+    // set the default value according to the settings file
     $default = [
-        'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'campingcar.png'],
+        'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'travel.png'],
         'mapping' => []
     ];
 
@@ -47,6 +48,92 @@ function wp_postmap_load_category_mapping( $file = null ) {
     }
 
     return $data;
+}
+
+function find_best_category_match($keywords, $stopwords, $json_file=null) {
+    // JSON-Datei mit settings einlesen
+    $json_data = \mvbplugins\helpers\wp_postmap_load_category_mapping($json_file);
+
+    if (!$json_data || !isset($json_data['mapping'])) {
+        return [$json_data['default']['category'], $json_data['default']['icon'], $json_data['default']['icon-png'] ] ?? ['','',''];
+    }
+
+    // Kategorien aus JSON extrahieren
+    $categories = array_column($json_data['mapping'], 'category');
+
+    // Keywords in Kleinbuchstaben umwandeln, in ein Array splitten
+    /*
+    $keyword_list = array_map('trim', explode(',', strtolower($keywords)));
+
+    // Stopwords entfernen
+    $keyword_list = array_map(function ($word) use ($stopwords) {
+        foreach ($stopwords as $stopword) {
+            $word = str_replace($stopword, '', $word);
+        }
+        return trim($word);
+    }, $keyword_list);
+
+    // Leere Werte entfernen
+    $keyword_list = array_filter($keyword_list);
+
+    // Bindestriche in Leerzeichen umwandeln für bessere Vergleichbarkeit
+    $keyword_list = array_map(fn($k) => str_replace('-', ' ', $k), $keyword_list);
+
+    // nochmals trim auf die Einträge anwenden
+    $keyword_list = array_map('trim', $keyword_list);
+
+    // doppelte einträge in der liste entfernen
+    $keyword_list = array_unique($keyword_list);
+    */
+    // -------------
+    // Keywords verarbeiten: Kleinbuchstaben, Stopwords entfernen, Bindestriche ersetzen, trimmen
+    
+    // stopwords strtolower
+    $stopwords = array_map('strtolower', $stopwords);
+    $keyword_list = array_unique(array_filter(array_map(function ($word) use ($stopwords) {
+        return trim(str_replace('-', ' ', str_replace($stopwords, '', strtolower($word))));
+    }, explode(',', $keywords))));
+    
+    $best_match = null;
+    $best_score = 0;
+    $match_count = 0;
+
+    // Fuzzy Matching Schwellenwert
+    $levenshtein_threshold = 3;
+
+    foreach ($categories as $category) {
+        // Kategorie ebenfalls bereinigen
+        $clean_category = strtolower(str_replace('-', ' ', $category));
+
+        // Prüfe, wie viele Keywords mit der Kategorie übereinstimmen oder ähnlich sind
+        $score = 0;
+
+        foreach ($keyword_list as $keyword) {
+            if ($keyword === $clean_category) {
+                $score += 3; // Perfekter Treffer
+            } elseif (levenshtein($keyword, $clean_category) <= $levenshtein_threshold) {
+                $score += 1; // Fuzzy-Match Treffer
+            }
+        }
+
+        // Besten Treffer speichern
+        if ($score > $best_score) {
+            $best_score = $score;
+            $best_match = $category;
+            $match_count = 1;
+        } elseif ($score === $best_score && $score > 0) {
+            $match_count++;
+        }
+    }
+
+    // Falls mehr als eine beste Übereinstimmung → Default zurückgeben
+    if ($match_count > 1 || $match_count === 0) {
+        return [$json_data['default']['category'], $json_data['default']['icon'], $json_data['default']['icon-png'] ];
+    } else {
+        // Wenn genau eine beste Übereinstimmung gefunden wurde, zurückgeben
+        $key = array_search($best_match, $categories);
+        return [$best_match, $json_data['mapping'][$key]['icon'], $json_data['mapping'][$key]['icon-png']];
+    }
 }
 
 /**

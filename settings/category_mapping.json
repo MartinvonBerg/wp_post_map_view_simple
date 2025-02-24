@@ -6,7 +6,7 @@
     },
     "mapping": [
         {
-            "category": "Camping",
+            "category": "Campingplatz",
             "icon": "camping",
             "icon-png": "campingground.png"
         },
@@ -36,13 +36,13 @@
             "icon-png": "cycling.png"
         },
         {
-            "category": "MTB",
+            "category": "Mountainbike",
             "icon": "MTB",
             "icon-png": "MTB.png"
         },
         {
             "category": "Wanderung",
-            "icon": "hiking",
+            "icon": "hiking2",
             "icon-png": "hiking2.png"
         },
         {
@@ -59,11 +59,6 @@
             "category": "Paddeln",
             "icon": "kayaking",
             "icon-png": "kayaking2.png"
-        },
-        {
-            "category": "Reisebericht",
-            "icon": "travel",
-            "icon-png": "travel.png"
         }
     ]
 }
