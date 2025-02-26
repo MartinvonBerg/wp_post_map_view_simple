@@ -15,6 +15,7 @@
  * Author URI:        https://www.berg-reise-foto.de/info/ueber-mich/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Domain Path:       /languages
  */
 
 namespace mvbplugins\postmapviewsimple;
@@ -40,3 +41,12 @@ function register_tourmap_shortcode($atts) {
         {return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_tourmap();}
     \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
 }
+
+function plugin_load_textdomain() {
+    $path = dirname(plugin_basename(__FILE__)) . '/languages/';
+    $result = load_plugin_textdomain('postmapviewsimple', false, $path);
+    if ($result === false) {
+        error_log('Plugin PostMapTableView: Fehler beim Laden der Sprachdatei');
+    }
+}
+add_action('init', '\mvbplugins\postmapviewsimple\plugin_load_textdomain');

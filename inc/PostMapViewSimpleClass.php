@@ -44,6 +44,10 @@ interface PostMapViewSimpleInterface {
  * TODO: update PHPunit-Tests for PostMapViewSimple....php
  * TODO: i18n solution ??? use the solution from fotoramamulti as settings + translation. Mind to use for tabulator options in js too!
  *        But: the local settings will be overwritten. So the backup of the settings like in fs-lightbox will be necessary!
+ *        Status with wp solution: npm make-pot and wp i18n make-pot do not pass comments and flags to the pot, po, files. Mo files are binary reduced to the minimum, so no comments by definition.
+ *        Tested workflow: Generate the pot with eazy po and translate the pot with poedit. Generate the mo files with poedit.
+ *        But: there is no WP built in funtion to load comments and flags. So, this has to be written in the by me.
+ *        Finally the definition for tabulator has to be adopted to the translated strings, otherwise the js will not work.
  * 
  * @return string
  * 
@@ -91,6 +95,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $m = null;
     private $chunksize = 20;
     private $tableMapMoveSelector = '';
+    private $backendLanguage = 'en_UK';
+    private $frontendLanguage = 'en_UK';
 	
 	public function __construct( $attr ) {
 		
@@ -168,11 +174,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->mapselector = $attr['mapselector'];
         $this->myMarkerIcons = $attr['mymarkericons'] === 'true';
         $this->categoryFilter = $this->parseParameterToArray($attr['categoryfilter']);
+
+        // Aktuelle Backend-Sprache sichern
+        $this->backendLanguage = determine_locale(); //get_bloginfo('language');
+        $this->frontendLanguage = get_locale();
+        // Falls abweichend, temporär umschalten
+        if ($this->frontendLanguage) {
+            switch_to_locale($this->frontendLanguage);
+        }
     }
 	
 	public function show_post_map(): string {
 
-        $this->tableMapMoveSelector = 'Stadt'; // I18n
+        //$this->tableMapMoveSelector = 'Stadt'; // I18n
+        $this->tableMapMoveSelector  .= __('Stadt', 'postmapviewsimple'); // I18n
+        
         // check the transient set time and delete transient if post was published during that time
         $wpid = get_the_ID();
         $wpid = $wpid ? strval($wpid) : '';
@@ -284,7 +300,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( $this->tourfolder === '') {
             return '';
         }
-        $this->tableMapMoveSelector = 'Google'; // I18n
+        //$this->tableMapMoveSelector = 'Google'; // I18n
+        $this->tableMapMoveSelector  .= __('Google', 'postmapviewsimple'); // I18n
         $tourDir = $this->up_dir . '/' . $this->tourfolder;
         $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
         $pathSettingsFile = null;
@@ -335,9 +352,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     $hasPopupInHTML = $test !== strip_tags($test);
                 }
                 // Die 'category' wird in PHP für den Klarnamen der Kategorie in der Tabelle benutzt. 
-                //Im JS jedoch zur Auswahl des Icons UND der Klarnamens im ControlLayer. Das ist nicht konsistent und nicht nachvollziehbar.
-                //$catname = wp_postmap_get_icon_cat($feature['properties']['category'], 'category', $pathSettingsFile);
-                //$iconpng = wp_postmap_get_icon_cat($feature['properties']['category'], 'icon', $pathSettingsFile);
+                // Im JS zur Auswahl des Icons UND der Klarnamens im ControlLayer. 
                 [$catname, $icon, $iconpng] = find_best_category_match($feature['properties']['category'], $this->categoryFilter ); 
 
                 if ($hasPopupInHTML) { 
@@ -536,25 +551,42 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         //$table_out  .= '<button id="tablereset" type="button">Reset Filter</button>';
         $table_out  .= '<table id="post_table"><thead><tr>';
-                            
-        $table_out  .= '<th>Nr</th>'; // I18n
-        $table_out  .= '<th>Titel</th>'; //'<th>'. __('Title-Text', 'postmapviewsimple') .'</th>'; // I18n
-        $translated = __('Table-Title-Text', 'postmapviewsimple');
-        $translated .= $translated;
-        //$table_out  .= '<th>'.$translated.'</th>'; // I18n
-        //$table_out  .= '<th>'. __('Title-Text', 'postmapviewsimple') .'</th>'; // I18n
-        $table_out  .= '<th>Kategorie</th>'; // I18n
-        $translated = __('Table-Category-Text', 'postmapviewsimple');
-        $translated .= $translated;
+
+        /* translators: Table Row 1: Number */
+        /* flag: format: text */  
+        $table_out  .= '<th data-filter="false">'. __('Nr', 'postmapviewsimple') .'</th>'; // I18n
+        /* translators: Table Row 2: Title */
+        /* flag: format: html */
+        $table_out  .= '<th data-type="html">'. __('Titel', 'postmapviewsimple') .'</th>'; // I18n
+        /* translators: Table Row 3: Category */
+        /* flag: format: text */
+        $table_out  .= '<th>'. __('Kategorie', 'postmapviewsimple') .'</th>'; // I18n
+        
         if ( $caller !== 'tourmap' ) {
-            $table_out  .= '<th>Distanz</th>'; // I18n
-            $table_out  .= '<th>Aufstieg</th>'; // I18n
-            $table_out  .= '<th>Abstieg</th>'; // I18n
-            $table_out  .= '<th>Land</th>'; // I18n
-            $table_out  .= '<th>Region</th>'; // I18n
-            $table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
+            /* translators: Table Row 4: Distance */
+            /* flag: format: text */
+            $table_out  .= '<th data-filter="number">'.__('Distanz', 'postmapviewsimple').'</th>'; // I18n
+            /* translators: Table Row 5: Ascent */
+            /* flag: format: text */
+            $table_out  .= '<th data-filter="number">'.__('Aufstieg', 'postmapviewsimple').'</th>'; // I18n
+            /* translators: Table Row 6: Descent */
+            /* flag: format: text */
+            $table_out  .= '<th data-filter="number">'.__('Abstieg', 'postmapviewsimple').'</th>'; // I18n
+            /* translators: Table Row 7: Country */
+            /* flag: format: text */
+            $table_out  .= '<th>'.__('Land', 'postmapviewsimple').'</th>'; // I18n
+            /* translators: Table Row 8: Region */
+            /* flag: format: text */
+            $table_out  .= '<th>'.__('Region', 'postmapviewsimple').'</th>'; // I18n
+            /* translators: Table Row 9: Stadt */
+            /* flag: format: html */
+            $table_out  .= '<th data-type="html" data-selector="true">'.__('Stadt', 'postmapviewsimple').'</th>'; // I18n
+            //$table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         } else {
-            $table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
+            /* translators: Table Row 4: Google */
+            /* flag: format: html */
+            $table_out  .= '<th data-type="html" data-filter="false" data-selector="true">'.__('Google', 'postmapviewsimple').'</th>'; // I18n
+            //$table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         }
         $table_out  .= '</tr></thead><tbody>';
         
@@ -681,9 +713,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 
             //sanitize the geostatistics value and array. The i18n causes problems with tabulator, so dist should be 25.3 instead of 25,3
             } else {
-                //$geostatarr[1] = number_format_i18n(floatval( $geostatarr[1]), 1);
-                //$geostatarr[4] = number_format_i18n(floatval( $geostatarr[4]), 1);
-                //$geostatarr[7] = number_format_i18n(floatval( $geostatarr[7]), 1);
                 $geostatarr[1] = $this->normalizeNumber( $geostatarr[1], 1);
                 $geostatarr[4] = $this->normalizeNumber( $geostatarr[4], 0);
                 $geostatarr[7] = $this->normalizeNumber( $geostatarr[7], 0);

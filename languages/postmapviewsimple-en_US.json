@@ -1,9 +1,0 @@
-{
-    "Nominatim API nicht erreichbar.": "Nominatim API is not reachable.",
-    "Ungültige API-Antwort.": "Invalid API response.",
-    "Fehler bei der Geo-API-Abfrage": "Error in Geo-API query",
-    "Es gab ein Problem bei der Abfrage der Geo-API für Post-ID: ": "There was an issue with the Geo-API query for Post-ID: ",
-    "Fehler bei der Nominatim-Abfrage: ": "Error during the Nominatim query: ",
-    "Unbekannt": "Unknown"
-}
-  

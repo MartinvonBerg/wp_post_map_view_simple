@@ -1,0 +1,77 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2025-02-25 11:04+0100\n"
+"PO-Revision-Date: 2025-02-26 14:22+0100\n"
+"Last-Translator: \n"
+"Language-Team: Spanish <LL@li.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
+
+#: geoaddress.php:65
+msgid "Nominatim API nicht erreichbar."
+msgstr "La API de Nominatim no está disponible."
+
+#: geoaddress.php:72
+msgid "Ungültige API-Antwort."
+msgstr "Respuesta de API no válida."
+
+#: geoaddress.php:82
+msgid "Fehler bei der Nominatim-Abfrage: "
+msgstr "Error en la consulta de Nominatim: "
+
+#: geoaddress.php:87
+msgid "Fehler bei der Geo-API-Abfrage"
+msgstr "Error en la consulta Geo-API"
+
+#: geoaddress.php:88
+msgid "Es gab ein Problem bei der Abfrage der Geo-API für Post-ID: "
+msgstr "Hubo un problema con la consulta de la API geográfica para el ID de publicación: "
+
+#: geoaddress.php:93 geoaddress.php:94 geoaddress.php:95 geoaddress.php:96
+msgid "Unbekannt"
+msgstr "Desconocido"
+
+#: PostMapViewSimpleClass.php:176 PostMapViewSimpleClass.php:568
+msgid "Stadt"
+msgstr "Ciudad"
+
+#: PostMapViewSimpleClass.php:289 PostMapViewSimpleClass.php:573
+msgid "Google"
+msgstr "Google"
+
+#: PostMapViewSimpleClass.php:542
+msgid "Nr"
+msgstr "N°"
+
+#: PostMapViewSimpleClass.php:545
+msgid "Titel"
+msgstr "Título"
+
+#: PostMapViewSimpleClass.php:548
+msgid "Kategorie"
+msgstr "Categoría"
+
+#: PostMapViewSimpleClass.php:553
+msgid "Distanz"
+msgstr "Distancia"
+
+#: PostMapViewSimpleClass.php:556
+msgid "Aufstieg"
+msgstr "Ascenso"
+
+#: PostMapViewSimpleClass.php:559
+msgid "Abstieg"
+msgstr "Descenso"
+
+#: PostMapViewSimpleClass.php:562
+msgid "Land"
+msgstr "País"
+
+#: PostMapViewSimpleClass.php:565
+msgid "Region"
+msgstr "Región"

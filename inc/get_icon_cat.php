@@ -60,36 +60,10 @@ function find_best_category_match($keywords, $stopwords, $json_file=null) {
 
     // Kategorien aus JSON extrahieren
     $categories = array_column($json_data['mapping'], 'category');
-
-    // Keywords in Kleinbuchstaben umwandeln, in ein Array splitten
-    /*
-    $keyword_list = array_map('trim', explode(',', strtolower($keywords)));
-
-    // Stopwords entfernen
-    $keyword_list = array_map(function ($word) use ($stopwords) {
-        foreach ($stopwords as $stopword) {
-            $word = str_replace($stopword, '', $word);
-        }
-        return trim($word);
-    }, $keyword_list);
-
-    // Leere Werte entfernen
-    $keyword_list = array_filter($keyword_list);
-
-    // Bindestriche in Leerzeichen umwandeln für bessere Vergleichbarkeit
-    $keyword_list = array_map(fn($k) => str_replace('-', ' ', $k), $keyword_list);
-
-    // nochmals trim auf die Einträge anwenden
-    $keyword_list = array_map('trim', $keyword_list);
-
-    // doppelte einträge in der liste entfernen
-    $keyword_list = array_unique($keyword_list);
-    */
-    // -------------
-    // Keywords verarbeiten: Kleinbuchstaben, Stopwords entfernen, Bindestriche ersetzen, trimmen
     
     // stopwords strtolower
     $stopwords = array_map('strtolower', $stopwords);
+    // Keywords verarbeiten: Kleinbuchstaben, Stopwords entfernen, Bindestriche ersetzen, trimmen, in ein Array splitten
     $keyword_list = array_unique(array_filter(array_map(function ($word) use ($stopwords) {
         return trim(str_replace('-', ' ', str_replace($stopwords, '', strtolower($word))));
     }, explode(',', $keywords))));
