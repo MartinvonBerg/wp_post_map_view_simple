@@ -175,13 +175,16 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->myMarkerIcons = $attr['mymarkericons'] === 'true';
         $this->categoryFilter = $this->parseParameterToArray($attr['categoryfilter']);
 
-        // Aktuelle Backend-Sprache sichern
+        // Set the language to "en_US" to prepare the translation of the table header in the cache_javascript_header
+        switch_to_locale('en_US');
+        /*
         $this->backendLanguage = determine_locale(); //get_bloginfo('language');
         $this->frontendLanguage = get_locale();
         // Falls abweichend, temporär umschalten
         if ($this->frontendLanguage) {
             switch_to_locale($this->frontendLanguage);
         }
+        */
     }
 	
 	public function show_post_map(): string {

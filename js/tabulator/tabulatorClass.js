@@ -101,6 +101,16 @@ class MyTabulatorClass {
                     "next_title":"Nächste Seite",
                     "all":"Alle",
                 },
+                "columns":{
+                    "Title":"Titel", //replace the title of column name with the value "Name"
+                    "Category":"Kategorie",
+                    "Distance":"Distanz",
+                    "Ascent":"Aufstieg",
+                    "Descent":"Abstieg",
+                    "Country":"Land",
+                    "State":"Region",
+                    "City":"Stadt",
+                }
             },
             "it-it": {
                 "pagination": {
@@ -115,6 +125,16 @@ class MyTabulatorClass {
                     "next": "Successivo",
                     "next_title": "Pagina successiva",
                     "all": "Tutti"
+                },
+                "columns": {
+                    "Title": "Titolo",
+                    "Category": "Categoria",
+                    "Distance": "Distanza",
+                    "Ascent": "Salita",
+                    "Descent": "Discesa",
+                    "Country": "Paese",
+                    "State": "Regione",
+                    "City": "Città"
                 }
             },
             "fr-fr": {
@@ -130,6 +150,16 @@ class MyTabulatorClass {
                     "next": "Suivant",
                     "next_title": "Page suivante",
                     "all": "Tous"
+                },
+                "columns": {
+                    "Title": "Titre",
+                    "Category": "Catégorie",
+                    "Distance": "Distance",
+                    "Ascent": "Montée",
+                    "Descent": "Descente",
+                    "Country": "Pays",
+                    "State": "Région",
+                    "City": "Ville"
                 }
             },
             "es-es": {
@@ -145,6 +175,16 @@ class MyTabulatorClass {
                     "next": "Siguiente",
                     "next_title": "Página siguiente",
                     "all": "Todos"
+                },
+                "columns": {
+                    "Title": "Título",
+                    "Category": "Categoría",
+                    "Distance": "Distancia",
+                    "Ascent": "Ascenso",
+                    "Descent": "Descenso",
+                    "Country": "País",
+                    "State": "Región",
+                    "City": "Ciudad"
                 }
             }
         };
