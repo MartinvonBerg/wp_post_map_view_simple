@@ -170,6 +170,10 @@ Upgrade is recommended. Preparation of Release is still missing.
 
 ## Changelog
 
+### 1.1.0 (26.02.2025)
+Translation for en, it, es, fr included. Translation for Tabulator.js is done in the frontend (for leaflet it what so before). Prerequisite: The html content has to be in English. 
+Therefore the language in PHP is set to en_US. Further translations have to be added in JS-code and not in po-, mo-files.
+
 ### 1.0.1 (16.02.2025)
 - CSS-File Clean-up: small main css is loaded in PHP. Reason for red clusters removed. grid prepared but not used.
 

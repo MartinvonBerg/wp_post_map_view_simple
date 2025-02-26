@@ -1,6 +1,6 @@
 {
 	"name": "post-map-table-view",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "Display a map with all posts with GPS data in a leaflet map and / or a table view",
 	"author": "Martin von Berg",
 	"license": "GPL-2.0",

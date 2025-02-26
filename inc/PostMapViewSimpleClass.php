@@ -15,7 +15,7 @@ use DOMDocument;
  * Author URI: https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * License: GPL-2.0
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
- * Version: 1.0.1
+ * Version: 1.1.0
  *
  * @package Post-Map-View-Simple
  */
@@ -283,8 +283,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
         // --- enqueue scripts
         $plugin_url = plugin_dir_url(__DIR__);
-        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.0.1', 'all');
-        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.0.1', true);
+        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.1.0', 'all');
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.1.0', true);
 		
 		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
@@ -466,8 +466,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // --- enqueue scripts and styles ---
         $plugin_url = plugin_dir_url(__DIR__);
-        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.0.1', 'all');
-        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.0.1', true);
+        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.1.0', 'all');
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.1.0', true);
         wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
             'path'  => $this->wp_postmap_url, 
@@ -530,9 +530,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // Load default Styles
         if ( $theme == '' ) {
-            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '1.0.1', 'all');
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '1.1.0', 'all');
         } else {
-            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '1.0.1', 'all');
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '1.1.0', 'all');
         }
     }
 
