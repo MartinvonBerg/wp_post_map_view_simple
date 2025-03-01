@@ -31,6 +31,11 @@ $allowed = \ini_get('allow_url_fopen') === '1';
 $useWebp = true;
 $error = false;
 
+// return silently if the request is not a tile request
+if ( ! isset($_GET["tile"])) {
+	return;
+}
+
 // partition the request code
 if ($_GET["tile"] === 'testfile.webp') {
 	http_response_code(302);
@@ -109,8 +114,8 @@ if ( $useWebp ) {
 	$headerMime = 'image/' . $req[4];
 }
 
-// check if file is available on server.
-if ( \file_exists($localFile)) {
+// check if file is available on server. // combine with filemtime to check if file is too old
+if ( \file_exists($localFile)) { 
 	$httpResCode = 200;
 } 
 elseif ( $allowed ) 
@@ -211,3 +216,76 @@ function webpImage($source, $quality = 80, $removeOld = false) {
 
 	return $destination;
 }
+
+function generateHtaccess() {
+	$url = 'http://' . $_SERVER['HTTP_HOST'];
+	if ( is_ssl() ) {
+		$url = str_replace('http://', 'https://', $url);
+	}
+	$plugin_main_dir = dirname( __DIR__, 1 );
+	$slug = \WP_PLUGIN_URL . '/' . \basename( $plugin_main_dir ) . '/leaflet_map_tiles/';
+	$relative_url =  \str_replace($url, '', $slug);
+
+	// create the file name 
+	$localFile = __DIR__ . \DIRECTORY_SEPARATOR . '.htaccess';
+
+	// create the .htaccess file
+	$htaccess = <<<EOT
+<LimitExcept GET HEAD>
+    Order Allow,Deny
+    Deny from all
+</LimitExcept>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Change only the next line according to your server 
+    RewriteBase {$relative_url}
+    # Do not change after this line
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} \.(jpeg|jpg|png|webp)$
+    RewriteRule ^(.+)$ tileserver.php/?tile=$1 [L]
+</IfModule>
+EOT;
+	// save the original file
+	$result = (bool) file_put_contents($localFile, $htaccess);
+	return $result;
+}
+
+/**
+ * Check if file .htaccess is available in the sub-folder 'leaflet_map_tiles' and try to fetch the 
+ * testfile, which will be responded with status code 302 file by the script 'tileserver.php'.
+ * 
+ * @return boolean the result of the htaccess check
+ */
+function checkHtaccess()
+{
+	// try to access testfile.webp which will be redirected to testfile.php if .htaccess is working. 
+	// The file 'testfile.webp' shall not be existent!
+	$path = plugins_url('/', __FILE__);
+
+	if (\ini_get('allow_url_fopen') === '1') {
+		$url = $path . 'testfile.webp';
+		$context = stream_context_create( array(
+			'http'=>array(
+				'timeout' => 5.0 // Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
+			)
+		), );
+
+		// switch off PHP error reporting and get the url.
+		$ere = \error_reporting();
+		\error_reporting(0);
+		$test = fopen($url, 'r', false, $context);
+		\error_reporting($ere);
+
+		// check if header contains status code 302
+		if ($test !== false) {
+			$code = $http_response_header[0];
+			$found = \strpos($code, '302');
+			fclose($test);
+			if ($found  !== false) return true;
+		}
+	}
+	return false;
+}
+

@@ -13,7 +13,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 == Description ==
 
 This plugin displays all WordPress posts or pages containing GPX data (lat, lon) stored in custom fields on an OpenStreetMap map. Posts are categorized using tags, allowing filtering and custom icons. Additionally, a table with all posts is displayed which may be used to filter the shown Posts.
-Alternatively a descriptive JSON-File in a seperate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
+Alternatively a descriptive JSON-File in a separate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
 There is no Admin-Panel to control the plugin. Everything is defined by shortcoder parameters oder settings in JSON-Files.
 
 == Shortcodes: == 

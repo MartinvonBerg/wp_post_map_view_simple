@@ -33,6 +33,10 @@ use function mvbplugins\helpers\get_geoaddress as get_geoaddress;
 require_once __DIR__ . '/get_icon_cat.php';
 use function mvbplugins\helpers\find_best_category_match as find_best_category_match;
 
+require_once dirname(__DIR__) . '/leaflet_map_tiles/tileserver.php';
+use function mvbplugins\fotoramamulti\checkHtaccess as checkHtaccess;
+use function mvbplugins\fotoramamulti\generateHtaccess as generateHtaccess;
+
 interface PostMapViewSimpleInterface {
 	public function show_post_map(): string;
     public function show_tourmap(): string;
@@ -42,12 +46,6 @@ interface PostMapViewSimpleInterface {
  * main shortcode function to generate the html
  * 
  * TODO: update PHPunit-Tests for PostMapViewSimple....php
- * TODO: i18n solution ??? use the solution from fotoramamulti as settings + translation. Mind to use for tabulator options in js too!
- *        But: the local settings will be overwritten. So the backup of the settings like in fs-lightbox will be necessary!
- *        Status with wp solution: npm make-pot and wp i18n make-pot do not pass comments and flags to the pot, po, files. Mo files are binary reduced to the minimum, so no comments by definition.
- *        Tested workflow: Generate the pot with eazy po and translate the pot with poedit. Generate the mo files with poedit.
- *        But: there is no WP built in funtion to load comments and flags. So, this has to be written in the by me.
- *        Finally the definition for tabulator has to be adopted to the translated strings, otherwise the js will not work.
  * 
  * @return string
  * 
@@ -80,7 +78,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $trackcolour = '#ff0000';
     private $mapselector = 'OpenStreeMap';
     private $myMarkerIcons = false;
-
     private $categoryFilter = [];
     // ---------- end of shortcode parameters ----------
 
@@ -95,8 +92,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private $m = null;
     private $chunksize = 20;
     private $tableMapMoveSelector = '';
-    private $backendLanguage = 'en_UK';
-    private $frontendLanguage = 'en_UK';
 	
 	public function __construct( $attr ) {
 		
@@ -137,7 +132,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		$this->gpx_dir = $this->up_dir . '/' . $this->gpxfolder . '/';    // gpx_dir
 		
 		$this->numberposts = $attr['numberposts'];
-        // fallback for great values, see above.
+        // fallback for great values
         if ( $this->numberposts > 1000 ) $this->numberposts = 1000;
 
 		$this->post_type = $this->parseParameterToArray($attr['post_type']) ?? '';
@@ -174,23 +169,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->mapselector = $attr['mapselector'];
         $this->myMarkerIcons = $attr['mymarkericons'] === 'true';
         $this->categoryFilter = $this->parseParameterToArray($attr['categoryfilter']);
-
-        // Set the language to "en_US" to prepare the translation of the table header in the cache_javascript_header
-        switch_to_locale('en_US');
-        /*
-        $this->backendLanguage = determine_locale(); //get_bloginfo('language');
-        $this->frontendLanguage = get_locale();
-        // Falls abweichend, temporär umschalten
-        if ($this->frontendLanguage) {
-            switch_to_locale($this->frontendLanguage);
-        }
-        */
     }
 	
 	public function show_post_map(): string {
 
-        //$this->tableMapMoveSelector = 'Stadt'; // I18n
-        $this->tableMapMoveSelector  .= __('Stadt', 'postmapviewsimple'); // I18n
+        $this->tableMapMoveSelector = 'City'; // No I18n required!
         
         // check the transient set time and delete transient if post was published during that time
         $wpid = get_the_ID();
@@ -224,8 +207,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
             // check htaccess for tileserver only here 
             if ( $this->useTileServer) {
-                $this->htaccessTileServerIsOK = $this->checkHtaccess();
-                !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+                $this->htaccessTileServerIsOK = checkHtaccess();
+                // if htaccess is not OK, write the file and set the flag to true
+                if ( !$this->htaccessTileServerIsOK ) {
+                    $this->htaccessTileServerIsOK = generateHtaccess();
+                    !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+                }
             }
             
             $this->pageVarsForJs = [];
@@ -262,9 +249,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
             // generate html for table with post data
             if ( $this->showtable ){
-                //$html .= '<div id="post_table_wrapper">';
                 $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray );
-                //$html .= '</div>';
             }
 
             // end generation of html output: write the html-output in $string now as set_transient
@@ -303,8 +288,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( $this->tourfolder === '') {
             return '';
         }
-        //$this->tableMapMoveSelector = 'Google'; // I18n
-        $this->tableMapMoveSelector  .= __('Google', 'postmapviewsimple'); // I18n
+        $this->tableMapMoveSelector = 'Google'; // No I18n required!
         $tourDir = $this->up_dir . '/' . $this->tourfolder;
         $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
         $pathSettingsFile = null;
@@ -317,7 +301,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $jsonFiles = glob($tourDir . '/*.{json,geojson}', GLOB_BRACE);
         // check if settings file is in $tourDir, if so exclude it from $jsonFiles and return the full url to the settings file
         if ( file_exists($tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE) ) {
-            //$jsonFiles = array_diff($jsonFiles, [$tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE]);
+            // exclude settings file from jsonFiles
             $jsonFiles = array_filter($jsonFiles, function($item) {
                 if ( !str_contains($item, SETTINGS_FILE)) {
                     return $item;
@@ -338,9 +322,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $json0 = mb_convert_encoding($json0, 'UTF-8', 'auto');
             if ( $json0 === false) { break; }
             $geojson = json_decode($json0, true);
-                //array_walk_recursive($geojson, function (&$value) {
-                //    $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
-                //});
+               
             if ($geojson['type'] !== 'FeatureCollection' || count($geojson['features']) === 0) { break; }
             
             foreach ( $geojson['features'] as $feature) {
@@ -401,11 +383,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             return str_replace($tourDir, $tourUrl, $file);
         }, $jsonFiles);
 
-        /*
-        $gpxFiles = array_map(function ($file) use ($tourUrl, $tourDir) {
-            return str_replace($tourDir, $tourUrl, $file);
-        }, $gpxFiles);
-        */
         $tracks = [];
         foreach( $gpxFiles as $index => $file){
             $url = str_replace($tourDir, $tourUrl, $file);
@@ -418,8 +395,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // check htaccess for tileserver only here 
         if ( $this->useTileServer) {
-            $this->htaccessTileServerIsOK = $this->checkHtaccess();
-            !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+            $this->htaccessTileServerIsOK = checkHtaccess();
+            // if htaccess is not OK, write the file and set the flag to true
+            if ( !$this->htaccessTileServerIsOK ) {
+                $this->htaccessTileServerIsOK = generateHtaccess();
+                !$this->htaccessTileServerIsOK ? $this->useTileServer=false : null;
+            }
         }
         
         $this->pageVarsForJs = [];
@@ -433,11 +414,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->pageVarsForJs[$this->m]['mapWidth'] = $this->mapWidth; //
         $this->pageVarsForJs[$this->m]['mapAspectRatio'] = $this->mapAspectRatio; //
         
-        //$this->pageVarsForJs[$this->m]['tabulatorTheme'] = $this->tabulatorTheme;
         $this->pageVarsForJs[$this->m]['tablePageSize'] = $this->tablePageSize;
         $this->pageVarsForJs[$this->m]['tableHeight'] = strval($this->tableHeight) . 'px';
         $this->pageVarsForJs[$this->m]['geoJsonFile'] = $jsonFiles;
-        //$this->pageVarsForJs[$this->m]['gpxFile'] = $gpxFiles;
         $this->pageVarsForJs[$this->m]['settingsFile'] = $pathSettingsFile;
         $this->pageVarsForJs[$this->m]['ngpxfiles'] = count($gpxFiles);
         $this->pageVarsForJs[$this->m]['tracks'] = $tracks;
@@ -448,7 +427,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
        
 
         // generate html for map with post data 
-        //$html = '<div class="pmtv_grid">';
         $html = '';
 
         if ( $this->showmap ) {
@@ -457,12 +435,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // generate html for table with post data
         if ( $this->showtable ){
-            //$html .= '<table id="post_table"></table>';
             $html .= '<div id="post_table_wrapper"><div>'; // hier 2x div, da sonst mit Headerhtml eine flex-Tabelle angezeigt wird.
             $html .= $this->generate_table_html($this->headerhtml, $this->postArray, 'tourmap');
             $html .= '</div></div>';
         }
-        //$html .= '</div>';
 
         // --- enqueue scripts and styles ---
         $plugin_url = plugin_dir_url(__DIR__);
@@ -552,43 +528,43 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $table_out  = $headerhtml;
         } 
 
-        //$table_out  .= '<button id="tablereset" type="button">Reset Filter</button>';
         $table_out  .= '<table id="post_table"><thead><tr>';
 
-        /* translators: Table Row 1: Number */
+        /* translators: This strings are translated in javascript, so no translation needed! The info is kept for later usage */
+        /* translators: Table Row 1: Number Nr */
         /* flag: format: text */  
-        $table_out  .= '<th data-filter="false">'. __('Nr', 'postmapviewsimple') .'</th>'; // I18n
+        $table_out  .= '<th data-filter="false">Nr</th>'; // I18n
         /* translators: Table Row 2: Title */
         /* flag: format: html */
-        $table_out  .= '<th data-type="html">'. __('Titel', 'postmapviewsimple') .'</th>'; // I18n
+        $table_out  .= '<th data-type="html">Title</th>'; // I18n
         /* translators: Table Row 3: Category */
         /* flag: format: text */
-        $table_out  .= '<th>'. __('Kategorie', 'postmapviewsimple') .'</th>'; // I18n
+        $table_out  .= '<th>Category</th>'; // I18n
         
         if ( $caller !== 'tourmap' ) {
             /* translators: Table Row 4: Distance */
             /* flag: format: text */
-            $table_out  .= '<th data-filter="number">'.__('Distanz', 'postmapviewsimple').'</th>'; // I18n
+            $table_out  .= '<th data-filter="number">Distance</th>'; // I18n
             /* translators: Table Row 5: Ascent */
             /* flag: format: text */
-            $table_out  .= '<th data-filter="number">'.__('Aufstieg', 'postmapviewsimple').'</th>'; // I18n
+            $table_out  .= '<th data-filter="number">Ascent</th>'; // I18n
             /* translators: Table Row 6: Descent */
             /* flag: format: text */
-            $table_out  .= '<th data-filter="number">'.__('Abstieg', 'postmapviewsimple').'</th>'; // I18n
+            $table_out  .= '<th data-filter="number">Descent</th>'; // I18n
             /* translators: Table Row 7: Country */
             /* flag: format: text */
-            $table_out  .= '<th>'.__('Land', 'postmapviewsimple').'</th>'; // I18n
-            /* translators: Table Row 8: Region */
+            $table_out  .= '<th>Country</th>'; // I18n
+            /* translators: Table Row 8: State */
             /* flag: format: text */
-            $table_out  .= '<th>'.__('Region', 'postmapviewsimple').'</th>'; // I18n
-            /* translators: Table Row 9: Stadt */
+            $table_out  .= '<th>State</th>'; // I18n
+            /* translators: Table Row 9: City */
             /* flag: format: html */
-            $table_out  .= '<th data-type="html" data-selector="true">'.__('Stadt', 'postmapviewsimple').'</th>'; // I18n
+            $table_out  .= '<th data-type="html" data-selector="true">City</th>'; // I18n
             //$table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         } else {
-            /* translators: Table Row 4: Google */
+            /* translators: Table Row 4: Google which won't be translated */
             /* flag: format: html */
-            $table_out  .= '<th data-type="html" data-filter="false" data-selector="true">'.__('Google', 'postmapviewsimple').'</th>'; // I18n
+            $table_out  .= '<th data-type="html" data-filter="false" data-selector="true">Google</th>'; // I18n
             //$table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         }
         $table_out  .= '</tr></thead><tbody>';
@@ -646,14 +622,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
         $string = '<div class="box1">';
         $string .= '<div id="map0"></div>'; // hier wird die Karte erzeugt!
-        //$string .= '<div id="map10_img">';
-    
-        // loop through all posts and fetch data for the output
-        //foreach ($allposts as $post) {
-        //    $string  .= '<a href="' . $post['featimage'] . '" data-title="'.$post['title'].'" data-icon="'. $post['icon']. '" data-geo="lat:' . $post['lat'] . ',lon:' . $post['lon'] . '" data-link="'. $post['link'] .'">' . $post['excerpt']. '</a>';
-        //}
-        // close divs for the map
-        //$string  .= '</div>';
         $string .= '</div>';
     
         return $string;
@@ -811,8 +779,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $all_names = implode(',',array_merge($tag_names, $wpcat_names) );
             [$cat, $icon, $iconPng] = find_best_category_match($all_names, $this->categoryFilter ); 
             
-            //$wpcat = count($wpcat) === 1 ? strtolower($wpcat[0]->name) : 'multiple'; // z.b ""Tourenbericht - Wanderung"
-            
             // extract the gpxfile from the shortcode fo fotoramay if any
             $content = $post->post_content;
             $gpxfilearr = [];
@@ -931,44 +897,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         return $result;
     }
-
-    // ---- htaccess helper -----------------
-	/**
-	 * Check if file .htaccess is available in the sub-folder 'leaflet_map_tiles' and try to fetch the 
-	 * testfile, which will be responded with status code 302 file by the script 'tileserver.php'.
-	 * 
-	 * @return boolean the result of the htaccess check
-	 */
-	private function checkHtaccess()
-	{
-		// try to access testfile.webp which will be redirected to testfile.php if .htaccess is working. 
-		// The file 'testfile.webp' shall not be existent!
-		$path = \str_replace('inc/', '', plugins_url('/', __FILE__)) . 'leaflet_map_tiles/';
-
-		if (\ini_get('allow_url_fopen') === '1') {
-			$url = $path . 'testfile.webp';
-            $context = stream_context_create( array(
-                'http'=>array(
-                    'timeout' => 5.0 // Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
-                )
-            ), );
-
-			// switch off PHP error reporting and get the url.
-			$ere = \error_reporting();
-			\error_reporting(0);
-			$test = fopen($url, 'r', false, $context);
-			\error_reporting($ere);
-
-			// check if header contains status code 302
-			if ($test !== false) {
-				$code = $http_response_header[0];
-				$found = \strpos($code, '302');
-				fclose($test);
-				if ($found  !== false) return true;
-			}
-		}
-		return false;
-	}
 
     private function is_user_editing_overview_map() {
         if ( is_user_logged_in() && is_admin() ) {

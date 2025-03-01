@@ -4,7 +4,7 @@
 
 This plugin displays all WordPress posts or pages containing GPX data (lat, lon) stored in custom fields on an OpenStreetMap map. Posts are categorized using tags, allowing filtering and custom icons. Additionally, a table with all posts is displayed.
 
-Alternatively a descriptive JSON-File in a seperate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
+Alternatively a descriptive JSON-File in a separate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
 
 There is no Admin-Panel to control the plugin. Everything is defined by shortcoder parameters oder settings in JSON-Files.
 
@@ -92,7 +92,7 @@ Write your geojson-File from the scratch. The geojson for ONE Point is like so:
 I recommend to use [geojson.io](https://geojson.io/#new&map=8.78/48.2514/13.403) to generate the structure of the geojson especially define the coordinates with an interactive map. The required fields in the properties section might be added in the table and content added manually. Additionally you might change the file `category_mapping.json` to your tourfolder. If available, this 'local' file will be used for the tourmap.
 
 ### 2. Optional: Prepare one GPX-File
-Donwload from your Track-Cloud / Provider and reduce to the usefull size and content.
+Download from your Track-Cloud / Provider and reduce to the usefull size and content.
 
 ### 3. Upload Files to your WordPress-Site
 The upload has to be done 'manually' by FileZilla or any comparable tool. Is you prepare the Files locally you will have a backup automatically. 
@@ -112,7 +112,7 @@ Live-Demo on my Site: https://www.berg-reise-foto.de/reisebericht-italien/uebers
 The following parameters are available for both shortcodes (where not all will be used by tourmap).
 | Parameter | Default Value | Description | Example |
 |-----------|---------------|-------------|---------|
-| `numberposts` | 100 | Number of posts to display |
+| `numberposts` | 100 | Number of posts to display (maximum : 1000) | - |
 | `post_type` | post | Post types (can be an array) | post,page
 | `showmap` | true | Show the map |
 | `showtable` | true | Show the table |
@@ -135,7 +135,7 @@ The following parameters are available for both shortcodes (where not all will b
 | `tourfolder` | tourfolder=tourmap/Italy-2022 | The folder with JSON-Files relative to the WordPress-Uploads-Folder. Used by shortcode [tourmap] only | |
 | `trackcolour`| #ff0000 | The colour of the gpx-track on the map, if any| red |
 | `trackwidth` | 3 | The width in px of the gpx-track on the map, if any| 3px |
-| `mapselector` | OpenStreeMap | The preselecte Map | - |
+| `mapselector` | OpenStreeMap | The preselected Map | - |
 | `mymarkericons` | false | Use another styling for the marker icons if true | - |
 
 ## Check Tile Server Settings in .htaccess
@@ -155,7 +155,16 @@ Drawback: No fileage clean-up implemented. So, once stored, the tiles are used f
 ## Upgrade Notice
 
 Upgrade is recommended. Preparation of Release is still missing.
-**ATTENTION** Your changes in `category_mapping.json` will be overwritten! Safe this file and `.htaccess` locally proir to updating.
+**ATTENTION** Your changes in `category_mapping.json` will be overwritten! Safe this file and `.htaccess` locally prior to updating.
+
+## I18N
+
+ Status with wp solution: npm make-pot and wp i18n make-pot do not pass translation comments and flags to the pot- and po- files. 
+ Mo files are binary reduced to the minimum, so no comments included by definition.
+ Tested workflow: Generate the pot with eazy po and translate the pot with poedit. Generate the mo files with poedit.
+ But: there is no WP built in function to load comments and flags into php or js. So, this had to be written by me.
+ Finally the frontend is translated in the client for tabulator and leaflet where the translations are hardcoded in js.
+ The PHP error messages are translated in PHP by the WP standard way.
 
 ## Installation
 
@@ -169,6 +178,9 @@ Upgrade is recommended. Preparation of Release is still missing.
 - Use the standard method of WordPress.
 
 ## Changelog
+
+### 1.2.0 (01.03.2025)
+Translation process updated, see I18N. Automatic generation of .htaccess file added.
 
 ### 1.1.0 (26.02.2025)
 Translation for en, it, es, fr included. Translation for Tabulator.js is done in the frontend (for leaflet it what so before). Prerequisite: The html content has to be in English. 

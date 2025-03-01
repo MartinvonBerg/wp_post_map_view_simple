@@ -6,7 +6,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     # Change only the next line according to your server 
-    #RewriteBase /wp-content/plugins/PostMapTableView/leaflet_map_tiles/
     RewriteBase /wordpress/wp-content/plugins/PostMapTableView/leaflet_map_tiles/
     # Do not change after this line
     RewriteCond %{REQUEST_FILENAME} !-f
