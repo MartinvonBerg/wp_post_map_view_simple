@@ -11,3 +11,4 @@ leaflet_map_tiles/otm*
 leaflet_map_tiles/sat*
 leaflet_map_tiles/cycle*
 *LICENSE.txt
+release/*
