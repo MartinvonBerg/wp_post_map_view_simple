@@ -5,9 +5,9 @@ node_modules*
 build/*.js
 build/pmtv_main.js
 build/*.png
+build/*.svg
 leaflet_map_tiles/osm*
 leaflet_map_tiles/otm*
 leaflet_map_tiles/sat*
 leaflet_map_tiles/cycle*
 *LICENSE.txt
-release*

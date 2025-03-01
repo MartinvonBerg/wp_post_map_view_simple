@@ -1,0 +1,42 @@
+{
+    "type": "FeatureCollection",
+    "note": "-This file is used as a template for the tourmap plugin-. You may additionally define your own category_mapping.json",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    1.1111,
+                    1.1111
+                ]
+            },
+            "properties": {
+                "id": "-Sequential Number of IDs for the points in the map-",
+                "name": "-Define the Title or Name of the point-",
+                "text": "-Define the Text as description which will be shown in the popup for the map marker-",
+                "category": "-use the category according to category_mapping.json-",
+                "link": "-Link to the Tour-",
+                "img": "-Link to Image of the tour which will be shown in the popup for the map marker-"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    2.2222,
+                    2.2222
+                ]
+            },
+            "properties": {
+                "id": "-Sequential Number of IDs for the points in the map-",
+                "name": "-Define the Title or Name of the point-",
+                "text": "-Define the Text as description which will be shown in the popup for the map marker-",
+                "category": "-use the category according to category_mapping.json-",
+                "link": "-Link to the Tour-",
+                "img": "-Link to Image of the tour which will be shown in the popup for the map marker-"
+            }
+        }
+    ]
+}

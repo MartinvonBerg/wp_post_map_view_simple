@@ -1,0 +1,102 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-25 11:04+0100\n"
+"PO-Revision-Date: 2025-02-26 14:16+0100\n"
+"Last-Translator: \n"
+"Language-Team: Italian <LL@li.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
+
+#: geoaddress.php:65
+msgid "Nominatim API nicht erreichbar."
+msgstr "API Nominatim non raggiungibile."
+
+#: geoaddress.php:72
+msgid "Ungültige API-Antwort."
+msgstr "Risposta API non valida."
+
+#: geoaddress.php:82
+msgid "Fehler bei der Nominatim-Abfrage: "
+msgstr "Errore nella query Nominatim: "
+
+#: geoaddress.php:87
+msgid "Fehler bei der Geo-API-Abfrage"
+msgstr "Errore nella richiesta Geo-API"
+
+#: geoaddress.php:88
+msgid "Es gab ein Problem bei der Abfrage der Geo-API für Post-ID: "
+msgstr "Si è verificato un problema con la richiesta Geo-API per Post-ID: "
+
+#: geoaddress.php:93 geoaddress.php:94 geoaddress.php:95 geoaddress.php:96
+msgid "Unbekannt"
+msgstr "Sconosciuto"
+
+#.   translators: Table Row 9: Stadt
+#.   flag: format: html
+#: PostMapViewSimpleClass.php:176 PostMapViewSimpleClass.php:568
+msgid "Stadt"
+msgstr "Città"
+
+#.   translators: Table Row 4: Google
+#.   flag: format: html
+#: PostMapViewSimpleClass.php:289 PostMapViewSimpleClass.php:573
+msgid "Google"
+msgstr "Google"
+
+#.   translators: Table Row 1: Number
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:542
+msgid "Nr"
+msgstr "N"
+
+#.   translators: Table Row 2: Title
+#.   flag: format: html
+#: PostMapViewSimpleClass.php:545
+msgid "Titel"
+msgstr "Titolo"
+
+#.   translators: Table Row 3: Category
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:548
+msgid "Kategorie"
+msgstr "Categoria"
+
+#.   translators: Table Row 4: Distance
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:553
+msgid "Distanz"
+msgstr "Distanza"
+
+#.   translators: Table Row 5: Ascent
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:556
+msgid "Aufstieg"
+msgstr "Salita"
+
+#.   translators: Table Row 6: Descent
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:559
+msgid "Abstieg"
+msgstr "Discesa"
+
+#.   translators: Table Row 7: Country
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:562
+msgid "Land"
+msgstr "Paese"
+
+#.   translators: Table Row 8: Region
+#.   flag: format: text
+#: PostMapViewSimpleClass.php:565
+msgid "Region"
+msgstr "Regione"
