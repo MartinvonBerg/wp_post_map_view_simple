@@ -338,7 +338,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 }
                 // Die 'category' wird in PHP für den Klarnamen der Kategorie in der Tabelle benutzt. 
                 // Im JS zur Auswahl des Icons UND der Klarnamens im ControlLayer. 
-                [$catname, $icon, $iconpng] = find_best_category_match($feature['properties']['category'], $this->categoryFilter ); 
+                [$catname, $iconpng] = find_best_category_match($feature['properties']['category'], $this->categoryFilter ); 
 
                 if ($hasPopupInHTML) { 
                     // extract from maps marker pro geojson
@@ -777,7 +777,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             }
 
             $all_names = implode(',',array_merge($tag_names, $wpcat_names) );
-            [$cat, $icon, $iconPng] = find_best_category_match($all_names, $this->categoryFilter ); 
+            [$cat, $iconPng] = find_best_category_match($all_names, $this->categoryFilter ); 
             
             // extract the gpxfile from the shortcode fo fotoramay if any
             $content = $post->post_content;

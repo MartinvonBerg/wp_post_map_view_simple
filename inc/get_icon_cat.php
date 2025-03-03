@@ -28,7 +28,7 @@ defined('ABSPATH') or die('Are you ok?');
 function wp_postmap_load_category_mapping( $file = null ) {
     // set the default value according to the settings file
     $default = [
-        'default' => ['category' => 'Reisebericht', 'icon' => 'travel', 'icon-png' => 'travel.png'],
+        'default' => ['category' => 'Reisebericht', 'icon-png' => 'travel.png'],
         'mapping' => []
     ];
 
@@ -55,7 +55,7 @@ function find_best_category_match($keywords, $stopwords, $json_file=null) {
     $json_data = \mvbplugins\helpers\wp_postmap_load_category_mapping($json_file);
 
     if (!$json_data || !isset($json_data['mapping'])) {
-        return [$json_data['default']['category'], $json_data['default']['icon'], $json_data['default']['icon-png'] ] ?? ['','',''];
+        return [$json_data['default']['category'], $json_data['default']['icon-png'] ] ?? ['',''];
     }
 
     // Kategorien aus JSON extrahieren
@@ -102,11 +102,11 @@ function find_best_category_match($keywords, $stopwords, $json_file=null) {
 
     // Falls mehr als eine beste Übereinstimmung → Default zurückgeben
     if ($match_count > 1 || $match_count === 0) {
-        return [$json_data['default']['category'], $json_data['default']['icon'], $json_data['default']['icon-png'] ];
+        return [$json_data['default']['category'], $json_data['default']['icon-png'] ];
     } else {
         // Wenn genau eine beste Übereinstimmung gefunden wurde, zurückgeben
         $key = array_search($best_match, $categories);
-        return [$best_match, $json_data['mapping'][$key]['icon'], $json_data['mapping'][$key]['icon-png']];
+        return [$best_match, $json_data['mapping'][$key]['icon-png']];
     }
 }
 
