@@ -179,8 +179,11 @@ Upgrade is recommended. Preparation of Release is still missing.
 
 ## Changelog
 
+### 1.3.0 (07.03.2025)
+Google Maps links removed to avoid DSVGO problems. Replace by a link to HERE-we-go which is hosted in Europe.
+
 ### 1.2.0 (01.03.2025)
-Translation process updated, see I18N. Automatic generation of .htaccess file added.
+Translation process updated, see I18N chapter herein. Automatic generation of .htaccess file added.
 
 ### 1.1.0 (26.02.2025)
 Translation for en, it, es, fr included. Translation for Tabulator.js is done in the frontend (for leaflet it what so before). Prerequisite: The html content has to be in English. 
