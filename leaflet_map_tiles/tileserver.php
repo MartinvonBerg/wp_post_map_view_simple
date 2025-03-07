@@ -18,7 +18,9 @@ namespace mvbplugins\fotoramamulti;
  * @link       https://github.com/MartinvonBerg/Fotorama-Leaflet-Elevation
  */
 
-// TODO: cache fileage solution. What to do if files are too old?
+// Cache fileage solution in this script: combination with filemtime to check if file is too old won't work because for an existing file this script will not be called.
+// Option 1: Checking in .htaccess with RewriteMap (if supported). This method works only if the server supports RewriteMap. A custom validation function can be defined in an external script to check the file's age.  
+// Option 2: Modifying .htaccess rules so that tileserver.php is called even for existing files. The file's age can then be checked in tileserver.php, and it can be reloaded if necessary. However, this may lead to performance issues.  
 // Note: Do not convert to avif because performance will be worse than webp.
 
 // get the directory ot this file which is the cachedir and define other variables
@@ -32,77 +34,77 @@ $useWebp = true;
 $error = false;
 
 // return silently if the request is not a tile request
-if ( ! isset($_GET["tile"])) {
+if ( !isset($_GET["tile"]) ) {
 	return;
 }
 
 // partition the request code
-if ($_GET["tile"] === 'testfile.webp') {
+if ( $_GET["tile"] === 'testfile.webp' ) {
 	http_response_code(302);
 	echo('local htaccess is working');
 	return;
 }
 
 $req = preg_split('/(\/|\.)/', $_GET["tile"]);
-if ( \count($req) !== 5 ) {
+if ( count($req) !== 5 ) {
 	return;
 }
-$req[4] = \strtolower($req[4]);
+$req[4] = strtolower($req[4]);
 
-$tileServers = array(
-	"osm" => array(
+$tileServers = [
+	"osm" => [
 		"searchfor" => "osmde",
 		"localdir" 	=> "osm{$ds}{$req[1]}{$ds}{$req[2]}",
 		"server" 	=> "tile.openstreetmap.org/", //"tile.openstreetmap.org/", https://tile.openstreetmap.org/{z}/{x}/{y}.png
 		"tile" 		=> "{$req[1]}/{$req[2]}/{$req[3]}",
 		"file"		=> "{$req[3]}",
 		"ext" 		=> "png"
-	),
-	"otm" => array(
+	],
+	"otm" => [
 		"searchfor" => "opentopomap",
 		"localdir" 	=> "otm{$ds}{$req[1]}{$ds}{$req[2]}",
 		"server" 	=> "a.tile.opentopomap.org/",
 		"tile" 		=> "{$req[1]}/{$req[2]}/{$req[3]}",
 		"file"		=> "{$req[3]}",
 		"ext" 		=> "png"
-	),
-	"cycle" => array(
+	],
+	"cycle" => [
 		"searchfor" => "cyclosm",
 		"localdir" 	=> "cycle{$ds}{$req[1]}{$ds}{$req[2]}",
 		"server" 	=> "a.tile-cyclosm.openstreetmap.fr/cyclosm/",
 		"tile" 		=> "{$req[1]}/{$req[2]}/{$req[3]}",
 		"file"		=> "{$req[3]}",
 		"ext" 		=> "png"
-	),
-	"sat" => array(
+	],
+	"sat" => [
 		"searchfor" => "arcgisonline",
 		"localdir" 	=> "sat{$ds}{$req[1]}{$ds}{$req[2]}",
 		"server" 	=> "server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/",
 		"tile" 		=> "{$req[1]}/{$req[2]}/{$req[3]}",
 		"file"		=> "{$req[3]}",
 		"ext" 		=> "jpeg"
-	),
-);
+	],
+];
 
 // check if localdir is in request and get the requested tiletype.
-$tile ='';
-foreach ($tileServers as $key => $entry) {
-	if ( $req[0] === $key ) {
-		$tile = $key;
-		break;
-	}
-}
+$tile = array_key_exists($req[0], $tileServers) ? $req[0] : '';
 
-if ( $tile==='' || ! \is_numeric( $req[1]) || ! \is_numeric( $req[2]) || ! \is_numeric( $req[3]) || !( ($req[4] === 'webp') || ($req[4] === 'png') || ($req[4] === 'jpg') || ($req[4] === 'jpeg') )) {
-	http_response_code(404);
-	echo('request denied');
-	return;
+if (
+    $tile === '' || 
+    !ctype_digit($req[1]) || 
+    !ctype_digit($req[2]) || 
+    !ctype_digit($req[3]) || 
+    !in_array($req[4], ['webp', 'png', 'jpg', 'jpeg'])
+) {
+    http_response_code(404);
+    echo 'request denied';
+    return;
 }
 
 // create the directory name.
 $localDir = $cacheDir . $ds . $tileServers[$tile]["localdir"];
 
-if ( $req[4] !== 'webp') $useWebp = false;
+if ( $req[4] !== 'webp' ) $useWebp = false;
 
 // create the file name 
 $localFile = $localDir . $ds . $tileServers[$tile]["file"];
@@ -114,10 +116,11 @@ if ( $useWebp ) {
 	$headerMime = 'image/' . $req[4];
 }
 
-// check if file is available on server. // combine with filemtime to check if file is too old
+// check if file is already available on server. 
+// Hint: combination with filemtime to check if file is too old won't work because for an existing file this script will not be called.
 if ( \file_exists($localFile)) { 
 	$httpResCode = 200;
-} 
+}
 elseif ( $allowed ) 
 { // fallback if the file is still not available
 
@@ -266,11 +269,12 @@ function checkHtaccess()
 
 	if (\ini_get('allow_url_fopen') === '1') {
 		$url = $path . 'testfile.webp';
-		$context = stream_context_create( array(
-			'http'=>array(
+		$context = stream_context_create( [
+			'http'=>[
 				'timeout' => 5.0 // Das erzeugt bei Fehlern einen Verzögerung um 5 Sekunden!
-			)
-		), );
+			]
+		], 
+		);
 
 		// switch off PHP error reporting and get the url.
 		$ere = \error_reporting();

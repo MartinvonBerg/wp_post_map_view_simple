@@ -110,6 +110,7 @@ class MyTabulatorClass {
                     "Country":"Land",
                     "State":"Region",
                     "City":"Stadt",
+                    "Map":"Karte",
                 }
             },
             "it-it": {
@@ -134,7 +135,8 @@ class MyTabulatorClass {
                     "Descent": "Discesa",
                     "Country": "Paese",
                     "State": "Regione",
-                    "City": "Città"
+                    "City": "Città",
+                    "Map": "Mappa"
                 }
             },
             "fr-fr": {
@@ -159,7 +161,8 @@ class MyTabulatorClass {
                     "Descent": "Descente",
                     "Country": "Pays",
                     "State": "Région",
-                    "City": "Ville"
+                    "City": "Ville",
+                    "Map": "Carte"
                 }
             },
             "es-es": {
@@ -184,7 +187,8 @@ class MyTabulatorClass {
                     "Descent": "Descenso",
                     "Country": "País",
                     "State": "Región",
-                    "City": "Ciudad"
+                    "City": "Ciudad",
+                    "Map": "Mapa"
                 }
             }
         };

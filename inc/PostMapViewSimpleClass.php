@@ -288,7 +288,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( $this->tourfolder === '') {
             return '';
         }
-        $this->tableMapMoveSelector = 'Google'; // No I18n required!
+        $this->tableMapMoveSelector = 'Map'; // No I18n required!
         $tourDir = $this->up_dir . '/' . $this->tourfolder;
         $tourUrl = wp_get_upload_dir()['baseurl'] . '/' . $this->tourfolder;
         $pathSettingsFile = null;
@@ -562,9 +562,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $table_out  .= '<th data-type="html" data-selector="true">City</th>'; // I18n
             //$table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         } else {
-            /* translators: Table Row 4: Google which won't be translated */
+            /* translators: Table Row 4 or 10: Map Link*/
             /* flag: format: html */
-            $table_out  .= '<th data-type="html" data-filter="false" data-selector="true">Google</th>'; // I18n
+            $table_out  .= '<th data-type="html" data-filter="false" data-selector="true">Map</th>'; // I18n
             //$table_out  .= '<th>'.$this->tableMapMoveSelector.'</th>'; // tableMapMoveSelector
         }
         $table_out  .= '</tr></thead><tbody>';
@@ -577,7 +577,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 $geostatarr= \explode(' ', $data['geostat'] ); // gives strings of the values
                 
                 // define google url
-                $googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
+                //$googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
+                //https://wego.here.com/l/39.93171,16.1693?map=39.93306,16.16222,9
+                $googleurl = 'https://wego.here.com/l/' . $data['lat'] . ',' . $data['lon'] . '?map=' . $data['lat'] . ',' . $data['lon'] . '&z=9';
+                // OSM : https://www.openstreetmap.org/?mlat=39.93171&mlon=16.16933#map=9/39.93171/16.16933
                 
                 // define the table row 
                 $table_out  .= '<tr>';
@@ -596,7 +599,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             foreach ($data2 as $data) {
                 
                 // define google url
-                $googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
+                //$googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
+                $googleurl = 'https://wego.here.com/l/' . $data['lat'] . ',' . $data['lon'] . '?map=' . $data['lat'] . ',' . $data['lon'] . '&z=9';
+                // OSM : https://www.openstreetmap.org/?mlat=39.93171&mlon=16.16933#map=9/39.93171/16.16933
                 
                 // define the table row 
                 $table_out  .= '<tr>';
