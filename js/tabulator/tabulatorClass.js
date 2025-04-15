@@ -1,6 +1,6 @@
 //tabulatorClass.js
 /*!
-	tabulatorClass V 1.3.0
+	tabulatorClass V 1.3.1
 	license: GPL 2.0
 	Martin von Berg
 */
@@ -19,12 +19,12 @@ class MyTabulatorClass {
     
     options = {};
 
-    constructor(options={}) {
+    constructor (options={}) {
         this.options = options;
         this.locale = navigator.language.toLowerCase();
     }
 
-    HeaderFilter(headerValue, rowValue){
+    HeaderFilter (headerValue, rowValue) {
         //headerValue - the value of the header filter element
         //rowValue - the value of the column in this row
         //rowData - the data for the row being filtered
@@ -34,11 +34,11 @@ class MyTabulatorClass {
         return rowInt >= headerInt; //must return a boolean, true if it passes the filter.
     }
 
-    getTableColumns() {
-        const table = document.getElementById("post_table");
+    getTableColumns () {
+        const table = document.getElementById('post_table');
         if (!table) return [];
         
-        const headers = table.querySelectorAll("thead th");
+        const headers = table.querySelectorAll('thead th');
         const columns = [];
         
         headers.forEach(th => {
@@ -47,17 +47,17 @@ class MyTabulatorClass {
                 field: th.textContent.trim()
             };
             
-            if (th.dataset.type === "html") {
-                column.formatter = "html";
+            if (th.dataset.type === 'html') {
+                column.formatter = 'html';
             }
             
-            if (th.dataset.filter !== "false") {
-                column.headerFilter = "input";
+            if (th.dataset.filter !== 'false') {
+                column.headerFilter = 'input';
             }
             
-            if (th.dataset.filter === "number") {
-                column.hozAlign = "right";
-                column.headerFilterPlaceholder = ">...m";
+            if (th.dataset.filter === 'number') {
+                column.hozAlign = 'right';
+                column.headerFilterPlaceholder = '>...m';
                 column.headerFilterFunc = this.HeaderFilter;
                 column.headerFilterFuncParams = { Distanz: 0 };
             }
@@ -68,7 +68,7 @@ class MyTabulatorClass {
         return columns;
     }
 
-    getUserLocale() {
+    getUserLocale () {
         const availableLangs = Object.keys(this.getLangs());
         let userLang = navigator.language.toLowerCase(); // z. B. "de", "de-de", "fr-fr"
     
@@ -82,119 +82,119 @@ class MyTabulatorClass {
         }
     
         // Fallback auf Englisch
-        return "en-en";
+        return 'en-en';
     }
 
-    getLangs() {
+    getLangs () {
         return {
-            "de-de":{
-                "pagination":{
-                    "page_size":"Anzahl Touren", //label for the page size select element
-                    "page_title":"Zeige",//tooltip text for the numeric page button, appears in front of the page number (eg. "Show Page" will result in a tool tip of "Show Page 1" on the page 1 button)
-                    "first":"Erste", //text for the first page button
-                    "first_title":"Erste", //tooltip text for the first page button
-                    "last":"Letzte",
-                    "last_title":"Letzte",
-                    "prev":"Nächste",
-                    "prev_title":"Nächste",
-                    "next":"Nächste",
-                    "next_title":"Nächste Seite",
-                    "all":"Alle",
+            'de-de':{
+                'pagination':{
+                    'page_size':'Anzahl Touren', //label for the page size select element
+                    'page_title':'Zeige',//tooltip text for the numeric page button, appears in front of the page number (eg. "Show Page" will result in a tool tip of "Show Page 1" on the page 1 button)
+                    'first':'Erste', //text for the first page button
+                    'first_title':'Erste', //tooltip text for the first page button
+                    'last':'Letzte',
+                    'last_title':'Letzte',
+                    'prev':'Nächste',
+                    'prev_title':'Nächste',
+                    'next':'Nächste',
+                    'next_title':'Nächste Seite',
+                    'all':'Alle',
                 },
-                "columns":{
-                    "Title":"Titel", //replace the title of column name with the value "Name"
-                    "Category":"Kategorie",
-                    "Distance":"Distanz",
-                    "Ascent":"Aufstieg",
-                    "Descent":"Abstieg",
-                    "Country":"Land",
-                    "State":"Region",
-                    "City":"Stadt",
-                    "Map":"Karte",
+                'columns':{
+                    'Title':'Titel', //replace the title of column name with the value "Name"
+                    'Category':'Kategorie',
+                    'Distance':'Distanz',
+                    'Ascent':'Aufstieg',
+                    'Descent':'Abstieg',
+                    'Country':'Land',
+                    'State':'Region',
+                    'City':'Stadt',
+                    'Map':'Karte',
                 }
             },
-            "it-it": {
-                "pagination": {
-                    "page_size": "Numero di percorsi",
-                    "page_title": "Mostra",
-                    "first": "Primo",
-                    "first_title": "Primo",
-                    "last": "Ultimo",
-                    "last_title": "Ultimo",
-                    "prev": "Precedente",
-                    "prev_title": "Precedente",
-                    "next": "Successivo",
-                    "next_title": "Pagina successiva",
-                    "all": "Tutti"
+            'it-it': {
+                'pagination': {
+                    'page_size': 'Numero di percorsi',
+                    'page_title': 'Mostra',
+                    'first': 'Primo',
+                    'first_title': 'Primo',
+                    'last': 'Ultimo',
+                    'last_title': 'Ultimo',
+                    'prev': 'Precedente',
+                    'prev_title': 'Precedente',
+                    'next': 'Successivo',
+                    'next_title': 'Pagina successiva',
+                    'all': 'Tutti'
                 },
-                "columns": {
-                    "Title": "Titolo",
-                    "Category": "Categoria",
-                    "Distance": "Distanza",
-                    "Ascent": "Salita",
-                    "Descent": "Discesa",
-                    "Country": "Paese",
-                    "State": "Regione",
-                    "City": "Città",
-                    "Map": "Mappa"
+                'columns': {
+                    'Title': 'Titolo',
+                    'Category': 'Categoria',
+                    'Distance': 'Distanza',
+                    'Ascent': 'Salita',
+                    'Descent': 'Discesa',
+                    'Country': 'Paese',
+                    'State': 'Regione',
+                    'City': 'Città',
+                    'Map': 'Mappa'
                 }
             },
-            "fr-fr": {
-                "pagination": {
-                    "page_size": "Nombre de parcours",
-                    "page_title": "Afficher",
-                    "first": "Premier",
-                    "first_title": "Premier",
-                    "last": "Dernier",
-                    "last_title": "Dernier",
-                    "prev": "Précédent",
-                    "prev_title": "Précédent",
-                    "next": "Suivant",
-                    "next_title": "Page suivante",
-                    "all": "Tous"
+            'fr-fr': {
+                'pagination': {
+                    'page_size': 'Nombre de parcours',
+                    'page_title': 'Afficher',
+                    'first': 'Premier',
+                    'first_title': 'Premier',
+                    'last': 'Dernier',
+                    'last_title': 'Dernier',
+                    'prev': 'Précédent',
+                    'prev_title': 'Précédent',
+                    'next': 'Suivant',
+                    'next_title': 'Page suivante',
+                    'all': 'Tous'
                 },
-                "columns": {
-                    "Title": "Titre",
-                    "Category": "Catégorie",
-                    "Distance": "Distance",
-                    "Ascent": "Montée",
-                    "Descent": "Descente",
-                    "Country": "Pays",
-                    "State": "Région",
-                    "City": "Ville",
-                    "Map": "Carte"
+                'columns': {
+                    'Title': 'Titre',
+                    'Category': 'Catégorie',
+                    'Distance': 'Distance',
+                    'Ascent': 'Montée',
+                    'Descent': 'Descente',
+                    'Country': 'Pays',
+                    'State': 'Région',
+                    'City': 'Ville',
+                    'Map': 'Carte'
                 }
             },
-            "es-es": {
-                "pagination": {
-                    "page_size": "Número de rutas",
-                    "page_title": "Mostrar",
-                    "first": "Primero",
-                    "first_title": "Primero",
-                    "last": "Último",
-                    "last_title": "Último",
-                    "prev": "Anterior",
-                    "prev_title": "Anterior",
-                    "next": "Siguiente",
-                    "next_title": "Página siguiente",
-                    "all": "Todos"
+            'es-es': {
+                'pagination': {
+                    'page_size': 'Número de rutas',
+                    'page_title': 'Mostrar',
+                    'first': 'Primero',
+                    'first_title': 'Primero',
+                    'last': 'Último',
+                    'last_title': 'Último',
+                    'prev': 'Anterior',
+                    'prev_title': 'Anterior',
+                    'next': 'Siguiente',
+                    'next_title': 'Página siguiente',
+                    'all': 'Todos'
                 },
-                "columns": {
-                    "Title": "Título",
-                    "Category": "Categoría",
-                    "Distance": "Distancia",
-                    "Ascent": "Ascenso",
-                    "Descent": "Descenso",
-                    "Country": "País",
-                    "State": "Región",
-                    "City": "Ciudad",
-                    "Map": "Mapa"
+                'columns': {
+                    'Title': 'Título',
+                    'Category': 'Categoría',
+                    'Distance': 'Distancia',
+                    'Ascent': 'Ascenso',
+                    'Descent': 'Descenso',
+                    'Country': 'País',
+                    'State': 'Región',
+                    'City': 'Ciudad',
+                    'Map': 'Mapa'
                 }
             }
         };
     }
 
-    createTable(tableId, options={}){
+    createTable (tableId, options={}) {
         let page_size = options.tablePageSize ? options.tablePageSize : 20;
         let tableHeight = options.tableHeight ? options.tableHeight : '0px';
         let tabulatorOptions = {};
@@ -202,14 +202,14 @@ class MyTabulatorClass {
 
         if (options.type === 'tourmap') {
             tabulatorOptions = {
-                layout: "fitDataTable", //
+                layout: 'fitDataTable', //
                 locale: this.getUserLocale(),
                 height: tableHeight,
                 columnDefaults: { //
                     widthShrink: 1, // Passt Spalten flexibel an, aber nicht größer als nötig
                 },
                 langs:this.getLangs(),
-                pagination: "local",
+                pagination: 'local',
                 paginationSize: page_size,
                 paginationSizeSelector:[5, 10, page_size, 50, true],
                 movableColumns:false,
@@ -217,11 +217,11 @@ class MyTabulatorClass {
             };
         } else {
             tabulatorOptions = {
-                layout: "fitData",
+                layout: 'fitData',
                 locale: this.getUserLocale(),
                 height: tableHeight,
                 langs:this.getLangs(),
-                pagination: "local",
+                pagination: 'local',
                 paginationSize: page_size,
                 paginationSizeSelector:[5, 10, page_size, 50, true],
                 movableColumns:false,
@@ -229,7 +229,7 @@ class MyTabulatorClass {
             };
         }
 
-        if ( tableHeight == '0px' ) {
+        if (tableHeight == '0px') {
             delete tabulatorOptions.height;
         }
         return new Tabulator(tableId, tabulatorOptions);

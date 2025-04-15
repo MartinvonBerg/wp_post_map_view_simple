@@ -51,7 +51,7 @@ class gpxTrackClass {
      *                      this.pageVariables.sw_options.trackwidth
      * @global {object} pageVarsForJs[number].tracks_polyline_options
      */
-    constructor(number, mapobject, tracks, trackNumber, trackColour = '#ff0000') {
+    constructor (number, mapobject, tracks, trackNumber, trackColour = '#ff0000') {
         this.number = number;
         this.pageVariables = pageVarsForJs[number];
         pageVarsForJs[number].tracks_polyline_options = [];
@@ -60,7 +60,7 @@ class gpxTrackClass {
         this.mapobject = mapobject;
         this.trackNumber = trackNumber;
         this.trackColour = trackColour;
-        this.trackurl = tracks['track_'+ trackNumber.toString() ].url; // set track url : might be url or string in xml format or geojson format.
+        this.trackurl = tracks['track_'+ trackNumber.toString()].url; // set track url : might be url or string in xml format or geojson format.
 
         // set the imagePath and size for the Leaflet default icons
         L.Icon.Default.prototype.options.iconUrl = this.pageVariables.imagepath + 'marker-icon.png';
@@ -91,7 +91,7 @@ class gpxTrackClass {
      * @param {string|object} input 
      * @returns {string} 'geojson', 'xml' or 'url'
      */
-    #getTrackUrlType(input) {
+    #getTrackUrlType (input) {
 
         if (typeof input === 'string' && input.startsWith('<')) { // direct XML has to start with a <
             return 'xml'
@@ -111,7 +111,7 @@ class gpxTrackClass {
      * @param {string} shadowpng 
      * @returns {object} icon leaflet.icon-object-type
      */
-    #setIcon(path, iconpng, shadowpng, retinapng='') {
+    #setIcon (path, iconpng, shadowpng, retinapng='') {
         let icon = L.icon({ 
             iconUrl: path + iconpng,
             iconRetinaUrl: path + retinapng,
@@ -125,8 +125,8 @@ class gpxTrackClass {
         return icon;
     }
 
-    #handleMouseOver(e) {
-        if ( e.type === 'mouseover' && (this.trackNumber == this.mapobject.currentTrack ) ) {
+    #handleMouseOver (e) {
+        if (e.type === 'mouseover' && (this.trackNumber == this.mapobject.currentTrack)) {
             // get id in coords. triggerEvent
             const changed = new CustomEvent('mouseoverpath', {
                 detail: {
@@ -138,7 +138,7 @@ class gpxTrackClass {
               });
               e.layer._map._container.dispatchEvent(changed);
 
-        } else if ( e.type === 'mouseover' && (this.trackNumber != this.mapobject.currentTrack ) ) {
+        } else if (e.type === 'mouseover' && (this.trackNumber != this.mapobject.currentTrack)) {
             const changed = new CustomEvent('changetrack', {
                 detail: {
                     name: 'changetrack',
@@ -159,7 +159,7 @@ class gpxTrackClass {
      * @param {none} - no parameters
      * @returns {none} - no return values
      */
-    showGeoJson() {
+    showGeoJson () {
         let coords = [];
         let elevs = [];
         let layers = [];
@@ -178,27 +178,27 @@ class gpxTrackClass {
 
         this.trackurl.features[0].geometry.coordinates.forEach(element => {
             let newElem = {
-                "lat": element[1],
-                "lng": element[0],
-                "meta": {
-                    "time": null,
-                    "ele": element[2],
-                    "hr": null,
-                    "cad": null,
-                    "atemp": null,
-                    "speed": 0
+                'lat': element[1],
+                'lng': element[0],
+                'meta': {
+                    'time': null,
+                    'ele': element[2],
+                    'hr': null,
+                    'cad': null,
+                    'atemp': null,
+                    'speed': 0
                 }
             };
             coords.push(newElem);
             // calc the dist from the last element and add to total dist.
             if (i==0) {lastCoords = newElem;}
-            dist = dist + calcDist( lastCoords.lat, lastCoords.lng, newElem.lat, newElem.lng );
+            dist = dist + calcDist(lastCoords.lat, lastCoords.lng, newElem.lat, newElem.lng);
             lastCoords = newElem;
             
             let newelev = [
                 dist, // dist from null or beginning of the track.
                 element[2],
-                dist.toFixed(2) + " km, " + element[2].toFixed(0) + " m",
+                dist.toFixed(2) + ' km, ' + element[2].toFixed(0) + ' m',
                 ];
             elevs.push(newelev);
             i+=1;
@@ -222,7 +222,7 @@ class gpxTrackClass {
 
         // this.setTrackInfo(); // set track statistics
         this.gpxTracks._info = {};
-        this.gpxTracks._info.desc = this.trackurl.properties.description || "";
+        this.gpxTracks._info.desc = this.trackurl.properties.description || '';
         this.setTrackInfo();
 
         // set track name and bounds in leaflet
@@ -246,7 +246,7 @@ class gpxTrackClass {
      * @global {object} this.polyline_options as return with stored results in {color, weight, type} where type is the type of the track extracted from the xml
      * @return {number} number of different track types.
      */
-    #getTrackTypes() {
+    #getTrackTypes () {
         
         let TypesInTrack = []; 
         const resultSet = new Set();
@@ -270,7 +270,7 @@ class gpxTrackClass {
 
         // get the number of different track types in the track
         let i = 1;
-        let resultArray = Object.assign(...Array.from(resultSet, v => ({[v]:i++}) ) ) ;
+        let resultArray = Object.assign(...Array.from(resultSet, v => ({[v]:i++}))) ;
         
         // and calculate equally distributed colors
         let colors = calculateEquallyDistributedColors(this.trackColour, nTypesInTrack);
@@ -293,7 +293,7 @@ class gpxTrackClass {
      * @param {object} polyline_options - polyline_options for the different sub-tracks
      * @return {void} This function does not return anything.
      */
-    async showTrack( polyline_options = null ) {
+    async showTrack (polyline_options = null) {
         
         if (polyline_options == null) {
             polyline_options = {
@@ -354,14 +354,14 @@ class gpxTrackClass {
      * 
      * @returns {void}
      */
-    setTrackInfo() {
+    setTrackInfo () {
         let info = this.gpxTracks._info.desc;
         if (info) {info = info.split(' ')} else {info='';};
 
         if (info[0]=='Dist:' && info[1] && info[4] && info[7]) {
-            this.pageVariables.tracks['track_'+ this.trackNumber.toString() ].info = this.gpxTracks._info.desc;
+            this.pageVariables.tracks['track_'+ this.trackNumber.toString()].info = this.gpxTracks._info.desc;
         } else {
-            this.pageVariables.tracks['track_'+ this.trackNumber.toString() ].info = this.calcGpxTrackInfo();
+            this.pageVariables.tracks['track_'+ this.trackNumber.toString()].info = this.calcGpxTrackInfo();
         }
 
     }
@@ -373,7 +373,7 @@ class gpxTrackClass {
      * @param {object} point - The point for which to find the index.
      * @return {number} The index of the closest coordinate.
      */
-    getIndexForCoords(point) {
+    getIndexForCoords (point) {
         let n = this.coords.length
         let dist = Infinity;
         let index = -1;
@@ -402,11 +402,11 @@ class gpxTrackClass {
      *  
      * @returns {string} 'Dist: 11 km, Gain: 22 Hm, Loss: 33 Hm' : The distance and elevation data for the track.
      */
-    calcGpxTrackInfo(inCoords=null) {
+    calcGpxTrackInfo (inCoords=null) {
         let info = '';
         let coords = inCoords ? inCoords : this.coords;
 
-        if ( coords.length == 0 ) return 'No Data found';
+        if (coords.length == 0) return 'No Data found';
 
         //elevation
         let lastConsideredElevation = coords[0].meta.ele;
@@ -417,14 +417,14 @@ class gpxTrackClass {
         let lastConsideredPoint = [coords[0].lat, coords[0].lng];
         let cumulativeDistance = 0;
         
-        if ( this.doTrackCalc && typeof(coords) === 'array' ) {
+        if (this.doTrackCalc && typeof(coords) === 'array') {
             coords.forEach((point, index) => {
                 let curElevation = point.meta.ele;
                 
-                if ( typeof(curElevation === 'number') ){
+                if (typeof(curElevation === 'number')) {
                     let elevationDelta = curElevation - lastConsideredElevation;
 
-                    if ( Math.abs(elevationDelta) > this.eleSmoothing ) {
+                    if (Math.abs(elevationDelta) > this.eleSmoothing) {
                         elevationDelta>0 ? cumulativeElevationGain += elevationDelta : '';
                         elevationDelta<0 ? cumulativeElevationLoss -= elevationDelta : '';
                         lastConsideredElevation = curElevation;
@@ -444,15 +444,15 @@ class gpxTrackClass {
             this.descent = cumulativeElevationLoss.toString();
             info = 'Dist: '+ cumulativeDistance/1000 +' km, Gain: '+ cumulativeElevationGain +' Hm, Loss: '+ cumulativeElevationLoss+' Hm';  
 
-        } else if ( this.doTrackCalc && typeof(coords) === 'object' ) {
+        } else if (this.doTrackCalc && typeof(coords) === 'object') {
             for (const [index, point] of Object.entries(coords)) {
     
                 let curElevation = point.meta.ele;
                 
-                if ( typeof(curElevation === 'number') ){
+                if (typeof(curElevation === 'number')) {
 
                     let elevationDelta = curElevation - lastConsideredElevation;
-                    if ( Math.abs(elevationDelta) > this.eleSmoothing ) {
+                    if (Math.abs(elevationDelta) > this.eleSmoothing) {
                         elevationDelta>0 ? cumulativeElevationGain += elevationDelta : '';
                         elevationDelta<0 ? cumulativeElevationLoss -= elevationDelta : '';
                         lastConsideredElevation = curElevation;

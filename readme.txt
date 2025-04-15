@@ -3,10 +3,10 @@ Contributors: Martin von Berg
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CQA6XZ7LUMBJQ
 Tags: leaflet, map, markercluster, table, post-map, travel-map
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 8.0
 License: GPLv2
-Stable Tag: 1.3.0
+Stable Tag: 1.3.1
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 

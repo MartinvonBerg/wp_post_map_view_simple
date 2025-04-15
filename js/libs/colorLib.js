@@ -14,7 +14,7 @@ export { calculateEquallyDistributedColors };
      * @param {number} numColors - The number of colors to calculate.
      * @return {Array<string>} The array of equally distributed colors.
      */
-function calculateEquallyDistributedColors(startHex, numColors) {
+function calculateEquallyDistributedColors (startHex, numColors) {
     // Parse the starting color hex value
     const r = parseInt(startHex.slice(1, 3), 16);
     const g = parseInt(startHex.slice(3, 5), 16);
@@ -47,7 +47,7 @@ function calculateEquallyDistributedColors(startHex, numColors) {
  * @param {number} b - The blue component of the RGB color (0-255).
  * @return {object} An object representing the HSL color with properties h, s, and l.
  */
-function rgbToHsl(r, g, b) {
+function rgbToHsl (r, g, b) {
     r /= 255;
     g /= 255;
     b /= 255;
@@ -89,9 +89,9 @@ function rgbToHsl(r, g, b) {
  * @param {number} l - The lightness value of the HSL color (0-1).
  * @return {string} The hexadecimal color code.
  */
-function hslToHex(h, s, l) {
+function hslToHex (h, s, l) {
     // treatment of wrong input values
-    if ( (h<0) || (h>360) || (s<0) || (s>1) || (l<0) || (l>1) ) {
+    if ((h<0) || (h>360) || (s<0) || (s>1) || (l<0) || (l>1)) {
           return '#000000';
     }
   

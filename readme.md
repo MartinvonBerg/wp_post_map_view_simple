@@ -179,6 +179,10 @@ Upgrade is recommended. Preparation of Release is still missing.
 
 ## Changelog
 
+### 1.3.1 (15.05.2025)
+- Tested with WP 6.8. No changes for that.
+- introduced ESlint. Non functional changes for that.
+
 ### 1.3.0 (07.03.2025)
 Google Maps links removed to avoid DSVGO problems. Replace by a link to HERE-we-go which is hosted in Europe.
 

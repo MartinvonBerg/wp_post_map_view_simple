@@ -1,4 +1,4 @@
-function isValidCssSize(value) {
+function isValidCssSize (value) {
     if (typeof value !== 'string') return false;
 
     // Regulärer Ausdruck für gültige CSS-Größenangaben mit Zahlen > 0
@@ -13,7 +13,7 @@ function isValidCssSize(value) {
     return true;
   }
 
-  function isValidAspectRatio(value) {
+  function isValidAspectRatio (value) {
       if (typeof value !== 'string') return false;
       
       // Regulärer Ausdruck für aspect-ratio: entweder ein Float oder zwei Integer mit Schrägstrich

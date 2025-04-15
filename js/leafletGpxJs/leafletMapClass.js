@@ -17,7 +17,7 @@ import 'leaflet.fullscreen/Control.FullScreen.css';
 //import '../../css/wp_post_map_view_simple.css'; // is no loaded on PHP
 import '../../css/leafletMapClass.css';
 
-import "leaflet"; 
+import 'leaflet'; 
 import 'leaflet.markercluster';
 import 'leaflet.markercluster.layersupport';
 import 'leaflet-gesture-handling';
@@ -97,7 +97,7 @@ class LeafletMap {
      * @param {array} center the map center as lat, lon coord value
      * @param {int} zoom the zoom factor to use for a map with center coords.
      */
-    constructor(number, elementOnPage, center=null, zoom=null) {
+    constructor (number, elementOnPage, center=null, zoom=null) {
         LeafletMap.count++; // update the number of instances on construct.
         this.number = number;
         this.elementOnPage = elementOnPage;
@@ -123,7 +123,7 @@ class LeafletMap {
         this.myIcon5 = this.setIcon(this.pageVariables.imagepath, 'video-active2.png', 'shadow.png');
 
         //change options for maps without gpx-tracks so without elevation.
-        if ( center !== null & zoom !== null) { 
+        if (center !== null & zoom !== null) { 
             this.opts.map.center = center;
             this.opts.map.zoom = zoom;
         }
@@ -150,12 +150,12 @@ class LeafletMap {
         this.setFullscreenButton()
     }
 
-    setBounds(bds) {
+    setBounds (bds) {
         this.bounds = bds;
     }
 
-    getFeatureGroup( markers) {
-        let _group = new L.featureGroup( markers );
+    getFeatureGroup (markers) {
+        let _group = new L.featureGroup(markers);
         return _group;
     }
 
@@ -166,7 +166,7 @@ class LeafletMap {
      * @param {string} shadowpng 
      * @returns {object} icon leaflet.icon-object-type
      */
-    setIcon(path, iconpng, shadowpng, iconSize = [32,32]) {
+    setIcon (path, iconpng, shadowpng, iconSize = [32,32]) {
         let icon = L.icon({ 
             iconUrl: path + iconpng,
             iconSize: iconSize,
@@ -182,18 +182,18 @@ class LeafletMap {
     /**
      * set the path to the tileserver and check the availability of htacces on server
      */
-    getTileServerPath() {
+    getTileServerPath () {
         if (this.tileserver ==='' && this.useLocalTiles === true) {
             this.tileserver = this.pageVariables.imagepath;
             this.tileserver = this.tileserver.replace('images/','leaflet_map_tiles/');
             
             // check for htacces here and set the path respectively
-            if ( LeafletMap.count === 1) {
+            if (LeafletMap.count === 1) {
                 LeafletMap.isHtaccessOK = this.pageVariables.htaccessTileServerIsOK === 'true';
             }
 
                                     
-            if ( ! LeafletMap.isHtaccessOK ) {
+            if (! LeafletMap.isHtaccessOK) {
                 // local htaccess is not working. Change url for tileserver requests.
                 this.tileserver = this.tileserver + 'tileserver.php/?tile=';
             } 
@@ -203,10 +203,10 @@ class LeafletMap {
     /**
      * Define the map layers that should be used for the Leaflet Map.
      */
-    defMapLayers() {
+    defMapLayers () {
         
         let ext = ['webp', 'webp', 'webp', 'webp']; 
-        if ( ! this.useWebpTiles ) {
+        if (! this.useWebpTiles) {
             ext = ['png', 'png', 'png', 'jpeg']
         } 
 
@@ -218,7 +218,7 @@ class LeafletMap {
         ]
 
         // define map layers
-        if ( this.useLocalTiles ) {
+        if (this.useLocalTiles) {
          
             this.layer1 = new L.tileLayer(this.tileserver + 'otm/{z}/{x}/{y}.' + ext[0], {
                 maxZoom: this.maxZoomValue,
@@ -270,15 +270,15 @@ class LeafletMap {
 
         // define base layers for leaflet map
         this.baseLayers = {
-            "OpenStreetMap": this.layer2,
-            "OpenTopoMap"  : this.layer1,
-            "CycleOSM"     : this.layer3,
-            "Satellit"     : this.layer4
+            'OpenStreetMap': this.layer2,
+            'OpenTopoMap'  : this.layer1,
+            'CycleOSM'     : this.layer3,
+            'Satellit'     : this.layer4
         };
        
     }
     
-    i18n(text) {
+    i18n (text) {
         if (typeof(L.registerLocale) === 'function') {
             return L._(text);
         } else if (LeafletMap.myLocale !== null && typeof(LeafletMap.myLocale[text]) !== 'undefined') {
@@ -292,65 +292,65 @@ class LeafletMap {
      * set the i18n values for the leaflet map.
      * @returns {string|null} the string value for the locale or null, if none available.
      */
-    setLanguage() {
+    setLanguage () {
         let de = {
-            'Show all' : "Alles anzeigen",
-            'Distance' : "Strecke",
-            "Ascent"   : "Anstieg",
-            "Descent"  : "Abstieg",
-            "Altitude" : "Höhe", // is in file /src/altitude.js
-            "Images"   : "Fotos",
+            'Show all' : 'Alles anzeigen',
+            'Distance' : 'Strecke',
+            'Ascent'   : 'Anstieg',
+            'Descent'  : 'Abstieg',
+            'Altitude' : 'Höhe', // is in file /src/altitude.js
+            'Images'   : 'Fotos',
             'Show fullscreen' : 'Zeige Vollbild',
             'Exit fullscreen' : 'Vollbild beenden',
-            "y: "				: "Höhe: ",
-			"x: "				: "Strecke: ",
-            "All" : "Alle",
-            "None" : "Keine",
+            'y: '				: 'Höhe: ',
+			'x: '				: 'Strecke: ',
+            'All' : 'Alle',
+            'None' : 'Keine',
         };
 
         let it = {
-            'Show all' : "Mostra Tutti",
-            'Distance' : "Distanza",
-            "Ascent"   : "Salita",
-            "Descent"  : "Discesa",
-            "Altitude" : "Altitudine", // is in file /src/altitude.js
-            "Images"   : "Foto",
+            'Show all' : 'Mostra Tutti',
+            'Distance' : 'Distanza',
+            'Ascent'   : 'Salita',
+            'Descent'  : 'Discesa',
+            'Altitude' : 'Altitudine', // is in file /src/altitude.js
+            'Images'   : 'Foto',
             'Show fullscreen' : 'Mappa a schermo intero',
             'Exit fullscreen' : 'Esci schermo intero',
-            "y: "				: "Altitudine: ",
-			"x: "				: "Distanza: ",
-            "All" : "Tutti",
-            "None" : "Nessuno",
+            'y: '				: 'Altitudine: ',
+			'x: '				: 'Distanza: ',
+            'All' : 'Tutti',
+            'None' : 'Nessuno',
         };
 
         let fr = {
-            'Show all' : "Afficher Tout",
-            'Distance' : "Distance",
-            "Ascent"   : "Ascente",
-            "Descent"  : "Descente",
-            "Altitude" : "Altitude", // is in file /src/altitude.js
-            "Images"   : "Images",
+            'Show all' : 'Afficher Tout',
+            'Distance' : 'Distance',
+            'Ascent'   : 'Ascente',
+            'Descent'  : 'Descente',
+            'Altitude' : 'Altitude', // is in file /src/altitude.js
+            'Images'   : 'Images',
             'Show fullscreen' : 'Afficher carte en plein écran',
             'Exit fullscreen' : 'Quitter le mode plein écran',
-            "y: "				: "Altitude: ",
-			"x: "				: "Distance: ",
-            "All" : "Tout",
-            "None" : "Aucun",
+            'y: '				: 'Altitude: ',
+			'x: '				: 'Distance: ',
+            'All' : 'Tout',
+            'None' : 'Aucun',
         };
 
         let es = {
-            'Show all' : "Mostrar Todo",
-            'Distance' : "Distancia",
-            "Ascent"   : "Ascenso",
-            "Descent"  : "Descenso",
-            "Altitude" : "Altura", // is in file /src/altitude.js
-            "Images"   : "Fotos",
+            'Show all' : 'Mostrar Todo',
+            'Distance' : 'Distancia',
+            'Ascent'   : 'Ascenso',
+            'Descent'  : 'Descenso',
+            'Altitude' : 'Altura', // is in file /src/altitude.js
+            'Images'   : 'Fotos',
             'Show fullscreen' : 'Mostrar pantalla completa',
             'Exit fullscreen' : 'Salir de pantalla completa',
-            "y: "				: "Altura: ",
-			"x: "				: "Distancia: ",
-            "All" : "Todo",
-            "None" : "Nada",
+            'y: '				: 'Altura: ',
+			'x: '				: 'Distancia: ',
+            'All' : 'Todo',
+            'None' : 'Nada',
         };
 
         let langs = {'de': de, 'it':it, 'fr':fr, 'es':es};
@@ -362,9 +362,9 @@ class LeafletMap {
             L._ = L.i18n = this.i18n;
         }
 
-        if ( (lang == 'de') || (lang == 'it') || (lang == 'fr') || (lang == 'es') ) {
+        if ((lang == 'de') || (lang == 'it') || (lang == 'fr') || (lang == 'es')) {
             if (typeof(L.registerLocale) === 'function') {
-                L.registerLocale(lang, langs[lang] );
+                L.registerLocale(lang, langs[lang]);
                 L.setLocale(lang);
             } 
             return langs[lang];
@@ -377,7 +377,7 @@ class LeafletMap {
     /**
      * show the map according to the PHP setting.
      */
-    showSelectedMap() {
+    showSelectedMap () {
         if (this.pageVariables.mapselector === 'OpenStreetMap') {
             this.map.addLayer(this.baseLayers.OpenStreetMap); // this one is preselected for one gpx-track
         } else if (this.pageVariables.mapselector === 'OpenTopoMap') {
@@ -391,10 +391,10 @@ class LeafletMap {
         }
     }
 
-    setMapControls() {
+    setMapControls () {
         let classThis = this;
 
-        if ( ! this.#isMobile ) {
+        if (! this.#isMobile) {
             this.controlZoom = new L.Control.Zoom(this.opts.zoomControl);
             this.controlZoom.addTo(this.map);
         }
@@ -403,7 +403,7 @@ class LeafletMap {
         L.Control.Watermark = L.Control.extend({
             onAdd: function () {
                 let img = L.DomUtil.create('img');
-                img.src = classThis.pageVariables.imagepath + "/lupe_p_32.png";
+                img.src = classThis.pageVariables.imagepath + '/lupe_p_32.png';
                 img.style.background = 'white';
                 img.style.width = '32px';
                 img.style.height = '32px';
@@ -437,9 +437,9 @@ class LeafletMap {
         //}
     }
 
-    setFullscreenButton() {
+    setFullscreenButton () {
         // create a fullscreen button and add it to the map
-        import(/* webpackChunkName: "ControlFullscreen" */ 'leaflet.fullscreen').then( () => {
+        import(/* webpackChunkName: "ControlFullscreen" */ 'leaflet.fullscreen').then(() => {
             // the next two lines are here for testing
             let locLL = {};
             typeof(MyLL) === 'undefined' ? locLL = L : locLL = MyLL;
@@ -461,8 +461,8 @@ class LeafletMap {
      * Create a single marker on the map with myIcon2.
      * @param {string} markertext text to show on hover over marker.
      */
-    createSingleMarker(markertext) {
-        L.marker(this.opts.map.center, { title: markertext, icon: this.myIcon2 } ).addTo(this.map);
+    createSingleMarker (markertext) {
+        L.marker(this.opts.map.center, { title: markertext, icon: this.myIcon2 }).addTo(this.map);
     }
 
     /**
@@ -470,7 +470,7 @@ class LeafletMap {
      * @param {array} markers
      * @param {boolean} fit fit the map to the leaflet map markers for the images shown in slider
      */
-    createFotoramaMarkers(markers, fit=true) {
+    createFotoramaMarkers (markers, fit=true) {
         let { marker, j, testgroup } = this.createMarkers(markers);
         this.mrk = marker;
         this.controlLayer.addOverlay(this.group1, this.i18n('Images') + ' (' + j + ')');
@@ -484,7 +484,7 @@ class LeafletMap {
      * @param {array} imgdata 
      * @returns {array} bounds
      */
-    createMarkers(imgdata) {
+    createMarkers (imgdata) {
         let classThis = this;
         this.group1 = L.layerGroup();
         let testgroup = L.featureGroup();
@@ -495,7 +495,7 @@ class LeafletMap {
 
         // define image markers for map
         imgdata.forEach(tour => {
-            if ((tour["coord"][0] == null) || (tour["coord"][1] == null)) {
+            if ((tour['coord'][0] == null) || (tour['coord'][1] == null)) {
                 // do nothing. skip this image if no gpx-data provided.
             }
             else {
@@ -505,15 +505,15 @@ class LeafletMap {
                 } else {
                     selectedIcon = this.myIcon1;
                 }
-                marker.push(new L.Marker(tour["coord"], { title: tour["title"], icon: selectedIcon, id: j, riseOnHover: true, }));
+                marker.push(new L.Marker(tour['coord'], { title: tour['title'], icon: selectedIcon, id: j, riseOnHover: true, }));
 
-                if (("srcset" in tour) && (Object.keys(tour["srcset"]).length)) { // "srcset" in tour
+                if (('srcset' in tour) && (Object.keys(tour['srcset']).length)) { // "srcset" in tour
                     var key = Object.keys(tour.srcset)[0];
-                    marker[j].bindPopup('<div>' + tour["title"] + '<br><img class="leaf_pup_img" src="' + tour.srcset[key] + '"></div>', {
-                        maxWidth: "auto",
+                    marker[j].bindPopup('<div>' + tour['title'] + '<br><img class="leaf_pup_img" src="' + tour.srcset[key] + '"></div>', {
+                        maxWidth: 'auto',
                     });
                 } else {
-                    marker[j].bindPopup(tour["title"]);
+                    marker[j].bindPopup(tour['title']);
                 }
 
                 marker[j].addTo(this.group1);
@@ -521,7 +521,7 @@ class LeafletMap {
                 // trigger click on marker: marker.on('click', ....)
                 marker[j].on('click', function (a) {
                     // get the index number of the map on the page
-                    let source = parseInt( a.originalEvent.currentTarget.id.replace('map', '') );
+                    let source = parseInt(a.originalEvent.currentTarget.id.replace('map', ''));
                                        
                     const changed = new CustomEvent('mapmarkerclick', {
                         detail: {
@@ -551,7 +551,7 @@ class LeafletMap {
      * remove old markers - on change only
      */
     unSetActiveMarker () {
-        if ( typeof(this.storemarker.setIcon)==='function' && typeof(this.storemarker.addTo)==='function') {
+        if (typeof(this.storemarker.setIcon)==='function' && typeof(this.storemarker.addTo)==='function') {
             // remove old markers - on change only. --> removeMarkers
             this.map.removeLayer(this.newmarker);
             // differ between image and video
@@ -568,12 +568,12 @@ class LeafletMap {
      * update or change the marker for the active image.
      * @param {int} markerNumber 
      */
-    setActiveMarker ( markerNumber ) {
-        if ( markerNumber === undefined) return;
+    setActiveMarker (markerNumber) {
+        if (markerNumber === undefined) return;
 
         this.storemarker = this.mrk[markerNumber];
         this.newmarker = this.mrk[markerNumber];
-        this.map.removeLayer( this.mrk[markerNumber]);
+        this.map.removeLayer(this.mrk[markerNumber]);
         // differ between image and video
         if (this.pageVariables.imgdata[markerNumber].mime === 'video') this.newmarker.setIcon(this.myIcon5) 
         else this.newmarker.setIcon(this.myIcon3);
@@ -585,22 +585,22 @@ class LeafletMap {
      * set new Bounds of Map according to the shown Markers and already predefined bounds.
      * @param {object} markergroup group of markery as leaflet markergroup
      */
-    setBoundsToMarkers( markergroup ) {
+    setBoundsToMarkers (markergroup) {
         let oldbounds = this.bounds;
         let newbounds = [];
 
-        if ( markergroup instanceof L.LayerGroup ) {
+        if (markergroup instanceof L.LayerGroup) {
             newbounds = markergroup.getBounds().pad(0.1);
         } else {
             newbounds = oldbounds;
         }
 
         // fit map to bounds and set zoom level
-        if ( (newbounds.length !== 0) && (newbounds instanceof L.LatLngBounds) ) {
+        if ((newbounds.length !== 0) && (newbounds instanceof L.LatLngBounds)) {
             this.map.fitBounds(newbounds);
             // set the max zoom level for markers exactly on the same postion
             let curzoom = this.map.getZoom();
-            if ( curzoom == this.maxZoomValue ) {
+            if (curzoom == this.maxZoomValue) {
                 this.map.fitBounds(newbounds, {maxZoom : this.maxZoomValue});
             }
         }
@@ -608,8 +608,8 @@ class LeafletMap {
     }
 
     // update marker on click
-    mapFlyTo(coordinates=[0,0]) {
-        this.map.flyTo( coordinates );
+    mapFlyTo (coordinates=[0,0]) {
+        this.map.flyTo(coordinates);
     }
 
 }

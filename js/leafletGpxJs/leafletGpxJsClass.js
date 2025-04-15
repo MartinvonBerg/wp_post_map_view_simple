@@ -29,7 +29,7 @@ class LeafletGpxJs extends LeafletMap {
     currentTrack = 0;
     preload = true;
 
-    constructor(number, elementOnPage, preload=null, center=null, zoom=null ) {
+    constructor (number, elementOnPage, preload=null, center=null, zoom=null) {
         super(number, elementOnPage, center=null, zoom=null);
 
         if (preload !== null) {
@@ -55,7 +55,7 @@ class LeafletGpxJs extends LeafletMap {
      *            this.pageVariables.sw_options.trackwidth
      * @global {object} pageVarsForJs[number].tracks_polyline_options
      */
-    async createTrackOnMap() {
+    async createTrackOnMap () {
         // generate the track colors
         let number = this.number;
         this.trackStartColour = pageVarsForJs[number].sw_options.trackcolour ?? '#ff0000';
@@ -63,15 +63,15 @@ class LeafletGpxJs extends LeafletMap {
         this.trackColours = calculateEquallyDistributedColors(this.trackStartColour, this.pageVariables.ngpxfiles);
 
         // generate all tracks on the map 
-        for (const [key, track] of Object.entries( this.pageVariables.tracks )) {
+        for (const [key, track] of Object.entries(this.pageVariables.tracks)) {
             let trackNumber = parseInt(key.replace(/\D/g,''));
             this.track[trackNumber] = await this.createTrack(number, trackNumber).then(results => { 
               return results ;
             });
             // get all bounds from all tracks. These bounds are not available if asyncLoading is true.
-            if ( this.track[trackNumber].bounds !== null && this.track[trackNumber].bounds.isValid() ) {
+            if (this.track[trackNumber].bounds !== null && this.track[trackNumber].bounds.isValid()) {
               this.allBounds[trackNumber] = this.track[trackNumber].bounds;
-            } else if ( this.bounds ) {
+            } else if (this.bounds) {
               this.allBounds[trackNumber] = this.bounds;
             } 
         };
@@ -85,8 +85,8 @@ class LeafletGpxJs extends LeafletMap {
         this.map.currentTrack = this.currentTrack; 
     };
 
-    async createTrack(number, trackNumber) {
-      if ( this.preload ) {
+    async createTrack (number, trackNumber) {
+      if (this.preload) {
         let track_x = `track_${trackNumber}`;  // where x is 0, 1, 2, etc.
         let path = this.pageVariables.tracks[track_x].url;
         let newFile = await fetch(path).then(response => response.text());
@@ -102,8 +102,8 @@ class LeafletGpxJs extends LeafletMap {
      * @param {Array<L.LatLngBounds>} mapBoundsArray - An array of map bounds.
      * @return {L.LatLngBounds|null} The maximum bounds from the array, or null if the array is empty or invalid.
      */
-    findMaxBounds(mapBoundsArray) {
-      if ( mapBoundsArray[0] === null || !Array.isArray(mapBoundsArray) || mapBoundsArray.length === 0) {
+    findMaxBounds (mapBoundsArray) {
+      if (mapBoundsArray[0] === null || !Array.isArray(mapBoundsArray) || mapBoundsArray.length === 0) {
         return null; // Return null for an empty or invalid array
       }
     

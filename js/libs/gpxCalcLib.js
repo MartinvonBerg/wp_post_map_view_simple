@@ -13,7 +13,7 @@ export { calcDist, calcDist3D, uniqueltems };
      * @param {number} lon2 - Longitude of the second location.
      * @returns {number} - The distance between the two coordinates in km.
      */
-function calcDist(lat1, lon1, lat2, lon2) {
+function calcDist (lat1, lon1, lat2, lon2) {
     const R = 6371; // km
     const toRad = (degrees) => degrees * (Math.PI / 180);
 
@@ -39,7 +39,7 @@ function calcDist(lat1, lon1, lat2, lon2) {
  * @param {number} lon2 - Longitude of the second location.
  * @returns {number} - The distance between the two coordinates in km.
  */
-function calcDist3D(lat1, lon1, lat2, lon2) {
+function calcDist3D (lat1, lon1, lat2, lon2) {
     const r = 12742; // 6371 * 2
     const toRadians = (degrees) => degrees * (Math.PI / 180);
 
@@ -58,7 +58,7 @@ function calcDist3D(lat1, lon1, lat2, lon2) {
  * @param {String|Function} keyOrFn - A string with the name of the key to use for uniqueness or a function that will be called for each item with the item as argument and must return the key to use for uniqueness.
  * @returns {Number} - The number of unique items in the list.
  */
-function uniqueltems(list, keyOrFn) {
+function uniqueltems (list, keyOrFn) {
 
     const resultSet = new Set();
     

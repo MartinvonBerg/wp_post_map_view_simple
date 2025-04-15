@@ -1,13 +1,13 @@
 {
 	"name": "post-map-table-view",
-	"version": "1.3.0",
+	"version": "1.3.1",
 	"description": "Display a map with all posts with GPS data in a leaflet map and / or a table view",
 	"author": "Martin von Berg",
 	"license": "GPL-2.0",
 	"homepage": "https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/",
 	"main": "build/index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "eslint --config ./js/eslint.config.js ./js/pmtv_main*.js ./js/tabulator/*.js ./js/libs/*.js ./js/leafletGpxJs/*.js",
 		"build": "webpack --config ./js/webpack.config.js"
 	},
 	"devDependencies": {
@@ -16,6 +16,8 @@
 		"@wp-blocks/make-pot": "^1.4.0",
 		"babel-loader": "^9.2.1",
 		"css-loader": "^7.1.2",
+		"eslint": "^9.23.0",
+		"eslint-plugin-security": "^3.0.1",
 		"path-browserify": "^1.0.1",
 		"style-loader": "^4.0.0",
 		"webpack": "^5.97.1",
