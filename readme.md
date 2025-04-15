@@ -154,7 +154,7 @@ Drawback: No fileage clean-up implemented. So, once stored, the tiles are used f
 
 ## Upgrade Notice
 
-Upgrade is recommended. Preparation of Release is still missing.
+No need to upgrade right now. So, no new release will be submitted.
 **ATTENTION** Your changes in `category_mapping.json` will be overwritten! Safe this file and `.htaccess` locally prior to updating.
 
 ## I18N
