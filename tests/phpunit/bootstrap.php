@@ -38,8 +38,9 @@ if ( ! defined( 'WP_PLUGIN_URL' ) ) {
 }
 
 //$comp_path = "C:/Users/Martin von Berg/AppData/Roaming/Composer"; // TODO: get the global path
+define ( 'PLUGIN_DIR', 'C:\wamp64\www\wordpress\wp-content\plugins\PostMapTableView' );
 
-require_once 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\plugins\PostMapTableView\vendor\autoload.php';
+require_once PLUGIN_DIR . '\vendor\autoload.php';
 
 // Mocks for global functions
 function maybe_serialize($data) {
