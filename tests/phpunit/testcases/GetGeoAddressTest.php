@@ -11,7 +11,7 @@ use function Brain\Monkey\Functions\expect;
 //use function Brain\Monkey\Actions\expectDone;
 //use function Brain\Monkey\Filters\expectApplied;
 
-include 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\plugins\PostMapTableView\inc\geoaddress.php';
+include PLUGIN_DIR . '\inc\geoaddress.php';
 use function \mvbplugins\helpers\get_geoaddress as get_geoaddress;
 
 class GetGeoaddressTest extends TestCase

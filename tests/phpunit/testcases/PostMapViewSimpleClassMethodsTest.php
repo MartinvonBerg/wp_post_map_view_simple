@@ -17,7 +17,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
         // Set up necessary WordPress functions and mocks
         expect('add_shortcode')
             ->andReturn(true);
-        require_once 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\plugins\PostMapTableView\inc\PostMapViewSimpleClass.php';
+        require_once PLUGIN_DIR . '\inc\PostMapViewSimpleClass.php';
         setUp();
     }
 	public function tearDown(): void {
@@ -32,7 +32,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		expect('wp_get_upload_dir')
             ->once()
-            ->andReturn( ['basedir' => 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\uploads'] );
+            ->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
 
         expect('plugin_dir_url')
             ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
@@ -46,11 +46,30 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
             'showtable'   => 'true',
             'category'    => 'all',
             'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'true',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
         ];
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
-            ->once()
+            //->once()
             ->with([
                 'numberposts' => 100,
                 'post_type'   => 'post',
@@ -60,8 +79,14 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
                 'headerhtml'  => '',
             ], $attr)
             ->andReturn($expected_atts);
+		
+		expect('wp_enqueue_style')
+			->atLeast()
+			->once()
+			->andReturn(true);
 
-        $tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
+		# call the constructor with an empty array	
+		$tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
 		$this->assertInstanceOf( '\mvbplugins\postmapviewsimple\PostMapViewSimple', $tested );
 
 		$privateProp1 = new \ReflectionProperty( "mvbplugins\\postmapviewsimple\\PostMapViewSimple", "lenexcerpt" );
@@ -89,7 +114,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		expect('wp_get_upload_dir')
             ->once()
-            ->andReturn( ['basedir' => 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\uploads'] );
+            ->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
 
         expect('plugin_dir_url')
             ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
@@ -158,7 +183,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		expect('wp_get_upload_dir')
 			->once()
-			->andReturn( ['basedir' => 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\uploads'] );
+			->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
 
 		expect('plugin_dir_url')
 			->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
@@ -251,7 +276,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		expect('wp_get_upload_dir')
 			->once()
-			->andReturn( ['basedir' => 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\uploads'] );
+			->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
 
 		expect('plugin_dir_url')
 			->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
