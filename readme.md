@@ -58,7 +58,9 @@ Simple translate or change according to your site, e.g. translate Tag 'Radfahren
 Insert the `[mapview]` shortcode on any page. Use only once per Page or Post!
 
 ## Usage of [tourmap]
-### 1. Generate JSON-File(s) locally
+### 1. Generate JSON-File(s) locally (Required!)
+HINT: If no JSON-File is provided nothing will be shown.
+
 If you used MapsMarkerPro before: 
 - Download the geojson File(s) for the Map. Add at least a 'category' according to the 'category' in file `./settings/category_mapping.json`. Alternatively you might change the file `category_mapping.json` to your tourfolder. If available, this 'local' file will be used for the tourmap.
 
