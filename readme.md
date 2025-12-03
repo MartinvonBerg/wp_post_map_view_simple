@@ -181,6 +181,9 @@ No need to upgrade right now. So, no new release will be submitted.
 
 ## Changelog
 
+### 1.3.2 (03.12.2025)
+- Tested with WP 6.9.0, locally.
+
 ### 1.3.2 (08.09.2025)
 - Updated .htaccess for Apache-servers > 2.3 in src and release
 - Tested with WP 6.8.2, locally. (PHP unit tests not fully updated, yet. TODO)
