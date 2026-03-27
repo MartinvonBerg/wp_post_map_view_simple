@@ -1,43 +1,86 @@
-# Post-Map-Table-View
+# Post-Map-Table-View <!-- omit from toc -->
 
-## Description
-
-This plugin displays all WordPress posts or pages containing GPX data (lat, lon) stored in custom fields on an OpenStreetMap map. Posts are categorized using tags, allowing filtering and custom icons. Additionally, a table with all posts is displayed.
+This plugin displays all WordPress posts or pages containing GPX data (lat, lon stored in custom fields) on an OpenStreetMap map. Posts are categorized by WordPress categories allowing filtering and custom icons. Additionally, a table with all posts and / or pages is displayed.
 
 Alternatively a descriptive JSON-File in a separate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
 
 There is no Admin-Panel to control the plugin. Everything is defined by shortcoder parameters oder settings in JSON-Files.
 
-
-
 **Shortcodes:** `[mapview]` — Ready to use. Multiple options available, see table below! Use only once per Page or Post! The generated HTML is stored in transients for improved performance.
 
 `[tourmap tourfolder=<folder relative to upload directory with json-file>]` Will show a nice map and table with all markers you defined in the JSON. This shortocdes requires work with JSON-Files and uploading these with FileZilla. If you don't feel comfortable with that this Plugins is not for you.
 
-For both the Map Tiles for Leaflet may be stored locally on your server!
-
+For both shortcodees the Map Tiles may be stored locally on your server!
 **NOTE:** Both shortcodes might be used once only per page or post!
 
-## Screenshots
+## Contents <!-- omit from toc -->
+- [Demo](#demo)
+- [Usage of \[mapview\]](#usage-of-mapview)
+  - [1. Prepare Posts / Pages for the Post-Map shown by \[mapview\]](#1-prepare-posts--pages-for-the-post-map-shown-by-mapview)
+    - [Add Custom Fields:](#add-custom-fields)
+    - [2. Check Category and Icon Mapping](#2-check-category-and-icon-mapping)
+  - [2. Displaying the Map](#2-displaying-the-map)
+- [Usage of \[tourmap\]](#usage-of-tourmap)
+  - [1. Generate JSON-File(s) locally (Required!)](#1-generate-json-files-locally-required)
+  - [2. Optional: Prepare one GPX-File](#2-optional-prepare-one-gpx-file)
+  - [3. Upload Files to your WordPress-Site](#3-upload-files-to-your-wordpress-site)
+  - [4. Add shortcode to page](#4-add-shortcode-to-page)
+  - [5. Screenshot / Demo](#5-screenshot--demo)
+- [Shortcode Parameters \[mapview\] and \[tourmap\]](#shortcode-parameters-mapview-and-tourmap)
+- [Check Tile Server Settings in .htaccess](#check-tile-server-settings-in-htaccess)
+  - [Tile Server for Leaflet Map Tiles](#tile-server-for-leaflet-map-tiles)
+- [Upgrade Notice](#upgrade-notice)
+- [I18N](#i18n)
+- [Installation](#installation)
+- [Deinstallation](#deinstallation)
+- [Changelog](#changelog)
+  - [1.3.2 (03.12.2025)](#132-03122025)
+  - [1.3.2 (08.09.2025)](#132-08092025)
+  - [1.3.1 (15.05.2025)](#131-15052025)
+  - [1.3.0 (07.03.2025)](#130-07032025)
+  - [1.2.0 (01.03.2025)](#120-01032025)
+  - [1.1.0 (26.02.2025)](#110-26022025)
+  - [1.0.1 (16.02.2025)](#101-16022025)
+  - [1.0.0 (14.02.2025)](#100-14022025)
+  - [0.10.5 (14.05.2022)](#0105-14052022)
+  - [0.10.4 (02.02.2022)](#0104-02022022)
+  - [0.10.3 (30.01.2022)](#0103-30012022)
+  - [0.10.2 (16.01.2022)](#0102-16012022)
+  - [0.10.1 (13.01.2022)](#0101-13012022)
+  - [0.10.0 (30.11.2021)](#0100-30112021)
+  - [0.9.1 (18.11.2021)](#091-18112021)
+  - [0.9.0 (16.11.2021)](#090-16112021)
+  - [0.8.1 (08.11.2021)](#081-08112021)
+  - [0.8.0 (30.03.2021)](#080-30032021)
+  - [0.7.0 (17.02.2021)](#070-17022021)
+  - [0.6.0 (09.01.2021)](#060-09012021)
+  - [0.5.0 (28.12.2020)](#050-28122020)
+  - [0.4.0 (14.12.2020)](#040-14122020)
+  - [0.3.0 (01.04.2020)](#030-01042020)
+- [Credits](#credits)
 
-See below and check the example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersichtskarte/)
+
+
+## Demo
+
+Example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersichtskarte/)
 
 ## Usage of [mapview]
 
-### 1. Preparing Posts for the Post-Map shown by [mapview]
+### 1. Prepare Posts / Pages for the Post-Map shown by [mapview]
 #### Add Custom Fields:
 - **Lat:** Latitude (use a decimal point as separator)
-- **Lon:** Longitude
-- Posts with `(0,0)`, invalid, or missing data are ignored.
-- To check if all custom fields are set, use the "Admin Columns" WP plugin for better overview.
+- **Lon:** Longitude (use a decimal point as separator)
+  - Posts with `(0,0)`, invalid, or missing data are ignored.
+  - To check if all custom fields are set, use the "Admin Columns" WP plugin for better overview.
 - Hint: By using the shortcode `[mapview]` the retrieved **geoadress** will be stored as custom field to your post.
 
-#### Check Category and Icon Mapping:
+#### 2. Check Category and Icon Mapping
 Categories are now defined in a JSON file in `/<Plugin-Folder>/settings/category_mapping.json`. So it is fully customizable by changing this file. The Icon-PNGs are expected in `/<Plugin-Folder>/images/` Below is the default (german) mapping (which might be changed easily in the settings-file):
 
 | Category       | Icon               | Note |
 |----------------|--------------------|------|
-| Reisebericht   | travel.png         | DEFAULT if not category is defined.
+| Reisebericht   | travel.png         | DEFAULT if no category is defined.
 | Campingplatz   | campingground.png  |
 | Stellplatz     | campingcar.png     |
 | Besichtigung   | sightseeing.png    |
@@ -109,7 +152,7 @@ Live-Demo on my Site: https://www.berg-reise-foto.de/reisebericht-italien/uebers
 ![tourmap_example](./assets/tourmap-example.png)
 
 
-## Set Shortcode Parameters
+## Shortcode Parameters [mapview] and [tourmap]
 The following parameters are available for both shortcodes (where not all will be used by tourmap).
 | Parameter | Default Value | Description | Example |
 |-----------|---------------|-------------|---------|
