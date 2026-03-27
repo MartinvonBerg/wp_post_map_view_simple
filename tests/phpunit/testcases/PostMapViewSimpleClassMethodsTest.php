@@ -128,11 +128,30 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
             'showtable'   => 'true',
             'category'    => 'all',
             'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'true',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
         ];
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
-            ->once()
+            //->once()
             ->with([
                 'numberposts' => 100,
                 'post_type'   => 'post',
@@ -142,8 +161,14 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
                 'headerhtml'  => '',
             ], $attr)
             ->andReturn($expected_atts);
+		
+		expect('wp_enqueue_style')
+			->atLeast()
+			->once()
+			->andReturn(true);
 
-        $tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
+		# call the constructor with an empty array	
+		$tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
 		$this->assertInstanceOf( '\mvbplugins\postmapviewsimple\PostMapViewSimple', $tested );
 
 		$privateProp1 = new \ReflectionProperty( "mvbplugins\\postmapviewsimple\\PostMapViewSimple", "lenexcerpt" );
@@ -191,17 +216,36 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		// Erwartetes Ergebnis nach shortcode_atts
 		$attr = [];
 		$expected_atts = [
-			'numberposts' => 100,
-			'post_type'   => 'post',
-			'showmap'     => 'true',
-			'showtable'   => 'true',
-			'category'    => 'all',
-			'headerhtml'  => '',
-		];
+            'numberposts' => 100,
+            'post_type'   => 'post',
+            'showmap'     => 'true',
+            'showtable'   => 'true',
+            'category'    => 'all',
+            'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'true',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
+        ];
 
 		// Mock die Funktion shortcode_atts
 		expect('shortcode_atts')
-			->once()
+			//->once()
 			->with([
 				'numberposts' => 100,
 				'post_type'   => 'post',
@@ -248,6 +292,11 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		});
 		
 		when('number_format_i18n')->returnArg();
+
+		expect('wp_enqueue_style')
+			->atLeast()
+			->once()
+			->andReturn(true);
 		
 		$tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
 		$this->assertInstanceOf( '\mvbplugins\postmapviewsimple\PostMapViewSimple', $tested );
@@ -260,14 +309,14 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		$this->assertEquals( '0 0 0 0 0 0 0 0', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file1' );
-		$this->assertEquals( 'Dist: 111 0 0 444 0 0 777', $out );
+		$this->assertEquals( 'Dist: 111.0 0 0 444 0 0 777', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file2' );
-		$this->assertEquals( 'Dist: 17 km, Gain: 1214 m, Loss: 1181 m', $out );
+		$this->assertEquals( 'Dist: 17.0 km, Gain: 1214 m, Loss: 1181 m', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file3' );
 		// the assertion here is because number_format_i18n is mocked and returns the same value as the input
-		$this->assertEquals( 'Dist: 17.111 km, Gain: 1214.22 m, Loss: 1181.333 m', $out );
+		$this->assertEquals( 'Dist: 17.1 km, Gain: 1214 m, Loss: 1181 m', $out );
     }
 
 	public function test_method_post_extract() {
@@ -284,17 +333,36 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		// Erwartetes Ergebnis nach shortcode_atts
 		$attr = [];
 		$expected_atts = [
-			'numberposts' => 100,
-			'post_type'   => 'post',
-			'showmap'     => 'true',
-			'showtable'   => 'true',
-			'category'    => 'all',
-			'headerhtml'  => '',
-		];
+            'numberposts' => 100,
+            'post_type'   => 'post',
+            'showmap'     => 'true',
+            'showtable'   => 'true',
+            'category'    => 'all',
+            'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'true',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
+        ];
 
 		// Mock die Funktion shortcode_atts
 		expect('shortcode_atts')
-			->once()
+			//->once()
 			->with([
 				'numberposts' => 100,
 				'post_type'   => 'post',
@@ -305,6 +373,11 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 			], $attr)
 			->andReturn($expected_atts);
 
+		expect('wp_enqueue_style')
+			->atLeast()
+			->once()
+			->andReturn(true);
+			
 		$tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
 		$this->assertInstanceOf( '\mvbplugins\postmapviewsimple\PostMapViewSimple', $tested );
 

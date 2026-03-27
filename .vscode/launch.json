@@ -24,6 +24,23 @@
             ]
         },
         {
+            "name": "Run PHPUnit (with Xdebug)",
+            "type": "php",
+            "request": "launch",
+            "runtimeExecutable": "C:/PHP/php.exe",
+            "program": "${workspaceFolder}/vendor/bin/phpunit",
+            "args": [
+                "${workspaceFolder}/tests/phpunit/testcases/PostMapViewSimpleClassTest.php"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "XDEBUG_MODE": "debug",
+                "XDEBUG_TRIGGER": "1"
+            },
+            "port": 9003,
+            "stopOnEntry": false
+        },
+        {
             "name": "Launch currently open script",
             "type": "php",
             "request": "launch",

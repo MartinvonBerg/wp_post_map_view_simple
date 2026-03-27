@@ -97,7 +97,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		
 		// extract and handle shortcode parameters
         //'post_status' => 'publish' ist voreingestellt.
-		$attr = shortcode_atts ( array ( 
+		$attr = shortcode_atts ([ 
 			'numberposts' => 100, 
 			'post_type'   => 'post', // laut doku geht das so : array( 'post', 'page', 'movie', 'book' ) post_types können mit array abgefragt werden
 			'showmap'     => 'true',
@@ -123,13 +123,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'mapselector'       => 'OpenStreeMap',
             'mymarkericons'     => 'false',
             'categoryfilter'    => 'Reisebericht,Tourenbericht',
-		), $attr);
+            ], $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
 		$this->wp_postmap_url = $this->plugin_url . 'images/';
 		$this->up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
         $this->gpxfolder = $attr['gpxfolder'];
-		$this->gpx_dir = $this->up_dir . '/' . $this->gpxfolder . '/';    // gpx_dir
+		$this->gpx_dir = $this->up_dir . \DIRECTORY_SEPARATOR . $this->gpxfolder . \DIRECTORY_SEPARATOR;    // gpx_dir
 		
 		$this->numberposts = $attr['numberposts'];
         // fallback for great values

@@ -50,6 +50,16 @@ function wp_postmap_load_category_mapping( $file = null ) {
     return $data;
 }
 
+/**
+ * Find the best matching category for a given set of keywords and stopwords.
+ *
+ * @param string $keywords Comma-separated list of keywords to match against.
+ * @param array $stopwords List of stopwords to ignore when matching.
+ * @param string|null $json_file Path to the JSON file containing the category mapping. If null, use the default file.
+ *
+ * @return array An array containing the best matching category and icon.
+ * @example ['category_name', 'icon_name.png']
+ */
 function find_best_category_match($keywords, $stopwords, $json_file=null) {
     // JSON-Datei mit settings einlesen
     $json_data = \mvbplugins\helpers\wp_postmap_load_category_mapping($json_file);
@@ -61,7 +71,11 @@ function find_best_category_match($keywords, $stopwords, $json_file=null) {
     // Kategorien aus JSON extrahieren
     $categories = array_column($json_data['mapping'], 'category');
     
-    // stopwords strtolower
+    // stopwords strtolower. TODO : convert single string to array if needed
+    if (is_string($stopwords)) {
+        $stopwords = explode(',', $stopwords);
+    }
+
     $stopwords = array_map('strtolower', $stopwords);
     // Keywords verarbeiten: Kleinbuchstaben, Stopwords entfernen, Bindestriche ersetzen, trimmen, in ein Array splitten
     $keyword_list = array_unique(array_filter(array_map(function ($word) use ($stopwords) {
