@@ -30,32 +30,31 @@ See below and check the example of the plugin in action: [Demo](https://www.berg
 - **Lon:** Longitude
 - Posts with `(0,0)`, invalid, or missing data are ignored.
 - To check if all custom fields are set, use the "Admin Columns" WP plugin for better overview.
-- Optionally : add **geoadress** taken from nominatim as serialized JSON. Example:
-    ```json 
-    a:7:{s:7:"village";s:6:"Marktl";s:12:"municipality";s:13:"Marktl (VGem)";s:6:"county";s:20:"Landkreis Altötting";s:5:"state";s:6:"Bayern";s:14:"ISO3166-2-lvl4";s:5:"DE-BY";s:7:"country";s:11:"Deutschland";s:12:"country_code";s:2:"de";}
-    ```  
-    By using [mapview] the retrieved **geoadress** will be stored as updated metadate to your post.
+- Hint: By using the shortcode `[mapview]` the retrieved **geoadress** will be stored as custom field to your post.
 
 #### Check Category and Icon Mapping:
-Categories are now defined in a JSON file. So it is fully customizable by changing the file. The Icon-PNGs are expected in `/Plugin-Folder/images/` Below is the mapping (which might be changed easily in the settings-file):
+Categories are now defined in a JSON file in `/<Plugin-Folder>/settings/category_mapping.json`. So it is fully customizable by changing this file. The Icon-PNGs are expected in `/<Plugin-Folder>/images/` Below is the default (german) mapping (which might be changed easily in the settings-file):
 
-| Tag in Post | Category | Icon |
-|------------|----------|---------------|
-| Trekk | Trekking | hiking.png |
-| Bike hike | Bike-Hike | mountainbiking-3.png |
-| Radfahren | Cycling | cycling.png |
-| MTB | MTB | MTB.png |
-| Wander | Hiking | hiking2.png |
-| Bergtour | Mountain | peak2.png |
-| Skitour | Skiing | skiing.png |
-| Paddeln | Kayaking | kayaking2.png |
-| (Default) | Travel | campingcar.png |
+| Category       | Icon               | Note |
+|----------------|--------------------|------|
+| Reisebericht   | travel.png         | DEFAULT if not category is defined.
+| Campingplatz   | campingground.png  |
+| Stellplatz     | campingcar.png     |
+| Besichtigung   | sightseeing.png    |
+| Trekking       | hiking.png         |
+| Bike-Hike      | mountainbiking-3.png |
+| Radfahren      | cycling.png        |
+| Mountainbike   | MTB.png            |
+| Wanderung      | hiking2.png        |
+| Bergtour       | peak2.png          |
+| Skitour        | skiing.png         |
+| Paddeln        | kayaking2.png      |
 
 It is case sensitive!
-Simple translate or change according to your site, e.g. translate Tag 'Radfahren' to 'Cycling'. Or Add 'Painting' / 'painting' / 'painting.png'. 
+Simple translate or change according to the defined categories of your site, e.g. translate Tag 'Radfahren' to 'Cycling' or 'Skitouren' to 'SkiMo' or so. 
 
 ### 2. Displaying the Map
-Insert the `[mapview]` shortcode on any page. Use only once per Page or Post!
+Insert the `[mapview]` shortcode on any page. Use only once per Page or Post!. All below defined Parameters are optional, so not mandatory.
 
 ## Usage of [tourmap]
 ### 1. Generate JSON-File(s) locally (Required!)
