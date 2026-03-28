@@ -17,8 +17,9 @@ For both shortcodees the Map Tiles may be stored locally on your server!
 - [Demo](#demo)
 - [Usage of \[mapview\]](#usage-of-mapview)
   - [1. Prepare Posts / Pages for the Post-Map shown by \[mapview\]](#1-prepare-posts--pages-for-the-post-map-shown-by-mapview)
-    - [Add Custom Fields:](#add-custom-fields)
-    - [GPX-Tracks:](#gpx-tracks)
+    - [Add Custom Fields](#add-custom-fields)
+    - [GPX-Tracks](#gpx-tracks)
+    - [Define Categories](#define-categories)
     - [2. Check Category and Icon Mapping](#2-check-category-and-icon-mapping)
   - [2. Displaying the Map](#2-displaying-the-map)
 - [Usage of \[tourmap\]](#usage-of-tourmap)
@@ -45,22 +46,25 @@ Example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersich
 ## Usage of [mapview]
 
 ### 1. Prepare Posts / Pages for the Post-Map shown by [mapview]
-#### Add Custom Fields:
+#### Add Custom Fields
 - **Lat:** Latitude (use a decimal point as separator)
 - **Lon:** Longitude (use a decimal point as separator)
-  - Posts with `(0,0)`, invalid, or mising custom fields lat, lon are ignored.
+  - Posts with `(0,0)`, invalid, or missing custom fields lat, lon are ignored.
   - To check if the custom fields are set, use the "Admin Columns" WP plugin for better overview.
 - Hint: By using the shortcode `[mapview]` the retrieved **geoadress** will be stored as additional custom field to the post or page.
 
-#### GPX-Tracks:
+#### GPX-Tracks
 - GPX-Tracks: If my Plugin https://github.com/MartinvonBerg/Fotorama-Leaflet-Elevation is used to show GPX-Tracks on the pages:
-  - The tracks statistics is only inluded in the Table if it is inlucded in the GPX-track file like so:
+  - The tracks statistics is only included in the Table if it is included in the GPX-track file like so:
     ```xml
     ....
     <desc>Dist: 7.5 km, Gain: 866 Hm, Loss: 860 Hm</desc>
     ....
     ```
   - This is done automatically if the GPX-Track-Uploader of https://github.com/MartinvonBerg/Fotorama-Leaflet-Elevation is used.
+
+#### Define Categories
+The Posts are sorted by WordPress-Categories. If no Category is defined the default category will be used. So, define some WordPress Categories (see Table below) and change the `/<Plugin-Folder>/settings/category_mapping.json` accordingly.
 
 #### 2. Check Category and Icon Mapping
 Categories are now defined in a JSON file in `/<Plugin-Folder>/settings/category_mapping.json`. So it is fully customizable by changing this file. The Icon-PNGs are expected in `/<Plugin-Folder>/images/` Below is the default (german) mapping (which might be changed easily in the settings-file):
@@ -81,7 +85,7 @@ Categories are now defined in a JSON file in `/<Plugin-Folder>/settings/category
 | Paddeln        | kayaking2.png      |
 
 It is case sensitive!
-Simple translate or change according to the defined categories of your site, e.g. translate Tag 'Radfahren' to 'Cycling' or 'Skitouren' to 'SkiMo' or so. 
+Simple translate or change according to the defined categories of your site, e.g. translate Category 'Radfahren' to 'Cycling' or 'Skitouren' to 'SkiMo' or so. 
 
 ### 2. Displaying the Map
 Insert the `[mapview]` shortcode on any page. Use only once per Page or Post!. All below defined Parameters are optional, so not mandatory.
