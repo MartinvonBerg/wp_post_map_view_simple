@@ -1,41 +1,66 @@
-# Post-Map-Table-View <!-- omit from toc -->
+# Post-Map-Table-View
 
-This plugin displays all WordPress posts or pages containing GPX data (lat, lon stored in custom fields) on an OpenStreetMap map. Posts are categorized by WordPress categories allowing filtering and custom icons. Additionally, a table with all posts and / or pages is displayed.
+This WordPress plugin displays posts or pages with GPS coordinates (latitude/longitude stored in custom fields) on an interactive OpenStreetMap using Leaflet.
 
-Alternatively a descriptive JSON-File in a separate folder may be used to show a map with all destinations you travelled or any other POI you defined in the JSON. 
+Posts can be organized and filtered by categories and visualized with custom markers. In addition to the map, an optional table view lists all displayed entries.
 
-There is no Admin-Panel to control the plugin. Everything is defined by shortcoder parameters oder settings in JSON-Files.
+As an alternative to WordPress-based content, the plugin also supports external JSON data sources. This allows you to create maps for travel routes, destinations, or any custom points of interest (POIs) independent of posts or pages.
 
-**Shortcodes:** `[mapview]` — Ready to use. Multiple options available, see table below! Use only once per Page or Post! The generated HTML is stored in transients for improved performance.
+The plugin is configuration-driven and does not provide an admin interface. All settings are defined via shortcodes or JSON files.
 
-`[tourmap tourfolder=<folder relative to upload directory with json-file>]` Will show a nice map and table with all markers you defined in the JSON. This shortocdes requires work with JSON-Files and uploading these with FileZilla. If you don't feel comfortable with that this Plugins is not for you.
+## Features
 
-For both shortcodees the Map Tiles may be stored locally on your server!
-**NOTE:** Both shortcodes might be used once only per page or post!
+- Display posts or pages with GPS coordinates on a map
+- Category-based filtering and custom marker icons
+- Optional table view of all entries
+- Support for external JSON-based data sources
+- Local storage of map tiles (optional)
+- Performance optimization via transients
+
+## Usage
+
+### Shortcode: `[mapview]`
+
+Displays a map with posts or pages containing GPS coordinates.  
+Multiple configuration options are available (see below).  
+**Note:** Use this shortcode only once per page or post.
+
+### Shortcode: `[tourmap tourfolder=<folder>]`
+
+Displays a map based on a JSON file located in a folder relative to the WordPress upload directory.
+
+This mode is intended for advanced users who manage data manually via JSON files (e.g. using FTP tools like FileZilla).
+
+**Note:** This shortcode should also be used only once per page or post.
 
 ## Contents <!-- omit from toc -->
-- [Demo](#demo)
-- [Usage of \[mapview\]](#usage-of-mapview)
-  - [1. Prepare Posts / Pages for the Post-Map shown by \[mapview\]](#1-prepare-posts--pages-for-the-post-map-shown-by-mapview)
-    - [Add Custom Fields](#add-custom-fields)
-    - [GPX-Tracks](#gpx-tracks)
-    - [Define Categories](#define-categories)
-    - [2. Check Category and Icon Mapping](#2-check-category-and-icon-mapping)
-  - [2. Displaying the Map](#2-displaying-the-map)
-- [Usage of \[tourmap\]](#usage-of-tourmap)
-  - [1. Generate JSON-File(s) locally (Required!)](#1-generate-json-files-locally-required)
-  - [2. Optional: Prepare one GPX-File](#2-optional-prepare-one-gpx-file)
-  - [3. Upload Files to your WordPress-Site](#3-upload-files-to-your-wordpress-site)
-  - [4. Add shortcode to page](#4-add-shortcode-to-page)
-  - [5. Screenshot / Demo](#5-screenshot--demo)
-- [Shortcode Parameters \[mapview\] and \[tourmap\]](#shortcode-parameters-mapview-and-tourmap)
-- [Check Tile Server Settings in .htaccess](#check-tile-server-settings-in-htaccess)
-  - [Tile Server for Leaflet Map Tiles](#tile-server-for-leaflet-map-tiles)
-- [Upgrade Notice](#upgrade-notice)
-- [I18N](#i18n)
-- [Installation](#installation)
-- [Deinstallation](#deinstallation)
-- [Credits](#credits)
+- [Post-Map-Table-View](#post-map-table-view)
+  - [Features](#features)
+  - [Usage](#usage)
+    - [Shortcode: `[mapview]`](#shortcode-mapview)
+    - [Shortcode: `[tourmap tourfolder=<folder>]`](#shortcode-tourmap-tourfolderfolder)
+  - [Demo](#demo)
+  - [Detailed Usage of \[mapview\]](#detailed-usage-of-mapview)
+    - [1. Prepare Posts / Pages for the Post-Map shown by \[mapview\]](#1-prepare-posts--pages-for-the-post-map-shown-by-mapview)
+      - [Add Custom Fields](#add-custom-fields)
+      - [GPX-Tracks](#gpx-tracks)
+      - [Define Categories](#define-categories)
+      - [2. Check Category and Icon Mapping](#2-check-category-and-icon-mapping)
+    - [2. Displaying the Map](#2-displaying-the-map)
+  - [Detailed Usage of \[tourmap\]](#detailed-usage-of-tourmap)
+    - [1. Generate JSON-File(s) locally (Required!)](#1-generate-json-files-locally-required)
+    - [2. Optional: Prepare one GPX-File](#2-optional-prepare-one-gpx-file)
+    - [3. Upload Files to your WordPress-Site](#3-upload-files-to-your-wordpress-site)
+    - [4. Add shortcode to page](#4-add-shortcode-to-page)
+    - [5. Screenshot / Demo](#5-screenshot--demo)
+  - [Shortcode Parameters \[mapview\] and \[tourmap\]](#shortcode-parameters-mapview-and-tourmap)
+  - [Check Tile Server Settings in .htaccess](#check-tile-server-settings-in-htaccess)
+    - [Tile Server for Leaflet Map Tiles](#tile-server-for-leaflet-map-tiles)
+  - [Upgrade Notice](#upgrade-notice)
+  - [I18N](#i18n)
+  - [Installation](#installation)
+  - [Deinstallation](#deinstallation)
+  - [Credits](#credits)
 
 
 
@@ -43,7 +68,7 @@ For both shortcodees the Map Tiles may be stored locally on your server!
 
 Example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersichtskarte/)
 
-## Usage of [mapview]
+## Detailed Usage of [mapview]
 
 ### 1. Prepare Posts / Pages for the Post-Map shown by [mapview]
 #### Add Custom Fields
@@ -90,7 +115,7 @@ Simple translate or change according to the defined categories of your site, e.g
 ### 2. Displaying the Map
 Insert the `[mapview]` shortcode on any page. Use only once per Page or Post!. All below defined Parameters are optional, so not mandatory.
 
-## Usage of [tourmap]
+## Detailed Usage of [tourmap]
 ### 1. Generate JSON-File(s) locally (Required!)
 HINT: If no JSON-File is provided nothing will be shown.
 

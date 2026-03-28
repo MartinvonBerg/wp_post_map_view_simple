@@ -9,13 +9,17 @@
  * @wordpress-plugin
  * Plugin Name:       Post Map Table View
  * Plugin URI:        https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
- * Description:       Anzeige aller Posts (max 100!) mit GPS-Daten (lat, lon) und Kategorie in einer Karte
+ * Description:       Shows a map with posts that have geotags. Or shows a tour map with posts that have geotags and a tour date.
  * Version:           1.3.3
  * Author:            Martin von Berg
  * Author URI:        https://www.berg-reise-foto.de/info/ueber-mich/
  * License:           GPL-2.0+
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       postmapviewsimple
  * Domain Path:       /languages
+ * Requires at least: 6.0
+ * Requires PHP:      8.0
+ * Tested up to:      6.9
  */
 
 namespace mvbplugins\postmapviewsimple;
