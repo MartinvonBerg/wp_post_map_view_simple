@@ -18,6 +18,7 @@ For both shortcodees the Map Tiles may be stored locally on your server!
 - [Usage of \[mapview\]](#usage-of-mapview)
   - [1. Prepare Posts / Pages for the Post-Map shown by \[mapview\]](#1-prepare-posts--pages-for-the-post-map-shown-by-mapview)
     - [Add Custom Fields:](#add-custom-fields)
+    - [GPX-Tracks:](#gpx-tracks)
     - [2. Check Category and Icon Mapping](#2-check-category-and-icon-mapping)
   - [2. Displaying the Map](#2-displaying-the-map)
 - [Usage of \[tourmap\]](#usage-of-tourmap)
@@ -33,30 +34,6 @@ For both shortcodees the Map Tiles may be stored locally on your server!
 - [I18N](#i18n)
 - [Installation](#installation)
 - [Deinstallation](#deinstallation)
-- [Changelog](#changelog)
-  - [1.3.2 (03.12.2025)](#132-03122025)
-  - [1.3.2 (08.09.2025)](#132-08092025)
-  - [1.3.1 (15.05.2025)](#131-15052025)
-  - [1.3.0 (07.03.2025)](#130-07032025)
-  - [1.2.0 (01.03.2025)](#120-01032025)
-  - [1.1.0 (26.02.2025)](#110-26022025)
-  - [1.0.1 (16.02.2025)](#101-16022025)
-  - [1.0.0 (14.02.2025)](#100-14022025)
-  - [0.10.5 (14.05.2022)](#0105-14052022)
-  - [0.10.4 (02.02.2022)](#0104-02022022)
-  - [0.10.3 (30.01.2022)](#0103-30012022)
-  - [0.10.2 (16.01.2022)](#0102-16012022)
-  - [0.10.1 (13.01.2022)](#0101-13012022)
-  - [0.10.0 (30.11.2021)](#0100-30112021)
-  - [0.9.1 (18.11.2021)](#091-18112021)
-  - [0.9.0 (16.11.2021)](#090-16112021)
-  - [0.8.1 (08.11.2021)](#081-08112021)
-  - [0.8.0 (30.03.2021)](#080-30032021)
-  - [0.7.0 (17.02.2021)](#070-17022021)
-  - [0.6.0 (09.01.2021)](#060-09012021)
-  - [0.5.0 (28.12.2020)](#050-28122020)
-  - [0.4.0 (14.12.2020)](#040-14122020)
-  - [0.3.0 (01.04.2020)](#030-01042020)
 - [Credits](#credits)
 
 
@@ -71,9 +48,19 @@ Example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersich
 #### Add Custom Fields:
 - **Lat:** Latitude (use a decimal point as separator)
 - **Lon:** Longitude (use a decimal point as separator)
-  - Posts with `(0,0)`, invalid, or missing data are ignored.
-  - To check if all custom fields are set, use the "Admin Columns" WP plugin for better overview.
-- Hint: By using the shortcode `[mapview]` the retrieved **geoadress** will be stored as custom field to your post.
+  - Posts with `(0,0)`, invalid, or mising custom fields lat, lon are ignored.
+  - To check if the custom fields are set, use the "Admin Columns" WP plugin for better overview.
+- Hint: By using the shortcode `[mapview]` the retrieved **geoadress** will be stored as additional custom field to the post or page.
+
+#### GPX-Tracks:
+- GPX-Tracks: If my Plugin https://github.com/MartinvonBerg/Fotorama-Leaflet-Elevation is used to show GPX-Tracks on the pages:
+  - The tracks statistics is only inluded in the Table if it is inlucded in the GPX-track file like so:
+    ```xml
+    ....
+    <desc>Dist: 7.5 km, Gain: 866 Hm, Loss: 860 Hm</desc>
+    ....
+    ```
+  - This is done automatically if the GPX-Track-Uploader of https://github.com/MartinvonBerg/Fotorama-Leaflet-Elevation is used.
 
 #### 2. Check Category and Icon Mapping
 Categories are now defined in a JSON file in `/<Plugin-Folder>/settings/category_mapping.json`. So it is fully customizable by changing this file. The Icon-PNGs are expected in `/<Plugin-Folder>/images/` Below is the default (german) mapping (which might be changed easily in the settings-file):
@@ -221,65 +208,69 @@ No need to upgrade right now. So, no new release will be submitted.
 ## Deinstallation
 - Use the standard method of WordPress.
 
-## Changelog
+## Changelog <!-- omit from toc -->
 
-### 1.3.2 (03.12.2025)
+### 1.3.3 (11.04.2026) <!-- omit from toc -->
+- Update Unit Tests, Minor PHP Bug Fixes.
+- Tested with WP 7.0.0, locally.
+  
+### 1.3.2 (03.12.2025) <!-- omit from toc -->
 - Tested with WP 6.9.0, locally.
 
-### 1.3.2 (08.09.2025)
+### 1.3.2 (08.09.2025) <!-- omit from toc -->
 - Updated .htaccess for Apache-servers > 2.3 in src and release
-- Tested with WP 6.8.2, locally. (PHP unit tests not fully updated, yet. TODO)
+- Tested with WP 6.8.2, locally.
 
-### 1.3.1 (15.05.2025)
+### 1.3.1 (15.05.2025) <!-- omit from toc -->
 - Tested with WP 6.8. No changes for that.
 - introduced ESlint. Non functional changes for that.
 
-### 1.3.0 (07.03.2025)
+### 1.3.0 (07.03.2025) <!-- omit from toc -->
 Google Maps links removed to avoid DSVGO problems. Replace by a link to HERE-we-go which is hosted in Europe.
-
-### 1.2.0 (01.03.2025)
+ 
+### 1.2.0 (01.03.2025) <!-- omit from toc -->
 Translation process updated, see I18N chapter herein. Automatic generation of .htaccess file added.
 
-### 1.1.0 (26.02.2025)
+### 1.1.0 (26.02.2025) <!-- omit from toc -->
 Translation for en, it, es, fr included. Translation for Tabulator.js is done in the frontend (for leaflet it what so before). Prerequisite: The html content has to be in English. 
 Therefore the language in PHP is set to en_US. Further translations have to be added in JS-code and not in po-, mo-files.
 
-### 1.0.1 (16.02.2025)
+### 1.0.1 (16.02.2025) <!-- omit from toc -->
 - CSS-File Clean-up: small main css is loaded in PHP. Reason for red clusters removed. grid prepared but not used.
 
-### 1.0.0 (14.02.2025)
+### 1.0.0 (14.02.2025) <!-- omit from toc -->
 - TBD, see github changelog.
 
-### 0.10.5 (14.05.2022)
+### 0.10.5 (14.05.2022) <!-- omit from toc -->
 - Tested with WordPress 6.0
-
-### 0.10.4 (02.02.2022)
+ 
+### 0.10.4 (02.02.2022) <!-- omit from toc -->
 - Minor PHP warning correction to satisfy PHPStan (level 5) and QueryMonitor
 
-### 0.10.3 (30.01.2022)
+### 0.10.3 (30.01.2022) <!-- omit from toc -->
 - Replaced Bike-Hike-Map with CycleOSM
 
-### 0.10.2 (16.01.2022)
+### 0.10.2 (16.01.2022) <!-- omit from toc -->
 - Minor PHP bugfix
 
-### 0.10.1 (13.01.2022)
+### 0.10.1 (13.01.2022) <!-- omit from toc -->
 - CSS changes for new theme
 - Readme update
 
-### 0.10.0 (30.11.2021)
+### 0.10.0 (30.11.2021) <!-- omit from toc -->
 - Switched to tabulator.info
 
-### 0.9.1 (18.11.2021)
+### 0.9.1 (18.11.2021) <!-- omit from toc -->
 - Introduced and tested transients for PHP -> JS variable `$postArray`
 
-### 0.9.0 (16.11.2021)
+### 0.9.0 (16.11.2021) <!-- omit from toc -->
 - Reworked flexible icons and groups provided by PHP script
 - Tours are now passed to JS as a variable
 
-### 0.8.1 (08.11.2021)
+### 0.8.1 (08.11.2021) <!-- omit from toc -->
 - Added 'tab: false' for Safari to open pop-ups correctly
 
-### 0.8.0 (30.03.2021)
+### 0.8.0 (30.03.2021) <!-- omit from toc -->
 - Added a table to show all posts under the map
 - Bootstrap-table used for rendering
 - Full functionality not guaranteed with the "Photo Perfect Pro" theme
@@ -288,22 +279,22 @@ Therefore the language in PHP is set to en_US. Further translations have to be a
 - Passed variable `g_wp_postmap_path` to JS using `localize_scripts`
 - Introduced transients to store the generated HTML output (re-generated if a new post is published)
 
-### 0.7.0 (17.02.2021)
+### 0.7.0 (17.02.2021) <!-- omit from toc -->
 - PHP 8 compatibility check (OK, no changes needed)
 - Replaced `jQuery` with `$`
 - Run JS only if `div 'map10_img'` is present
 
-### 0.6.0 (09.01.2021)
+### 0.6.0 (09.01.2021) <!-- omit from toc -->
 - Mobile improvement: Hide zoom controls on mobile devices
 
-### 0.5.0 (28.12.2020)
+### 0.5.0 (28.12.2020) <!-- omit from toc -->
 - Speed improvement: Optimized excerpt function (uses `<p>` abstracts only)
 - Replaced function for converting tags to strings with an anonymous function
 
-### 0.4.0 (14.12.2020)
+### 0.4.0 (14.12.2020) <!-- omit from toc -->
 - Introduced namespace
 
-### 0.3.0 (01.04.2020)
+### 0.3.0 (01.04.2020) <!-- omit from toc -->
 - Initial release
 
 ## Credits

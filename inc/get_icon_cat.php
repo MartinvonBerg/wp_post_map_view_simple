@@ -71,7 +71,7 @@ function find_best_category_match($keywords, $stopwords, $json_file=null) {
     // Kategorien aus JSON extrahieren
     $categories = array_column($json_data['mapping'], 'category');
     
-    // stopwords strtolower. TODO : convert single string to array if needed
+    // stopwords strtolower. convert single string to array if needed
     if (is_string($stopwords)) {
         $stopwords = explode(',', $stopwords);
     }
