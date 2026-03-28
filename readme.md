@@ -240,7 +240,7 @@ No need to upgrade right now. So, no new release will be submitted.
 ## Changelog <!-- omit from toc -->
 
 ### 1.3.3 (28.03.2026) <!-- omit from toc -->
-- Update Unit Tests, Minor PHP Bug Fixes.
+- Update Unit Tests, Minor PHP Bug Fixes. Update PHP-Header for Plugin main file.
 - Tested with WP 6.9.4, locally.
 - Updated all JS libs used on site (excluded save-dev) except leaflet.fullscreen because 4.0.0. -> 5.3.1 has breaking changes. Checker composer, no updates requuired for site.
   
