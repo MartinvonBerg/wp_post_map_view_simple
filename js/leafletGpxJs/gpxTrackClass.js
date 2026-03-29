@@ -1,4 +1,5 @@
-/*!
+/* eslint-disable security/detect-object-injection -- This file uses dynamic object keys which can trigger false positives in the security plugin */
+ /*!
 	gpxTrackClass 0.33.0
 	license: GPL 2.0
 	Martin von Berg
@@ -112,7 +113,7 @@ class gpxTrackClass {
      * @returns {object} icon leaflet.icon-object-type
      */
     #setIcon (path, iconpng, shadowpng, retinapng='') {
-        let icon = L.icon({ 
+        const icon = L.icon({ 
             iconUrl: path + iconpng,
             iconRetinaUrl: path + retinapng,
             iconSize: [16, 22],
@@ -126,7 +127,7 @@ class gpxTrackClass {
     }
 
     #handleMouseOver (e) {
-        if (e.type === 'mouseover' && (this.trackNumber == this.mapobject.currentTrack)) {
+        if (e.type === 'mouseover' && (this.trackNumber === this.mapobject.currentTrack)) {
             // get id in coords. triggerEvent
             const changed = new CustomEvent('mouseoverpath', {
                 detail: {
@@ -138,7 +139,7 @@ class gpxTrackClass {
               });
               e.layer._map._container.dispatchEvent(changed);
 
-        } else if (e.type === 'mouseover' && (this.trackNumber != this.mapobject.currentTrack)) {
+        } else if (e.type === 'mouseover' && (this.trackNumber !== this.mapobject.currentTrack)) {
             const changed = new CustomEvent('changetrack', {
                 detail: {
                     name: 'changetrack',
@@ -160,9 +161,9 @@ class gpxTrackClass {
      * @returns {none} - no return values
      */
     showGeoJson () {
-        let coords = [];
-        let elevs = [];
-        let layers = [];
+        const coords = [];
+        const elevs = [];
+        const layers = [];
         
         this.gpxTracks = new L.geoJSON(this.trackurl, { // loads from url or parses xml directly
            // options 
@@ -177,7 +178,7 @@ class gpxTrackClass {
         let lastCoords = {};
 
         this.trackurl.features[0].geometry.coordinates.forEach(element => {
-            let newElem = {
+            const newElem = {
                 'lat': element[1],
                 'lng': element[0],
                 'meta': {
@@ -191,11 +192,11 @@ class gpxTrackClass {
             };
             coords.push(newElem);
             // calc the dist from the last element and add to total dist.
-            if (i==0) {lastCoords = newElem;}
+            if (i===0) {lastCoords = newElem;}
             dist = dist + calcDist(lastCoords.lat, lastCoords.lng, newElem.lat, newElem.lng);
             lastCoords = newElem;
             
-            let newelev = [
+            const newelev = [
                 dist, // dist from null or beginning of the track.
                 element[2],
                 dist.toFixed(2) + ' km, ' + element[2].toFixed(0) + ' m',
@@ -210,11 +211,11 @@ class gpxTrackClass {
         this.myIcon1 = this.#setIcon(this.pageVariables.imagepath, 'pin-icon-start.png', 'pin-shadow.png');
         this.myIcon2 = this.#setIcon(this.pageVariables.imagepath, 'pin-icon-end.png', 'pin-shadow.png');
         
-        let marker1 = new L.marker(coords[0], { icon: this.myIcon1 });
+        const marker1 = new L.marker(coords[0], { icon: this.myIcon1 });
         marker1.addTo(this.gpxTracks);
         layers.push(marker1);
 
-        let marker2 = new L.marker(coords[coords.length-1], { icon: this.myIcon2 });
+        const marker2 = new L.marker(coords[coords.length-1], { icon: this.myIcon2 });
         marker2.addTo(this.gpxTracks);
         layers.push(marker2);
 
@@ -248,7 +249,7 @@ class gpxTrackClass {
      */
     #getTrackTypes () {
         
-        let TypesInTrack = []; 
+        const TypesInTrack = []; 
         const resultSet = new Set();
 
         for (const match of this.trackurl.matchAll(/<type>(.*?)<\/type>/g)) {
@@ -256,10 +257,10 @@ class gpxTrackClass {
             resultSet.add(match[1]);
           }
 
-        let nTypesInTrack = resultSet.size;
+        const nTypesInTrack = resultSet.size;
 
         // handle case of no types in track are defined
-        if (nTypesInTrack == 0) {
+        if (nTypesInTrack === 0) {
             this.polyline_options[0] = {
                 color: this.trackColour,
                 weight: parseInt(this.pageVariables.sw_options.trackwidth),
@@ -270,14 +271,14 @@ class gpxTrackClass {
 
         // get the number of different track types in the track
         let i = 1;
-        let resultArray = Object.assign(...Array.from(resultSet, v => ({[v]:i++}))) ;
+        const resultArray = Object.assign(...Array.from(resultSet, v => ({[v]:i++}))) ;
         
         // and calculate equally distributed colors
-        let colors = calculateEquallyDistributedColors(this.trackColour, nTypesInTrack);
+        const colors = calculateEquallyDistributedColors(this.trackColour, nTypesInTrack);
 
         // set polyline_options as array with different colors for each tracktype and repeat if same tracktype appears again
         for (let i = 0; i < TypesInTrack.length; i++) {
-            let index=resultArray[TypesInTrack[i]];
+            const index=resultArray[TypesInTrack[i]];
             this.polyline_options.push({
                 color: colors[index-1],
                 weight: parseInt(this.pageVariables.sw_options.trackwidth),
@@ -295,14 +296,14 @@ class gpxTrackClass {
      */
     async showTrack (polyline_options = null) {
         
-        if (polyline_options == null) {
+        if (polyline_options === null) {
             polyline_options = {
                 color: this.trackColour,
                 weight: parseInt(this.pageVariables.sw_options.trackwidth),
             };
         }
         // show first track on map. track color, width, tooltip font color, background color
-        let options = { // loads from url or parses xml directly
+        const options = { // loads from url or parses xml directly
             async: this.asyncLoading,
             polyline_options: polyline_options,
             markers: {
@@ -358,7 +359,7 @@ class gpxTrackClass {
         let info = this.gpxTracks._info.desc;
         if (info) {info = info.split(' ')} else {info='';};
 
-        if (info[0]=='Dist:' && info[1] && info[4] && info[7]) {
+        if (info[0]==='Dist:' && info[1] && info[4] && info[7]) {
             this.pageVariables.tracks['track_'+ this.trackNumber.toString()].info = this.gpxTracks._info.desc;
         } else {
             this.pageVariables.tracks['track_'+ this.trackNumber.toString()].info = this.calcGpxTrackInfo();
@@ -374,13 +375,13 @@ class gpxTrackClass {
      * @return {number} The index of the closest coordinate.
      */
     getIndexForCoords (point) {
-        let n = this.coords.length
+        const n = this.coords.length
         let dist = Infinity;
         let index = -1;
 
         //let startTime = performance.now();
         for (let i = 0; i < n; i++) { // performance
-            let newdist = calcDist(point.lat, point.lng, this.coords[i].lat, this.coords[i].lng);
+            const newdist = calcDist(point.lat, point.lng, this.coords[i].lat, this.coords[i].lng);
 
             if (newdist < dist) {
                 index = i;
@@ -404,9 +405,9 @@ class gpxTrackClass {
      */
     calcGpxTrackInfo (inCoords=null) {
         let info = ''; // eslint-disable-line no-useless-assignment
-        let coords = inCoords ? inCoords : this.coords;
+        const coords = inCoords ? inCoords : this.coords;
 
-        if (coords.length == 0) return 'No Data found';
+        if (coords.length === 0) return 'No Data found';
 
         //elevation
         let lastConsideredElevation = coords[0].meta.ele;
@@ -419,10 +420,10 @@ class gpxTrackClass {
         
         if (this.doTrackCalc && Array.isArray(coords)) {
             coords.forEach((point) => {
-                let curElevation = point.meta.ele;
+                const curElevation = point.meta.ele;
                 
                 if (typeof(curElevation) === 'number') {
-                    let elevationDelta = curElevation - lastConsideredElevation;
+                    const elevationDelta = curElevation - lastConsideredElevation;
 
                     if (Math.abs(elevationDelta) > this.eleSmoothing) {
                         elevationDelta>0 ? cumulativeElevationGain += elevationDelta : '';
@@ -430,8 +431,8 @@ class gpxTrackClass {
                         lastConsideredElevation = curElevation;
                     }
 
-                    let curPoint = [point.lat, point.lng];
-                    let curDist = 1000 * calcDist3D(lastConsideredPoint[0], lastConsideredPoint[1], curPoint[0], curPoint[1]);
+                    const curPoint = [point.lat, point.lng];
+                    const curDist = 1000 * calcDist3D(lastConsideredPoint[0], lastConsideredPoint[1], curPoint[0], curPoint[1]);
                     if (Math.abs(curDist) > this.distSmoothing) {
                         cumulativeDistance += curDist;
                         lastConsideredPoint = curPoint;
@@ -447,19 +448,19 @@ class gpxTrackClass {
         } else if (this.doTrackCalc && typeof(coords) === 'object') {
             for (const [, point] of Object.entries(coords)) {
     
-                let curElevation = point.meta.ele;
+                const curElevation = point.meta.ele;
                 
                 if (typeof(curElevation) === 'number') {
 
-                    let elevationDelta = curElevation - lastConsideredElevation;
+                    const elevationDelta = curElevation - lastConsideredElevation;
                     if (Math.abs(elevationDelta) > this.eleSmoothing) {
                         elevationDelta>0 ? cumulativeElevationGain += elevationDelta : '';
                         elevationDelta<0 ? cumulativeElevationLoss -= elevationDelta : '';
                         lastConsideredElevation = curElevation;
                     }
 
-                    let curPoint = [point.lat, point.lng];
-                    let curDist = 1000 * calcDist3D(lastConsideredPoint[0], lastConsideredPoint[1], curPoint[0], curPoint[1]);
+                    const curPoint = [point.lat, point.lng];
+                    const curDist = 1000 * calcDist3D(lastConsideredPoint[0], lastConsideredPoint[1], curPoint[0], curPoint[1]);
                     if (Math.abs(curDist) > this.distSmoothing) {
                         cumulativeDistance += curDist;
                         lastConsideredPoint = curPoint;
@@ -473,10 +474,10 @@ class gpxTrackClass {
             info = 'Dist: '+ cumulativeDistance/1000 +' km, Gain: '+ cumulativeElevationGain +' Hm, Loss: '+ cumulativeElevationLoss+' Hm';  
 
         } else {
-            let distKm = this.gpxTracks.get_distance() / 1000;
-            let distKmRnd = distKm.toFixed(1);
-            let eleGain = this.gpxTracks.get_elevation_gain().toFixed(1);
-            let eleLoss = this.gpxTracks.get_elevation_loss().toFixed(1);
+            const distKm = this.gpxTracks.get_distance() / 1000;
+            const distKmRnd = distKm.toFixed(1);
+            const eleGain = this.gpxTracks.get_elevation_gain().toFixed(1);
+            const eleLoss = this.gpxTracks.get_elevation_loss().toFixed(1);
             info = 'Dist: '+distKmRnd+' km, Gain: '+ eleGain+' Hm, Loss: '+eleLoss+' Hm';   
         }
 

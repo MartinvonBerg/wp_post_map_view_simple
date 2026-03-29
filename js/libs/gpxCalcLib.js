@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-object-injection -- This file uses dynamic object keys which can trigger false positives in the security plugin */
+
 /* JS library with helper functions for GPX calculations
     gpxCalcLib.js designed as esm module
     written by Martin von Berg, 2024

@@ -29,8 +29,8 @@ class MyTabulatorClass {
         //rowValue - the value of the column in this row
         //rowData - the data for the row being filtered
         //filterParams - params object passed to the headerFilterFuncParams property
-        let rowInt = parseFloat(rowValue, this.locale);
-        let headerInt = parseFloat(headerValue, this.locale);
+        const rowInt = parseFloat(rowValue, this.locale);
+        const headerInt = parseFloat(headerValue, this.locale);
         return rowInt >= headerInt; //must return a boolean, true if it passes the filter.
     }
 
@@ -42,7 +42,7 @@ class MyTabulatorClass {
         const columns = [];
         
         headers.forEach(th => {
-            let column = {
+            const column = {
                 title: th.textContent.trim(),
                 field: th.textContent.trim()
             };
@@ -70,13 +70,13 @@ class MyTabulatorClass {
 
     getUserLocale () {
         const availableLangs = Object.keys(this.getLangs());
-        let userLang = navigator.language.toLowerCase(); // z. B. "de", "de-de", "fr-fr"
+        const userLang = navigator.language.toLowerCase(); // z. B. "de", "de-de", "fr-fr"
     
         // Wenn exakte Sprache existiert, verwenden
         if (availableLangs.includes(userLang)) return userLang;
     
         // Falls "de", "fr", "it" statt "de-de" kommt, kürzen und prüfen
-        let baseLang = userLang.split('-')[0]; // "de", "fr", "it"
+        const baseLang = userLang.split('-')[0]; // "de", "fr", "it"
         if (availableLangs.includes(baseLang + '-' + baseLang)) {
             return baseLang + '-' + baseLang;
         }
@@ -195,10 +195,10 @@ class MyTabulatorClass {
     }
 
     createTable (tableId, options={}) {
-        let page_size = options.tablePageSize ? options.tablePageSize : 20;
-        let tableHeight = options.tableHeight ? options.tableHeight : '0px';
+        const page_size = options.tablePageSize ? options.tablePageSize : 20;
+        const tableHeight = options.tableHeight ? options.tableHeight : '0px';
         let tabulatorOptions = {}; // eslint-disable-line no-useless-assignment
-        let columns = this.getTableColumns();        
+        const columns = this.getTableColumns();        
 
         if (options.type === 'tourmap') {
             tabulatorOptions = {
@@ -229,7 +229,7 @@ class MyTabulatorClass {
             };
         }
 
-        if (tableHeight == '0px') {
+        if (tableHeight === '0px') {
             delete tabulatorOptions.height;
         }
         return new Tabulator(tableId, tabulatorOptions);

@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-object-injection -- This file uses dynamic object keys which can trigger false positives in the security plugin */
+
 /*!
 	LeafletMapClass V 0.30.0
 	license: GPL 2.0
@@ -152,7 +154,7 @@ class LeafletMap {
     }
 
     getFeatureGroup (markers) {
-        let _group = new L.featureGroup(markers);
+        const _group = new L.featureGroup(markers);
         return _group;
     }
 
@@ -164,7 +166,7 @@ class LeafletMap {
      * @returns {object} icon leaflet.icon-object-type
      */
     setIcon (path, iconpng, shadowpng, iconSize = [32,32]) {
-        let icon = L.icon({ 
+        const icon = L.icon({ 
             iconUrl: path + iconpng,
             iconSize: iconSize,
             iconAnchor: [16, 32],
@@ -290,7 +292,7 @@ class LeafletMap {
      * @returns {string|null} the string value for the locale or null, if none available.
      */
     setLanguage () {
-        let de = {
+        const de = {
             'Show all' : 'Alles anzeigen',
             'Distance' : 'Strecke',
             'Ascent'   : 'Anstieg',
@@ -305,7 +307,7 @@ class LeafletMap {
             'None' : 'Keine',
         };
 
-        let it = {
+        const it = {
             'Show all' : 'Mostra Tutti',
             'Distance' : 'Distanza',
             'Ascent'   : 'Salita',
@@ -320,7 +322,7 @@ class LeafletMap {
             'None' : 'Nessuno',
         };
 
-        let fr = {
+        const fr = {
             'Show all' : 'Afficher Tout',
             'Distance' : 'Distance',
             'Ascent'   : 'Ascente',
@@ -335,7 +337,7 @@ class LeafletMap {
             'None' : 'Aucun',
         };
 
-        let es = {
+        const es = {
             'Show all' : 'Mostrar Todo',
             'Distance' : 'Distancia',
             'Ascent'   : 'Ascenso',
@@ -350,7 +352,7 @@ class LeafletMap {
             'None' : 'Nada',
         };
 
-        let langs = {'de': de, 'it':it, 'fr':fr, 'es':es};
+        const langs = {'de': de, 'it':it, 'fr':fr, 'es':es};
 
         let lang = navigator.language;
         lang = lang.split('-')[0];
@@ -359,12 +361,13 @@ class LeafletMap {
             L._ = L.i18n = this.i18n;
         }
 
-        if ((lang == 'de') || (lang == 'it') || (lang == 'fr') || (lang == 'es')) {
+        const localeData = { de: langs.de, it: langs.it, fr: langs.fr, es: langs.es }[lang];
+        if (localeData) {
             if (typeof(L.registerLocale) === 'function') {
-                L.registerLocale(lang, langs[lang]);
+                L.registerLocale(lang, localeData);
                 L.setLocale(lang);
             } 
-            return langs[lang];
+            return localeData;
         } 
         else {
             return null;
@@ -389,7 +392,7 @@ class LeafletMap {
     }
 
     setMapControls () {
-        let classThis = this;
+        const classThis = this;
 
         if (! this.#isMobile) {
             this.controlZoom = new L.Control.Zoom(this.opts.zoomControl);
@@ -399,7 +402,7 @@ class LeafletMap {
         // Functions and Overlays for Show-all (Magnifying glass) in the top left corner
         L.Control.Watermark = L.Control.extend({
             onAdd: function () {
-                let img = L.DomUtil.create('img');
+                const img = L.DomUtil.create('img');
                 img.src = classThis.pageVariables.imagepath + '/lupe_p_32.png';
                 img.style.background = 'white';
                 img.style.width = '32px';
@@ -468,7 +471,7 @@ class LeafletMap {
      * @param {boolean} fit fit the map to the leaflet map markers for the images shown in slider
      */
     createFotoramaMarkers (markers, fit=true) {
-        let { marker, j, testgroup } = this.createMarkers(markers);
+        const { marker, j, testgroup } = this.createMarkers(markers);
         this.mrk = marker;
         this.controlLayer.addOverlay(this.group1, this.i18n('Images') + ' (' + j + ')');
         this.group1.addTo(this.map); 
@@ -482,17 +485,17 @@ class LeafletMap {
      * @returns {array} bounds
      */
     createMarkers (imgdata) {
-        let classThis = this;
+        const classThis = this;
         this.group1 = L.layerGroup();
-        let testgroup = L.featureGroup();
+        const testgroup = L.featureGroup();
         //LayerSupportGroup.addTo(maps[m]);
         // Creating markers -----------------------
-        let marker = [];
+        const marker = [];
         let j = 0;
 
         // define image markers for map
         imgdata.forEach(tour => {
-            if ((tour['coord'][0] == null) || (tour['coord'][1] == null)) {
+            if ((tour['coord'][0] === null) || (tour['coord'][1] === null)) {
                 // do nothing. skip this image if no gpx-data provided.
             }
             else {
@@ -505,7 +508,7 @@ class LeafletMap {
                 marker.push(new L.Marker(tour['coord'], { title: tour['title'], icon: selectedIcon, id: j, riseOnHover: true, }));
 
                 if (('srcset' in tour) && (Object.keys(tour['srcset']).length)) { // "srcset" in tour
-                    var key = Object.keys(tour.srcset)[0];
+                    const key = Object.keys(tour.srcset)[0];
                     marker[j].bindPopup('<div>' + tour['title'] + '<br><img class="leaf_pup_img" src="' + tour.srcset[key] + '"></div>', {
                         maxWidth: 'auto',
                     });
@@ -518,7 +521,7 @@ class LeafletMap {
                 // trigger click on marker: marker.on('click', ....)
                 marker[j].on('click', function (a) {
                     // get the index number of the map on the page
-                    let source = parseInt(a.originalEvent.currentTarget.id.replace('map', ''));
+                    const source = parseInt(a.originalEvent.currentTarget.id.replace('map', ''));
                                        
                     const changed = new CustomEvent('mapmarkerclick', {
                         detail: {
@@ -583,7 +586,7 @@ class LeafletMap {
      * @param {object} markergroup group of markery as leaflet markergroup
      */
     setBoundsToMarkers (markergroup) {
-        let oldbounds = this.bounds;
+        const oldbounds = this.bounds;
         let newbounds = []; // eslint-disable-line no-useless-assignment
 
         if (markergroup instanceof L.LayerGroup) {
@@ -596,8 +599,8 @@ class LeafletMap {
         if ((newbounds.length !== 0) && (newbounds instanceof L.LatLngBounds)) {
             this.map.fitBounds(newbounds);
             // set the max zoom level for markers exactly on the same postion
-            let curzoom = this.map.getZoom();
-            if (curzoom == this.maxZoomValue) {
+            const curzoom = this.map.getZoom();
+            if (curzoom === this.maxZoomValue) {
                 this.map.fitBounds(newbounds, {maxZoom : this.maxZoomValue});
             }
         }

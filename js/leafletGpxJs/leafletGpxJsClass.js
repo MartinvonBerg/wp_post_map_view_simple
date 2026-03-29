@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-object-injection -- This file uses dynamic object keys which can trigger false positives in the security plugin */
+
 /*!
 	leafletChartJsClass 0.17.0
 	license: GPL 2.0
@@ -57,14 +59,14 @@ class LeafletGpxJs extends LeafletMap {
      */
     async createTrackOnMap () {
         // generate the track colors
-        let number = this.number;
+        const number = this.number;
         this.trackStartColour = pageVarsForJs[number].sw_options.trackcolour ?? '#ff0000';
         // calculate track colours for the different tracks.
         this.trackColours = calculateEquallyDistributedColors(this.trackStartColour, this.pageVariables.ngpxfiles);
 
         // generate all tracks on the map 
         for (const [key] of Object.entries(this.pageVariables.tracks)) {
-            let trackNumber = parseInt(key.replace(/\D/g,''));
+            const trackNumber = parseInt(key.replace(/\D/g,''));
             this.track[trackNumber] = await this.createTrack(number, trackNumber).then(results => { 
               return results ;
             });
@@ -77,7 +79,7 @@ class LeafletGpxJs extends LeafletMap {
         };
 
         // set the bounds for the map. handling of parameter showalltracks is ignored here.
-        let maxBounds = this.findMaxBounds(this.allBounds);
+        const maxBounds = this.findMaxBounds(this.allBounds);
         if (maxBounds !== null && maxBounds.isValid()) {
           super.setBounds(maxBounds); // bounds might not correctly set leaflet-overlay-pane
           this.map.fitBounds(maxBounds);
@@ -87,9 +89,9 @@ class LeafletGpxJs extends LeafletMap {
 
     async createTrack (number, trackNumber) {
       if (this.preload) {
-        let track_x = `track_${trackNumber}`;  // where x is 0, 1, 2, etc.
-        let path = this.pageVariables.tracks[track_x].url;
-        let newFile = await fetch(path).then(response => response.text());
+        const track_x = `track_${trackNumber}`;  // where x is 0, 1, 2, etc.
+        const path = this.pageVariables.tracks[track_x].url;
+        const newFile = await fetch(path).then(response => response.text());
         this.pageVariables.tracks[track_x].url = newFile;
       }
 
@@ -107,7 +109,7 @@ class LeafletGpxJs extends LeafletMap {
         return null; // Return null for an empty or invalid array
       }
     
-      let maxBounds = mapBoundsArray[0]; // Initialize with the first bounds in the array
+      const maxBounds = mapBoundsArray[0]; // Initialize with the first bounds in the array
     
       for (let i = 1; i < mapBoundsArray.length; i++) { // performance
         const currentBounds = mapBoundsArray[i];

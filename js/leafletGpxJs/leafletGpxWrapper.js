@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-object-injection -- This file uses dynamic object keys which can trigger false positives in the security plugin */
+
 /*!
 	leafletGpxWrapper 0.30.0
 	license: GPL 2.0
@@ -17,7 +19,7 @@ import 'leaflet-gpx';
  * @property {Array<Array<L.LatLng>>} coords - An array of arrays of latitude/longitude coordinates for each layer in the GPX data.
  * @method get_coords() - Returns a flattened array of all the latitude/longitude coordinates in the GPX data.
  */
-let leafletGpxWrapper = L.GPX.extend({
+const leafletGpxWrapper = L.GPX.extend({
     coords: [],
     get_coords: function () { return this.coords.flat(); },
 });
@@ -45,8 +47,8 @@ let leafletGpxWrapper = L.GPX.extend({
  *    - dist: Segment distance calculated from elevation points
  */
 leafletGpxWrapper.addInitHook(function () {
-    let id = this.getLayers()[0]._leaflet_id;
-    let layers = this._layers[id]._layers;
+    const id = this.getLayers()[0]._leaflet_id;
+    const layers = this._layers[id]._layers;
     let startIndex = 0;
     let stopIndex = 0;
     let nCoordsLayers = 0;
@@ -54,7 +56,7 @@ leafletGpxWrapper.addInitHook(function () {
 
     // loop for each layer
     Object.entries(layers).forEach(([, layer]) => {
-        if (layer._latlngs != undefined) {
+        if (layer._latlngs !== undefined) {
             this.coords.push(layer._latlngs);
             // this is only for a gpx file with several tracks in one file, e.g. for multisport tracks.
             if (this.options.polyline_options[nCoordsLayers]) {

@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-object-injection -- This file uses dynamic object keys which can trigger false positives in the security plugin */
+
 import { isValidAspectRatio, isValidCssSize } from './libs/cssCheckLib.js';
 import { loadSettings } from './libs/loadJSON.js';
 
@@ -68,7 +70,7 @@ function mainLogic (window, document) {
      * @returns {array} markersInGroups - an array of arrays with all markers grouped by their icon
      */
     function createMarkers (php_touren, allIcons, myIcon, nposts, _shortcodeType) {
-      let markersInGroups = [];
+      const markersInGroups = [];
       
       php_touren.forEach(tour => {
           // find the index of the icon in allIcons that matches the category of the tour
@@ -78,8 +80,8 @@ function mainLogic (window, document) {
           grpIndex = grpIndex !== -1 ? grpIndex : allIcons.length - 1;
           
           nposts[grpIndex]++;
-          let icon = myIcon[grpIndex];
-          let marker = new L.Marker(tour.coord, { title: tour.title, icon });
+          const icon = myIcon[grpIndex];
+          const marker = new L.Marker(tour.coord, { title: tour.title, icon });
   
           let popupContent = '';
           if (tour.link) popupContent += `<a href="${tour.link}">`;
@@ -141,17 +143,17 @@ function mainLogic (window, document) {
      * @param {array} [padding=[50, 50]] - padding between the map view and the markers.
      */
     function fitMaptoMarkers (map, markersArray, padding = [50, 50], checkZoom = false) {
-      let bounds = L.latLngBounds();
+      const bounds = L.latLngBounds();
       let marker = new Array(); // eslint-disable-line no-useless-assignment
       marker = markersArray.flat();
       marker.forEach(m => {
-          let lat_lng = m._latlng;
+          const lat_lng = m._latlng;
           bounds.extend(lat_lng);
       });
-      let zoomBefore = map.getZoom();
+      const zoomBefore = map.getZoom();
       map.fitBounds(bounds, { padding: padding });
-      let zoomAfter = map.getZoom();
-      let zoomDiff = zoomAfter - zoomBefore;  
+      const zoomAfter = map.getZoom();
+      const zoomDiff = zoomAfter - zoomBefore;  
       if (checkZoom && zoomDiff > 1) {
         map.setZoom(zoomBefore+3);
       }
@@ -169,10 +171,10 @@ function mainLogic (window, document) {
      */
     function createMarkerClusterGroup (mapClass, markersInGroups, LayerSupportGroup, allIcons, iconUrl, nposts) {
       // ---add the marker cluster group to map --------------
-      let group = new Array();
+      const group = new Array();
       
       allIcons.forEach(function (icon, index) {
-        if (markersInGroups[index] != undefined) {
+        if (markersInGroups[index] !== undefined) {
           group[index] = L.layerGroup(markersInGroups[index]);
         }	else {
           group[index] = L.layerGroup();
@@ -205,7 +207,7 @@ function mainLogic (window, document) {
       *            this.pageVariables.sw_options.trackwidth
       * @global {object} pageVarsForJs[number].tracks_polyline_options */
 
-      let glob = window.pageVarsForJs[number];
+      const glob = window.pageVarsForJs[number];
       //glob.imagepath = ''; is already defined.
       
       glob.sw_options = [];
@@ -218,19 +220,19 @@ function mainLogic (window, document) {
     
     // main logic
     if (window.g_wp_postmap_path.number === '1' && php_touren.length > 0) {
-      let postmap_url = window.g_wp_postmap_path.path;
-      let hasTable = window.g_wp_postmap_path.hasTable == '1' ? true : false;
-      let hasMap = window.g_wp_postmap_path.hasMap == '1' ? true : false;
-      let numberOfBoxes = 1;
-      let allMaps = [numberOfBoxes-1];
-      let m = 0;
-      let pageVars = window.pageVarsForJs[m];
+      const postmap_url = window.g_wp_postmap_path.path;
+      const hasTable = window.g_wp_postmap_path.hasTable === '1' ? true : false;
+      const hasMap = window.g_wp_postmap_path.hasMap === '1' ? true : false;
+      const numberOfBoxes = 1;
+      const allMaps = [numberOfBoxes-1];
+      const m = 0;
+      const pageVars = window.pageVarsForJs[m];
       let table = {};
-      let tableMapMoveSelector = window.g_wp_postmap_path.tableMapMoveSelector; // This is set by PHP, where it is not an option but hardcoded. 
+      const tableMapMoveSelector = window.g_wp_postmap_path.tableMapMoveSelector; // This is set by PHP, where it is not an option but hardcoded. 
       let LayerSupportGroup = {};
       let allIcons = {};
       let nposts = [];
-      let myIcon = new Array();
+      const myIcon = new Array();
       let group = new Array();
 
       pageVars.type = window.g_wp_postmap_path.type;
@@ -245,8 +247,8 @@ function mainLogic (window, document) {
        * @global {Object} LayerSupportGroup
        */
       function toggleGroup (event, groups = null) {
-        let op = event.op;
-        if (groups == null || op != 'removeLayer') {
+        const op = event.op;
+        if (groups === null || op !== 'removeLayer') {
           return;
         }
         // removes all Marker Layers and the control layers 
@@ -307,12 +309,12 @@ function mainLogic (window, document) {
               
               iconCreateFunction: function (cluster) {
                   // possible options: size, colors, color-limits, usage
-                  let count = cluster.getChildCount();
+                  const count = cluster.getChildCount();
                   //let size = count < 100 ? 40 : count < 500 ? 50 : 60; // Dynamische Größe
-                  let size = 35;
+                  const size = 35;
           
                   // Farbverlauf bestimmen
-                  let color = count < 5 ? '#61ea0b' :  // Grün
+                  const color = count < 5 ? '#61ea0b' :  // Grün
                               count < 10 ? '#FFA600' :  // Gelb
                               count < 50 ? '#d915ad' : 
                               '#f70413';               // Rot
@@ -346,10 +348,10 @@ function mainLogic (window, document) {
 
           // --- show the title of the included markers in the tooltip ---
           LayerSupportGroup.on('clustermouseover', function (a) {
-            var children = a.layer.getAllChildMarkers();
-            var names = [];
-            var string = '';
-            var max = children.length;
+            const children = a.layer.getAllChildMarkers();
+            const names = [];
+            let string = '';
+            let max = children.length;
             if (max > 10) { max = 10 };
             for (let i = 0; i < max; i++) {
                 names.push(children[i].options.title);
@@ -375,13 +377,13 @@ function mainLogic (window, document) {
              */
             getOverlays: function () {
             // create hash to hold all layers
-            var control, layers, activemaplayer;
-            layers = {};
-            control = this;
+            let activemaplayer;
+            const layers = {};
+            const control = this;
                     
             // loop thru all layers in control
             control._layers.forEach(function (obj) {
-                var layerName;
+                let layerName;
         
                 // check if layer is not an overlay 
                 if (!obj.overlay) {
@@ -398,7 +400,7 @@ function mainLogic (window, document) {
           
           // set the background color of the map according to the base layer
           allMaps[m].map.on('baselayerchange', function () {
-            let activeLayer =  allMaps[0].controlLayer.getOverlays();
+            const activeLayer =  allMaps[0].controlLayer.getOverlays();
             switch (activeLayer) {
                 case 'OpenStreetMap':
                   document.querySelector('.leaflet-container').style.background = '#b9d3dc';
@@ -420,7 +422,7 @@ function mainLogic (window, document) {
 
           // set the initial bounds and add the buttons "All" & "None" to the control. The Button Text is defined in the json file
           window.addEventListener('load', function () {
-            let newBounds = allMaps[m].map.getBounds();
+            const newBounds = allMaps[m].map.getBounds();
             allMaps[m].setBounds(newBounds);
 
             // Eigenes Element mit "Alles" und "Nichts" hinzufügen
@@ -473,13 +475,13 @@ function mainLogic (window, document) {
       // --- Generate the Table with Tabulator and Filter markers on the Map ---
       if (hasTable) {
         import('./tabulator/tabulatorClass.js').then((MyTabulatorClass) => {
-          let tabulator = new MyTabulatorClass.MyTabulatorClass({});
+          const tabulator = new MyTabulatorClass.MyTabulatorClass({});
           table = tabulator.createTable('#post_table', pageVars);
 
           if (hasMap) {
             table.on('dataFiltered', function (filters, rows) {
               
-              if (filters.length == 0 && (document.activeElement.id === 'selectAllBtn')) { // || document.activeElement.id === ''
+              if (filters.length === 0 && (document.activeElement.id === 'selectAllBtn')) { // || document.activeElement.id === ''
                 return;
               } 
 
@@ -491,7 +493,7 @@ function mainLogic (window, document) {
             
                 if (filters.length > 0 && rows.length > 0) {
                     // Gefilterte Touren ermitteln
-                    let filtered_touren = php_touren.filter(tour =>
+                    const filtered_touren = php_touren.filter(tour =>
                         rows.some(row => parseInt(row._row.data.Nr) === tour.id)
                     );
             
@@ -518,12 +520,12 @@ function mainLogic (window, document) {
 
             // click auf die Reihe zentriert die Karte auf den Marker, zoom bleibt gleich
             table.on('rowClick', function (e, row) {
-              let url = row._row.data[tableMapMoveSelector];
+              const url = row._row.data[tableMapMoveSelector];
               // get lat lon from google url which is like so "https://www.google.com/maps/place/47.607203,12.887333/@47.607203,12.887333,9z"
               if (!url) return;
-              let match = url.match(/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-              let lat = parseFloat(match[1]);
-              let lng = parseFloat(match[2]);
+              const match = url.match(/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+              const lat = parseFloat(match[1]);
+              const lng = parseFloat(match[2]);
               if (lat === 0 || lng === 0) return;
               allMaps[m].mapFlyTo([lat, lng]);
             })

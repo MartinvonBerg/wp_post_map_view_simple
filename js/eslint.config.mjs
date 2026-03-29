@@ -30,8 +30,12 @@ export default defineConfig([
 		rules: {
 			camelcase: 'off',
 			quotes: ['error', 'single', { avoidEscape: true }],
-			'no-constant-condition': 'error',
-			'no-shadow': 'warn',
+			'eqeqeq': ['error', 'always'],
+			'no-eval': 'error',
+			'no-implied-eval': 'error',
+			'no-var': 'error',
+			'prefer-const': 'warn', 
+			'no-constant-condition': ['error', { checkLoops: false }], // allows while(true) with break
 			'no-unreachable': 'error',
 			'no-unsafe-finally': 'error',
 			'no-mixed-spaces-and-tabs': ['error', 'smart-tabs'],
@@ -45,7 +49,6 @@ export default defineConfig([
 			'no-lonely-if': 'error',
 			'comma-style': ['error', 'last'],
 			'no-underscore-dangle': 'off',
-			'no-constant-condition': 'off',
 			'no-multi-spaces': 'off',
 			'strict': 'off',
 			'key-spacing': 'off',
@@ -58,16 +61,15 @@ export default defineConfig([
 			}],
 			...security.configs.recommended.rules, // aktiviert empfohlene Sicherheitsregeln
 			
-			'security/detect-object-injection': 'off',
+			'security/detect-object-injection': 'warn', 
 			'security/detect-eval-with-expression': 'error',
 			'security/detect-pseudoRandomBytes': 'error',
-  			'security/detect-buffer-noassert': 'error',
+			'security/detect-buffer-noassert': 'error',
 			'security/detect-non-literal-fs-filename': 'error',
 			'security/detect-non-literal-regexp': 'error',
 			'security/detect-child-process': 'error',
 			'security/detect-new-buffer': 'error',
 			'security/detect-unsafe-regex': 'error',
-			'security/detect-buffer-noassert': 'error',
 			'security/detect-non-literal-require': 'error',
 			
 		}
