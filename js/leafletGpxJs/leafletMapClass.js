@@ -12,9 +12,6 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
-import 'leaflet.fullscreen/Control.FullScreen.css';
-// local css
-//import '../../css/wp_post_map_view_simple.css'; // is no loaded on PHP
 import '../../css/leafletMapClass.css';
 
 import 'leaflet'; 
@@ -438,23 +435,23 @@ class LeafletMap {
     }
 
     setFullscreenButton () {
-        // create a fullscreen button and add it to the map
-        import(/* webpackChunkName: "ControlFullscreen" */ 'leaflet.fullscreen').then(() => {
-            // the next two lines are here for testing
-            let locLL = {};
-            typeof(MyLL) === 'undefined' ? locLL = L : locLL = MyLL;
+        // this creates a separate CSS chunk if webpack supports importing CSS.
+        import(/* webpackChunkName: "ControlFullscreenCSS" */ 'leaflet.fullscreen/dist/Control.FullScreen.css')
+            .then(() =>
+                import(/* webpackChunkName: "ControlFullscreen" */ 'leaflet.fullscreen'))
+                    .then(module => { 
+                            const fullscreen = module.default;
 
-            locLL.control.fullscreen({
-                position: 'topleft',
-                title: this.i18n('Show fullscreen'),
-                titleCancel: this.i18n('Exit fullscreen'),
-                content: null,
-                forceSeparateButton: true,
-                forcePseudoFullscreen: false,
-                fullscreenElement: false // Dom element to render in full screen, false by default, fallback to map._container
-            }).addTo(this.map);
-        });
-        
+                            this.map.addControl(new fullscreen({
+                                position: 'topleft',
+                                title: this.i18n('Show fullscreen'),
+                                titleCancel: this.i18n('Exit fullscreen'),
+                                content: null,
+                                forceSeparateButton: true,
+                                forcePseudoFullscreen: false,
+                                fullscreenElement: false
+                            }));
+                    });
     }
 
     /**
@@ -534,10 +531,10 @@ class LeafletMap {
                     classThis.el.dispatchEvent(changed);
                     
                 });
-                marker[j].on('mouseover', function (e) {
+                marker[j].on('mouseover', function () {
                     this.openPopup();
                 });
-                marker[j].on('mouseout', function (e) {
+                marker[j].on('mouseout', function () {
                     this.closePopup();
                 });
                 marker[j].addTo(testgroup);
