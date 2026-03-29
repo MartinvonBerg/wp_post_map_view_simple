@@ -47,7 +47,7 @@ function get_geoaddress( int $postid, string $lat, string $lon) : string {
         'http' => [
             'method'  => "GET",
             'header'  => [
-                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+                "User-Agent: PostMapTableView/1.3.3 (WordPress plugin; $site_url)",
                 "Referer: $site_url",
                 "Contact: $admin_email",
             ],

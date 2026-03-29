@@ -18,14 +18,14 @@ namespace mvbplugins\helpers;
  */
 
 // Prevent direct access
-defined('ABSPATH') or die('Are you ok?');
+\defined('ABSPATH') or die('Are you ok?');
 
 /**
  * Lädt die category_mapping.json und gibt sie als Array zurück.
  *
  * @return array Das Mapping aus der JSON-Datei.
  */
-function wp_postmap_load_category_mapping( $file = null ) {
+function wp_postmap_load_category_mapping( $file = null ) : array {
     // set the default value according to the settings file
     $default = [
         'default' => ['category' => 'Reisebericht', 'icon-png' => 'travel.png'],
@@ -60,7 +60,7 @@ function wp_postmap_load_category_mapping( $file = null ) {
  * @return array An array containing the best matching category and icon.
  * @example ['category_name', 'icon_name.png']
  */
-function find_best_category_match($keywords, $stopwords, $json_file=null) {
+function find_best_category_match(string $keywords, string|array $stopwords, ?string $json_file=null) : array {
     // JSON-Datei mit settings einlesen
     $json_data = \mvbplugins\helpers\wp_postmap_load_category_mapping($json_file);
 
@@ -131,7 +131,7 @@ function find_best_category_match($keywords, $stopwords, $json_file=null) {
  * @param string $returnKey Der Schlüssel des zurückzugebenden Wertes.
  * @return string Der Icon-Name als String.
  */
-function wp_postmap_get_icon_cat($arraytagnames, $returnKey, $file = null) {
+function wp_postmap_get_icon_cat(string $arraytagnames, string $returnKey, ?string $file = null) : string {
     $data = wp_postmap_load_category_mapping($file);
     $mapping = $data['mapping'];
     $default = $data['default'][$returnKey];
@@ -154,7 +154,7 @@ function wp_postmap_get_icon_cat($arraytagnames, $returnKey, $file = null) {
 }
 
 // Funktion zur Normalisierung: Entfernt alle Nicht-Buchstaben und wandelt in Kleinbuchstaben um
-function normalize_string($string) {
+function normalize_string(string $string) : string {
     return strtolower(preg_replace('/[^\p{L}]+/u', '', $string));
 }
 

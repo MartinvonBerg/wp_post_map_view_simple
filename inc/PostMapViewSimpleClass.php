@@ -23,7 +23,7 @@ use DOMDocument;
 // Prevent direct access
 defined('ABSPATH') or die('Are you ok?');
 
-if (!defined('SETTINGS_FILE')) {
+if (!\defined('SETTINGS_FILE')) {
     define('SETTINGS_FILE', 'category_mapping.json');
 }
 
@@ -50,48 +50,48 @@ interface PostMapViewSimpleInterface {
  */
 final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
-	public static $numberShortcodes = 0;
+	public static int $numberShortcodes = 0;
     // ---------- shortcode parameters ----------
-    private $numberposts = 100; // is shortcode parameter. Max 1000 wg. PHP Memory Limit und max_allowed_packet bei MySQL.
-    private $post_type = 'post'; // is shortcode parameter 
-	private $showmap = true; // is shortcode parameter
-	private $showtable = true; // is shortcode parameter
-	private $category = 'all'; // is shortcode parameter
-	private $headerhtml = ''; // is shortcode parameter
-    private $gpxfolder = 'gpx'; // to retrieve the gpx files added to posts with fotorama
-    private $lenexcerpt = 150;
-    private $useWPExcerptExtraction = false;
-    private $titlelength = 80;
-    private $useTileServer = true;
-    private $convertTilesToWebp = true;
-    private $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:'];
-    private $tabulatorTheme = '';
-    private $tablePageSize = 20;
-    private $tableHeight = 0;
-    private $mapHeight = ''; // shortcode parameter as string px or %
-    private $mapWidth = ''; // shortcode parameter as string px or %
-    private $mapAspectRatio = ''; // shortcode parameter as number (int or float)
-    private $tourfolder  = '';
-    private $trackwidth	 = '3';
-    private $trackcolour = '#ff0000';
-    private $mapselector = 'OpenStreeMap';
-    private $myMarkerIcons = false;
-    private $categoryFilter = [];
+    private int $numberposts = 100; // is shortcode parameter. Max 1000 wg. PHP Memory Limit und max_allowed_packet bei MySQL.
+    private string $post_type = 'post'; // is shortcode parameter 
+	private bool $showmap = true; // is shortcode parameter
+	private bool $showtable = true; // is shortcode parameter
+	private string $category = 'all'; // is shortcode parameter
+	private string $headerhtml = ''; // is shortcode parameter
+    private string $gpxfolder = 'gpx'; // to retrieve the gpx files added to posts with fotorama
+    private int $lenexcerpt = 150;
+    private bool $useWPExcerptExtraction = false;
+    private int $titlelength = 80;
+    private bool $useTileServer = true;
+    private bool $convertTilesToWebp = true;
+    private array $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:'];
+    private string $tabulatorTheme = '';
+    private int $tablePageSize = 20;
+    private int $tableHeight = 0;
+    private string $mapHeight = ''; // shortcode parameter as string px or %
+    private string $mapWidth = ''; // shortcode parameter as string px or %
+    private string $mapAspectRatio = ''; // shortcode parameter as number (int or float)
+    private string $tourfolder  = '';
+    private string $trackwidth	 = '3';
+    private string $trackcolour = '#ff0000';
+    private string $mapselector = 'OpenStreeMap';
+    private bool $myMarkerIcons = false;
+    private string|array $categoryFilter = [];
     // ---------- end of shortcode parameters ----------
 
-    private $plugin_url;
-    private $wp_postmap_url;
-	private $up_dir;
-	private $gpx_dir;
-	private $postArray = [];
-	private $geoDataArray = [];
-    private $htaccessTileServerIsOK = false;
-    private $pageVarsForJs = [];
+    private string $plugin_url;
+    private string $wp_postmap_url;
+	private string $up_dir;
+	private string $gpx_dir;
+	private array $postArray = [];
+	private array $geoDataArray = [];
+    private bool $htaccessTileServerIsOK = false;
+    private array $pageVarsForJs = [];
     private $m = null;
-    private $chunksize = 20;
-    private $tableMapMoveSelector = '';
+    private int $chunksize = 20;
+    private string $tableMapMoveSelector = '';
 	
-	public function __construct( $attr ) {
+	public function __construct( array $attr ) {
 		
 		// extract and handle shortcode parameters
         //'post_status' => 'publish' ist voreingestellt.
@@ -120,7 +120,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		    'trackcolour'		=> '#ff0000',
             'mapselector'       => 'OpenStreeMap',
             'mymarkericons'     => 'false',
-            'categoryfilter'    => 'Reisebericht,Tourenbericht',
+            'categoryfilter'    => 'Reisebericht,Tourenbericht', // string
             ], $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
@@ -194,7 +194,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // generate the output if not set in transient
         $html = get_transient( 'post_map_html_output_' . $wpid );
-        $this->pageVarsForJs = get_transient( 'post_map_js_pageVars_output_' . $wpid );
+        $temp = get_transient( 'post_map_js_pageVars_output_' . $wpid );
+        $this->pageVarsForJs = $temp ? $temp : [];
 
         $chunk_keys = get_option('post_map_array_chunk_keys_' . $wpid, []);
         foreach ($chunk_keys as $chunk_key) {
@@ -477,7 +478,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $filteredItems;
     }
     
-    private function enqueue_tabulator_Theme($theme) {
+    private function enqueue_tabulator_Theme(string $theme): void {
         $plugin_url = plugin_dir_url(__DIR__);
 
         $themes = [
@@ -525,7 +526,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         ];
     }
 
-    private function generate_table_html( $headerhtml, $data2, $caller = '') {
+    private function generate_table_html(string $headerhtml, array $data2, string $caller = ''): string {
         if ( count($data2) === 0) return '';
 
         // generate table with post data: generate the header
@@ -635,7 +636,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $table_out;
     }
     
-    private function generate_map_html( $allposts ) {
+    private function generate_map_html( array $allposts ) : string {
         if ( count( $allposts) === 0) return '';
         
         $string = '<div class="box1">';
@@ -645,7 +646,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $string;
     }
     
-    private function generate_the_excerpt( $post, $length ) {
+    private function generate_the_excerpt( object $post, int $length ) : string {
         $excerpt = $post->post_excerpt;
     
         if ( ! empty( $excerpt ) ) {
@@ -687,7 +688,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $excerpt;
     }
     
-    private function get_statistics_from_gpxfile( $path_to_gpxfile ) {
+    private function get_statistics_from_gpxfile( string $path_to_gpxfile ) : string {
         $default = '0 0 0 0 0 0 0 0';
     
         if ( \is_file( $path_to_gpxfile) ) {		
@@ -716,7 +717,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $default;
     }
 
-    private function normalizeNumber($numberString, $decimals = 1) {
+    private function normalizeNumber( string $numberString, int $decimals = 1) : string {
         // Ersetze Komma durch Punkt
         $numberString = str_replace(',', '.', $numberString);
         
@@ -727,7 +728,16 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return number_format($number, $decimals, '.', '');
     }
     
-    private function sanitize_geoaddress( $geoaddress ) {
+    private function sanitize_geoaddress( string|array $geoaddress ) : array {
+        if ( \is_string( $geoaddress ) ) {
+            return [
+                'address' => 'none',
+                'state' => 'none',
+                'country' => 'none'
+            ];
+        }
+    
+        // sanitize geoaddress values
         $address = $geoaddress['village'] ?? 
                    $geoaddress['city'] ?? 
                    $geoaddress['town'] ?? 
@@ -746,7 +756,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return compact('address', 'state', 'country');
     }
     
-    private function prepare_data( $queryArgs, $gpx_dir, $lenexcerpt ) {
+    private function prepare_data( array $queryArgs, string $gpx_dir, int $lenexcerpt ) : array {
         $postArray = [];
         $data2 = [];
         $custom_posts = [];
@@ -852,7 +862,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $lon = number_format( $lon, 6);
             
             $geoaddresstest =  get_post_meta($post->ID,'geoadress', true) ?? '';
-            if ( !empty($geoaddresstest) ) {
+             if ( !empty($geoaddresstest) ) {
                 $geoaddress = maybe_unserialize($geoaddresstest);	// type conversion to string 
             } else {
                 // lat and lon have to be set always
@@ -889,7 +899,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return [$postArray, $data2];
     }
 
-    private function extractHTMLFromGeoJson( $html ) {
+    private function extractHTMLFromGeoJson( string $html ) : array {
         $result = [];
 
         libxml_use_internal_errors(true);
@@ -919,7 +929,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $result;
     }
 
-    private function is_user_editing_overview_map() {
+    private function is_user_editing_overview_map() : bool {
         if ( is_user_logged_in() && is_admin() ) {
             $screen = get_current_screen();
 

@@ -191,7 +191,7 @@ readfile( $localFile);
  * @param  boolean $removeOld remove the original file or not.
  * @return string|false the file path to the converted file.
  */
-function webpImage($source, $quality = 80, $removeOld = false) {
+function webpImage( string $source, int $quality = 80, bool $removeOld = false) : string|false {
 	if( ! extension_loaded('gd') || ! \function_exists('imagewebp')) return false;
 
 	$dir = pathinfo($source, PATHINFO_DIRNAME);
@@ -223,7 +223,7 @@ function webpImage($source, $quality = 80, $removeOld = false) {
 	return $destination;
 }
 
-function generateHtaccess() {
+function generateHtaccess() : bool {
 	$url = 'http://' . $_SERVER['HTTP_HOST'];
 	if ( is_ssl() ) {
 		$url = str_replace('http://', 'https://', $url);
@@ -238,8 +238,13 @@ function generateHtaccess() {
 	// create the .htaccess file
 	$htaccess = <<<EOT
 <LimitExcept GET HEAD>
-    Order Allow,Deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
 </LimitExcept>
 
 <IfModule mod_rewrite.c>
@@ -264,7 +269,7 @@ EOT;
  * 
  * @return boolean the result of the htaccess check
  */
-function checkHtaccess()
+function checkHtaccess() : bool
 {
 	// try to access testfile.webp which will be redirected to testfile.php if .htaccess is working. 
 	// The file 'testfile.webp' shall not be existent!
