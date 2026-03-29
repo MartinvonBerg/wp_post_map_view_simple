@@ -1,7 +1,11 @@
 parameters:
-	level: 5
-	scanFiles:
+	level: 6
+	paths:
+		- inc
+		- leaflet_map_tiles
 		- wp_post_map_view_simple.php
-		
+		- uninstall.php
 	scanDirectories:
 		- inc
+		- leaflet_map_tiles
+	treatPhpDocTypesAsCertain: true

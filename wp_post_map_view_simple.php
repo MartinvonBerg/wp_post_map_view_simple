@@ -30,23 +30,28 @@ defined('ABSPATH') or die('Are you ok?');
 include_once __DIR__ . '/inc/PostMapViewSimpleClass.php';
 
 add_shortcode('mapview', 'mvbplugins\postmapviewsimple\register_mapview_shortcode');
-function register_mapview_shortcode($atts) {
-    // Die Klasse nur instanziieren, wenn der Shortcode genutzt wird.
-    if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes == 0) 
-        {return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_post_map();}
-    \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
+function register_mapview_shortcode( array $atts ) :string {
+    // Die Klasse nur instanziieren, wenn der Shortcode einmalig genutzt wird.
+    if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes === 0) 
+    {
+        \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
+        return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_post_map();
+    }
+    return '';
 }
 
 add_shortcode('tourmap', 'mvbplugins\postmapviewsimple\register_tourmap_shortcode');
-function register_tourmap_shortcode($atts) {
-    // Die Klasse nur instanziieren, wenn der Shortcode genutzt wird.
-    // TODO: ist die beschränkung auf einen Shortcode notwendig?
-    if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes == 0) 
-        {return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_tourmap();}
-    \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
+function register_tourmap_shortcode(array $atts ) : string {
+    // Die Klasse nur instanziieren, wenn der Shortcode einmalig genutzt wird.
+    if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes === 0) 
+    {
+        \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
+        return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_tourmap();
+    }
+    return '';
 }
 
-function plugin_load_textdomain() {
+function plugin_load_textdomain() : void {
     $path = dirname(plugin_basename(__FILE__)) . '/languages/';
     $result = load_plugin_textdomain('postmapviewsimple', false, $path);
     if ($result === false) {

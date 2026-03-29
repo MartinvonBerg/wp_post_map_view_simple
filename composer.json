@@ -1,10 +1,22 @@
 {
     "require-dev": {
+        "phpstan/phpstan": "*",
+        "szepeviktor/phpstan-wordpress": "*",
+        "phpstan/extension-installer": "*",
+        "phpcompatibility/php-compatibility": "*",
+        "dealerdirect/phpcodesniffer-composer-installer": "*",
         "phpunit/phpunit": "9.6.34",
         "brain/monkey": "^2.6",
         "php-mock/php-mock-phpunit": "^2.10"
     },
     "prefer-stable": true,
     "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        },
+        "platform": {
+            "php": "8.3"
+        }
     }
 }

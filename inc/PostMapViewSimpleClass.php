@@ -87,7 +87,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	private array $geoDataArray = [];
     private bool $htaccessTileServerIsOK = false;
     private array $pageVarsForJs = [];
-    private $m = null;
+    private ?int $m = null;
     private int $chunksize = 20;
     private string $tableMapMoveSelector = '';
 	
@@ -133,7 +133,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // fallback for great values
         if ( $this->numberposts > 1000 ) $this->numberposts = 1000;
 
-		$this->post_type = $this->parseParameterToArray($attr['post_type']) ?? '';
+		$this->post_type = $this->parseParameterToArray($attr['post_type']);
 		$this->showmap = $attr['showmap'] === 'true';
 		$this->showtable = $attr['showtable'] === 'true';
 		$this->category = $this->parseParameterToArray(strtolower( $attr['category'] ) );
@@ -297,15 +297,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
 
         // get the geojson and gpx-file in the tourfolder and pass it to js.
-        $jsonFiles = glob($tourDir . '/*.{json,geojson}', GLOB_BRACE);
+        $jsonFiles = glob($tourDir . '/*.{json,geojson}', GLOB_BRACE) ?: [];
         // check if settings file is in $tourDir, if so exclude it from $jsonFiles and return the full url to the settings file
         if ( file_exists($tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE) ) {
             // exclude settings file from jsonFiles
-            $jsonFiles = array_filter($jsonFiles, function($item) {
-                if ( !str_contains($item, SETTINGS_FILE)) {
-                    return $item;
-                }
-            });
+            $jsonFiles = array_filter($jsonFiles, fn($item) => !str_contains($item, SETTINGS_FILE));
             $pathSettingsFile = $tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE;
         }
         $gpxFiles = glob($tourDir . '/*.gpx');
@@ -913,7 +909,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         };
         
         $title = $dom->getElementsByTagName('strong')->item(0);
-        if (!$title || !$title === null) return $result;
+        if (!$title) return $result;
         $result['title'] = trim($title->textContent);
 
         $text = trim($dom->documentElement->nodeValue);

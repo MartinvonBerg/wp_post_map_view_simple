@@ -177,7 +177,7 @@ if ( $error || ! $allowed) {
 }
 
 // pass the image content to client
-http_response_code( $httpResCode );
+http_response_code( $httpResCode ?? 500 );
 header("Cache-Control: public, max-age=".$cacheHeaderTime.", s-maxage=".$cacheHeaderTime."");
 header('Content-type: ' . $headerMime); 
 readfile( $localFile);
@@ -229,7 +229,8 @@ function generateHtaccess() : bool {
 		$url = str_replace('http://', 'https://', $url);
 	}
 	$plugin_main_dir = dirname( __DIR__, 1 );
-	$slug = \WP_PLUGIN_URL . '/' . \basename( $plugin_main_dir ) . '/leaflet_map_tiles/';
+	//$slug = \WP_PLUGIN_URL . '/' . \basename( $plugin_main_dir ) . '/leaflet_map_tiles/';
+	$slug = plugins_url('leaflet_map_tiles', $plugin_main_dir) . '/';
 	$relative_url =  \str_replace($url, '', $slug);
 
 	// create the file name 

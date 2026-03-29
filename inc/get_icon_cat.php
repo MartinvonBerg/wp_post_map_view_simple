@@ -22,10 +22,10 @@ namespace mvbplugins\helpers;
 
 /**
  * Lädt die category_mapping.json und gibt sie als Array zurück.
- *
+ * @param string|null $file Optionaler Pfad zur JSON-Datei. Wenn null, wird die Standarddatei verwendet.
  * @return array Das Mapping aus der JSON-Datei.
  */
-function wp_postmap_load_category_mapping( $file = null ) : array {
+function wp_postmap_load_category_mapping( ?string $file = null ) : array {
     // set the default value according to the settings file
     $default = [
         'default' => ['category' => 'Reisebericht', 'icon-png' => 'travel.png'],
@@ -65,7 +65,7 @@ function find_best_category_match(string $keywords, string|array $stopwords, ?st
     $json_data = \mvbplugins\helpers\wp_postmap_load_category_mapping($json_file);
 
     if (!$json_data || !isset($json_data['mapping'])) {
-        return [$json_data['default']['category'], $json_data['default']['icon-png'] ] ?? ['',''];
+        return [$json_data['default']['category'] ?? '', $json_data['default']['icon-png'] ?? ''];
     }
 
     // Kategorien aus JSON extrahieren
