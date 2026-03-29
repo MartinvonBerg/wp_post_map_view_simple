@@ -55,14 +55,14 @@ class GetGeoaddressTest extends TestCase
              ->willReturn(false);
 
         expect( '__')
-            ->andReturn( 'Error' );
+            ->andReturn( 'Translate-Call' );
 
         expect( 'wp_mail')
             ->once()
             ->andReturn( true );
 
         $result = get_geoaddress($this->postId, $this->lat, $this->lon);
-        $this->assertEquals('a:4:{s:7:"country";s:5:"Error";s:5:"state";s:5:"Error";s:4:"city";s:5:"Error";s:7:"village";s:5:"Error";}', $result);
+        $this->assertEquals('a:4:{s:7:"country";s:14:"Translate-Call";s:5:"state";s:14:"Translate-Call";s:4:"city";s:14:"Translate-Call";s:7:"village";s:14:"Translate-Call";}', $result);
     }
     
     public function testSuccessfulApiCall()
