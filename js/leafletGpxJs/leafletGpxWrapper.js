@@ -53,7 +53,7 @@ leafletGpxWrapper.addInitHook(function () {
     this.coords = [];
 
     // loop for each layer
-    Object.entries(layers).forEach(([key, layer]) => {
+    Object.entries(layers).forEach(([, layer]) => {
         if (layer._latlngs != undefined) {
             this.coords.push(layer._latlngs);
             // this is only for a gpx file with several tracks in one file, e.g. for multisport tracks.

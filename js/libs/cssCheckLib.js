@@ -14,12 +14,11 @@ function isValidCssSize (value) {
   }
 
   function isValidAspectRatio (value) {
-      if (typeof value !== 'string') return false;
-      
-      // Regulärer Ausdruck für aspect-ratio: entweder ein Float oder zwei Integer mit Schrägstrich
-      const aspectRatioPattern = /^(\d+(\.\d+)?|\d+\/\d+)$/;
-      
-      return aspectRatioPattern.test(value.trim());
+    if (typeof value !== 'string') return false;
+    
+    const v = value.trim();
+    
+    return /^\d+\.\d+$/.test(v) || /^\d+\/\d+$/.test(v) || /^\d+$/.test(v);
   } 
 
   export { isValidCssSize, isValidAspectRatio };

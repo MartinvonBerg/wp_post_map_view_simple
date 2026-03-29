@@ -30,7 +30,7 @@ class LeafletGpxJs extends LeafletMap {
     preload = true;
 
     constructor (number, elementOnPage, preload=null, center=null, zoom=null) {
-        super(number, elementOnPage, center=null, zoom=null);
+        super(number, elementOnPage, center, zoom);
 
         if (preload !== null) {
           this.preload = preload;
@@ -63,7 +63,7 @@ class LeafletGpxJs extends LeafletMap {
         this.trackColours = calculateEquallyDistributedColors(this.trackStartColour, this.pageVariables.ngpxfiles);
 
         // generate all tracks on the map 
-        for (const [key, track] of Object.entries(this.pageVariables.tracks)) {
+        for (const [key] of Object.entries(this.pageVariables.tracks)) {
             let trackNumber = parseInt(key.replace(/\D/g,''));
             this.track[trackNumber] = await this.createTrack(number, trackNumber).then(results => { 
               return results ;

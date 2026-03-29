@@ -417,11 +417,11 @@ class gpxTrackClass {
         let lastConsideredPoint = [coords[0].lat, coords[0].lng];
         let cumulativeDistance = 0;
         
-        if (this.doTrackCalc && typeof(coords) === 'array') {
-            coords.forEach((point, index) => {
+        if (this.doTrackCalc && Array.isArray(coords)) {
+            coords.forEach((point) => {
                 let curElevation = point.meta.ele;
                 
-                if (typeof(curElevation === 'number')) {
+                if (typeof(curElevation) === 'number') {
                     let elevationDelta = curElevation - lastConsideredElevation;
 
                     if (Math.abs(elevationDelta) > this.eleSmoothing) {
@@ -445,11 +445,11 @@ class gpxTrackClass {
             info = 'Dist: '+ cumulativeDistance/1000 +' km, Gain: '+ cumulativeElevationGain +' Hm, Loss: '+ cumulativeElevationLoss+' Hm';  
 
         } else if (this.doTrackCalc && typeof(coords) === 'object') {
-            for (const [index, point] of Object.entries(coords)) {
+            for (const [, point] of Object.entries(coords)) {
     
                 let curElevation = point.meta.ele;
                 
-                if (typeof(curElevation === 'number')) {
+                if (typeof(curElevation) === 'number') {
 
                     let elevationDelta = curElevation - lastConsideredElevation;
                     if (Math.abs(elevationDelta) > this.eleSmoothing) {

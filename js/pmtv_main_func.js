@@ -46,7 +46,7 @@ function mainLogic (window, document, undefined) {
      * @param {boolean} selectAll - Show all layers if true, hide all layers if false.
      * @param {Object} table - The table object (not used yet).
      */
-    function toggleAllLayers (selectAll, table) {
+    function toggleAllLayers (selectAll, _table) {
       document.querySelectorAll('.leaflet-control-layers-overlays input[type="checkbox"]').forEach(checkbox => {
           if (checkbox.checked !== selectAll) {
               checkbox.click(); // Simuliert ein Nutzer-Klick-Event
@@ -67,7 +67,7 @@ function mainLogic (window, document, undefined) {
      * @param {string} shortcodeType - the type of the shortcode
      * @returns {array} markersInGroups - an array of arrays with all markers grouped by their icon
      */
-    function createMarkers (php_touren, allIcons, myIcon, nposts, shortcodeType) {
+    function createMarkers (php_touren, allIcons, myIcon, nposts, _shortcodeType) {
       let markersInGroups = [];
       
       php_touren.forEach(tour => {
@@ -277,7 +277,14 @@ function mainLogic (window, document, undefined) {
           } else {
             settingsUrl = postmap_url.replace('images/','') + 'settings/category_mapping.json';
           }
-          let category_mapping = await loadSettings(settingsUrl);
+
+          let category_mapping = {};
+          try {
+              category_mapping = await loadSettings(settingsUrl);
+          } catch {
+              category_mapping = { mapping: [], default: { category: 'Default', 'icon-png': 'marker-icon.png' } };
+          }
+
           allIcons = category_mapping['mapping'];
           // append the default from the json at the end of allIcons array
           allIcons.push(category_mapping['default']);
@@ -510,7 +517,7 @@ function mainLogic (window, document, undefined) {
             });
 
             // click auf die Reihe zentriert die Karte auf den Marker, zoom bleibt gleich
-            table.on('rowClick', function (e, row, data) {
+            table.on('rowClick', function (e, row) {
               let url = row._row.data[tableMapMoveSelector];
               // get lat lon from google url which is like so "https://www.google.com/maps/place/47.607203,12.887333/@47.607203,12.887333,9z"
               if (!url) return;
