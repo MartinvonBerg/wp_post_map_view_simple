@@ -106,8 +106,8 @@ function get_geoaddress( int $postid, string $lat, string $lon) : string {
 /**
  * sanitize the geoaddress: set undefined array-keys to an empty string ''
  *
- * @param array $geoaddress geoaddress to sanitize
- * @return array $geoaddress sanitized geoaddress
+ * @param array<string, string> $geoaddress geoaddress to sanitize
+ * @return array<string, string> sanitized geoaddress
  */
 function sanitize_geoaddress( array $geoaddress) : array {
     $keys = ['village', 'city', 'town', 'municipality', 'country', 'state', 'county', 'state_district'];

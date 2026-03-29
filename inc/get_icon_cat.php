@@ -22,8 +22,9 @@ namespace mvbplugins\helpers;
 
 /**
  * Lädt die category_mapping.json und gibt sie als Array zurück.
+ *
  * @param string|null $file Optionaler Pfad zur JSON-Datei. Wenn null, wird die Standarddatei verwendet.
- * @return array Das Mapping aus der JSON-Datei.
+ * @return array{default: array{category: string, icon-png: string}, mapping: array<int, array{category: string, icon-png: string}>} Das Mapping aus der JSON-Datei.
  */
 function wp_postmap_load_category_mapping( ?string $file = null ) : array {
     // set the default value according to the settings file
@@ -42,7 +43,12 @@ function wp_postmap_load_category_mapping( ?string $file = null ) : array {
         return $default;
     }
 
-    $data = json_decode(file_get_contents($mapping_file), true);
+    $json = file_get_contents($mapping_file);
+    if ($json === false) {
+        return $default;
+    }
+
+    $data = json_decode($json, true);
     if (!is_array($data) || !isset($data['mapping']) || !isset($data['default'])) {
         return $default;
     }
@@ -54,19 +60,16 @@ function wp_postmap_load_category_mapping( ?string $file = null ) : array {
  * Find the best matching category for a given set of keywords and stopwords.
  *
  * @param string $keywords Comma-separated list of keywords to match against.
- * @param array $stopwords List of stopwords to ignore when matching.
+ * @param array<int, string>|string $stopwords List of stopwords to ignore when matching.
  * @param string|null $json_file Path to the JSON file containing the category mapping. If null, use the default file.
  *
- * @return array An array containing the best matching category and icon.
+ * @return array{0: string, 1: string} An array containing the best matching category and icon.
  * @example ['category_name', 'icon_name.png']
  */
 function find_best_category_match(string $keywords, string|array $stopwords, ?string $json_file=null) : array {
     // JSON-Datei mit settings einlesen
     $json_data = \mvbplugins\helpers\wp_postmap_load_category_mapping($json_file);
 
-    if (!$json_data || !isset($json_data['mapping'])) {
-        return [$json_data['default']['category'] ?? '', $json_data['default']['icon-png'] ?? ''];
-    }
 
     // Kategorien aus JSON extrahieren
     $categories = array_column($json_data['mapping'], 'category');
@@ -82,7 +85,7 @@ function find_best_category_match(string $keywords, string|array $stopwords, ?st
         return trim(str_replace('-', ' ', str_replace($stopwords, '', strtolower($word))));
     }, explode(',', $keywords))));
     
-    $best_match = null;
+    $best_match = '';
     $best_score = 0;
     $match_count = 0;
 
@@ -155,6 +158,11 @@ function wp_postmap_get_icon_cat(string $arraytagnames, string $returnKey, ?stri
 
 // Funktion zur Normalisierung: Entfernt alle Nicht-Buchstaben und wandelt in Kleinbuchstaben um
 function normalize_string(string $string) : string {
-    return strtolower(preg_replace('/[^\p{L}]+/u', '', $string));
+    // Parameter #1 $string of function strtolower expects string, string|null given.
+    $temp = preg_replace('/[^\p{L}]+/u', '', $string);
+    if ($temp === null) {
+        return '';
+    }
+    return strtolower($temp);
 }
 

@@ -3,6 +3,7 @@
 namespace mvbplugins\postmapviewsimple;
 
 use DOMDocument;
+use WP_Post;
 
 /**
  * Main function or Class of Post-Map-View-Simple
@@ -53,10 +54,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 	public static int $numberShortcodes = 0;
     // ---------- shortcode parameters ----------
     private int $numberposts = 100; // is shortcode parameter. Max 1000 wg. PHP Memory Limit und max_allowed_packet bei MySQL.
-    private string $post_type = 'post'; // is shortcode parameter 
+    /** @var array<int, string>|string */
+    private string|array $post_type = 'post'; // is shortcode parameter 
 	private bool $showmap = true; // is shortcode parameter
 	private bool $showtable = true; // is shortcode parameter
-	private string $category = 'all'; // is shortcode parameter
+    /** @var array<int, string>|string */
+    private string|array $category = 'all'; // is shortcode parameter
 	private string $headerhtml = ''; // is shortcode parameter
     private string $gpxfolder = 'gpx'; // to retrieve the gpx files added to posts with fotorama
     private int $lenexcerpt = 150;
@@ -64,6 +67,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private int $titlelength = 80;
     private bool $useTileServer = true;
     private bool $convertTilesToWebp = true;
+    /** @var array<int, string> */
     private array $contentFilter = ['Kurzbeschreibung:', 'Tourenbeschreibung:'];
     private string $tabulatorTheme = '';
     private int $tablePageSize = 20;
@@ -76,6 +80,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private string $trackcolour = '#ff0000';
     private string $mapselector = 'OpenStreeMap';
     private bool $myMarkerIcons = false;
+    /** @var array<int, string>|string */
     private string|array $categoryFilter = [];
     // ---------- end of shortcode parameters ----------
 
@@ -83,14 +88,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private string $wp_postmap_url;
 	private string $up_dir;
 	private string $gpx_dir;
+    /** @var array<int, array<string, mixed>> */
 	private array $postArray = [];
+    /** @var array<int, array<string, mixed>> */
 	private array $geoDataArray = [];
     private bool $htaccessTileServerIsOK = false;
+    /** @var array<int|string, array<string, mixed>> */
     private array $pageVarsForJs = [];
     private ?int $m = null;
+    /** @var positive-int */
     private int $chunksize = 20;
     private string $tableMapMoveSelector = '';
 	
+    /**
+     * @param array<string, mixed> $attr
+     */
 	public function __construct( array $attr ) {
 		
 		// extract and handle shortcode parameters
@@ -126,31 +138,32 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->plugin_url = plugin_dir_url(__DIR__);
 		$this->wp_postmap_url = $this->plugin_url . 'images/';
 		$this->up_dir = wp_get_upload_dir()['basedir'];     // upload_dir
-        $this->gpxfolder = $attr['gpxfolder'];
+		$this->gpxfolder = (string) $attr['gpxfolder'];
 		$this->gpx_dir = $this->up_dir . \DIRECTORY_SEPARATOR . $this->gpxfolder . \DIRECTORY_SEPARATOR;    // gpx_dir
 		
-		$this->numberposts = $attr['numberposts'];
+		$this->numberposts = (int) $attr['numberposts'];
         // fallback for great values
         if ( $this->numberposts > 1000 ) $this->numberposts = 1000;
+        if ( $this->numberposts < 1 ) $this->numberposts = 1;
 
-		$this->post_type = $this->parseParameterToArray($attr['post_type']);
-		$this->showmap = $attr['showmap'] === 'true';
-		$this->showtable = $attr['showtable'] === 'true';
-		$this->category = $this->parseParameterToArray(strtolower( $attr['category'] ) );
-		$this->headerhtml = $attr['headerhtml'];
-        $this->lenexcerpt = $attr['lenexcerpt'];
-        $this->useWPExcerptExtraction = $attr['usewpexcerpt'] === 'true';
-        $this->titlelength = $attr['titlelength'];
-        $this->useTileServer = $attr['usetileserver'] === 'true';
-        $this->convertTilesToWebp = $attr['converttiles'] === 'true';
-        $this->contentFilter = $this->parseParameterToArray($attr['contentfilter']);
+		$this->post_type = $this->parseParameterToArray((string) $attr['post_type']);
+		$this->showmap = (string) $attr['showmap'] === 'true';
+		$this->showtable = (string) $attr['showtable'] === 'true';
+		$this->category = $this->parseParameterToArray(strtolower((string) $attr['category']));
+		$this->headerhtml = (string) $attr['headerhtml'];
+        $this->lenexcerpt = (int) $attr['lenexcerpt'];
+        $this->useWPExcerptExtraction = (string) $attr['usewpexcerpt'] === 'true';
+        $this->titlelength = (int) $attr['titlelength'];
+        $this->useTileServer = (string) $attr['usetileserver'] === 'true';
+        $this->convertTilesToWebp = (string) $attr['converttiles'] === 'true';
+        $this->contentFilter = $this->parseParameterToList((string) $attr['contentfilter']);
 
-        $this->tabulatorTheme = $attr['tabulatortheme'];
-        $this->tablePageSize = $attr['tablepagesize'];
-        $this->tableHeight = $attr['tableheight'];
-        $this->mapHeight = $attr['mapheight'];
-        $this->mapWidth = $attr['mapwidth'];
-        $this->mapAspectRatio = $attr['mapaspectratio'];
+        $this->tabulatorTheme = (string) $attr['tabulatortheme'];
+        $this->tablePageSize = max(1, (int) $attr['tablepagesize']);
+        $this->tableHeight = max(0, (int) $attr['tableheight']);
+        $this->mapHeight = (string) $attr['mapheight'];
+        $this->mapWidth = (string) $attr['mapwidth'];
+        $this->mapAspectRatio = (string) $attr['mapaspectratio'];
 
         $this->m = self::$numberShortcodes;
         $this->pageVarsForJs[$this->m] = [];
@@ -161,12 +174,12 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
 
         // extensions for tourmap
-        $this->tourfolder = $attr['tourfolder'];
-        $this->trackwidth = $attr['trackwidth'];
-        $this->trackcolour = $attr['trackcolour'];
-        $this->mapselector = $attr['mapselector'];
-        $this->myMarkerIcons = $attr['mymarkericons'] === 'true';
-        $this->categoryFilter = $this->parseParameterToArray($attr['categoryfilter']);
+        $this->tourfolder = (string) $attr['tourfolder'];
+        $this->trackwidth = (string) $attr['trackwidth'];
+        $this->trackcolour = (string) $attr['trackcolour'];
+        $this->mapselector = (string) $attr['mapselector'];
+        $this->myMarkerIcons = (string) $attr['mymarkericons'] === 'true';
+        $this->categoryFilter = $this->parseParameterToArray((string) $attr['categoryfilter']);
     }
 	
 	public function show_post_map(): string {
@@ -186,6 +199,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             delete_transient( 'post_map_html_output_' . $wpid );
             delete_transient( 'post_map_js_pageVars_output_' . $wpid );
             $chunk_keys = get_option('post_map_array_chunk_keys_' . $wpid, []);
+            if (!is_array($chunk_keys)) {
+                $chunk_keys = [];
+            }
             foreach ($chunk_keys as $chunk_key) {
                 delete_option($chunk_key);
             }
@@ -195,11 +211,17 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // generate the output if not set in transient
         $html = get_transient( 'post_map_html_output_' . $wpid );
         $temp = get_transient( 'post_map_js_pageVars_output_' . $wpid );
-        $this->pageVarsForJs = $temp ? $temp : [];
+        $this->pageVarsForJs = is_array($temp) ? $temp : [];
 
         $chunk_keys = get_option('post_map_array_chunk_keys_' . $wpid, []);
+        if (!is_array($chunk_keys)) {
+            $chunk_keys = [];
+        }
         foreach ($chunk_keys as $chunk_key) {
-            $this->postArray = array_merge($this->postArray, json_decode(get_option($chunk_key, []), true ) );
+            $chunk = json_decode((string) get_option($chunk_key, '[]'), true);
+            if (is_array($chunk)) {
+                $this->postArray = array_merge($this->postArray, $chunk);
+            }
         }
         
         if ( !$html || !$this->postArray || !$this->pageVarsForJs || $this->is_user_editing_overview_map() ) {
@@ -304,7 +326,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $jsonFiles = array_filter($jsonFiles, fn($item) => !str_contains($item, SETTINGS_FILE));
             $pathSettingsFile = $tourDir . DIRECTORY_SEPARATOR . SETTINGS_FILE;
         }
-        $gpxFiles = glob($tourDir . '/*.gpx');
+        $gpxFiles = glob($tourDir . '/*.gpx') ?: [];
         if ( !$jsonFiles && !$gpxFiles ) {
             return '';
         }
@@ -314,9 +336,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         foreach ( $jsonFiles as $jsonfile ) {
             
             $json0 = file_get_contents($jsonfile);
-            $json0 = mb_convert_encoding($json0, 'UTF-8', 'auto');
             if ( $json0 === false) { break; }
+            $json0 = mb_convert_encoding($json0, 'UTF-8', 'auto');
+            if (!is_string($json0)) { break; }
             $geojson = json_decode($json0, true);
+            if (!is_array($geojson) || !isset($geojson['type'], $geojson['features']) || !is_array($geojson['features'])) {
+                break;
+            }
                
             if ($geojson['type'] !== 'FeatureCollection' || count($geojson['features']) === 0) { break; }
             
@@ -452,6 +478,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $html;
     }
     // ---------------- pivate functions ----------------
+	/**
+	 * @return array<int, string>|string
+	 */
     private function parseParameterToArray(string $input): string|array {
         // Entferne unnötige Anführungszeichen
         $input = trim($input, '"');
@@ -472,6 +501,15 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
         // Ansonsten gib das Array zurück
         return $filteredItems;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function parseParameterToList(string $input): array {
+        $result = $this->parseParameterToArray($input);
+
+        return is_array($result) ? array_values($result) : [$result];
     }
     
     private function enqueue_tabulator_Theme(string $theme): void {
@@ -507,14 +545,18 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
     }
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array{id: string, title: string, category: string, link: string, lat: string, lon: string, country: string, state: string, address: string, geostat: string}
+	 */
     private function sanitize_table_row(array $data): array {
         return [
             'id'       => isset($data['id'])       ? esc_html((string) $data['id'])  : '',
             'title'    => isset($data['title'])    ? esc_html($data['title'])         : '',
             'category' => isset($data['category']) ? esc_html($data['category'])      : '',
             'link'     => isset($data['link'])     ? esc_url($data['link'])           : '',
-            'lat'      => isset($data['lat'])      ? number_format((float) $data['lat'], 6) : 0.0,
-            'lon'      => isset($data['lon'])      ? number_format((float) $data['lon'], 6) : 0.0,
+            'lat'      => isset($data['lat'])      ? number_format((float) $data['lat'], 6) : '0.000000',
+            'lon'      => isset($data['lon'])      ? number_format((float) $data['lon'], 6) : '0.000000',
             'country'  => isset($data['country'])  ? esc_html($data['country'])       : '',
             'state'    => isset($data['state'])    ? esc_html($data['state'])         : '',
             'address'  => isset($data['address'])  ? esc_html($data['address'])       : '',
@@ -522,6 +564,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         ];
     }
 
+	/**
+	 * @param array<int, array<string, mixed>> $data2
+	 */
     private function generate_table_html(string $headerhtml, array $data2, string $caller = ''): string {
         if ( count($data2) === 0) return '';
 
@@ -632,6 +677,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $table_out;
     }
     
+	/**
+	 * @param array<int, mixed> $allposts
+	 */
     private function generate_map_html( array $allposts ) : string {
         if ( count( $allposts) === 0) return '';
         
@@ -642,6 +690,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $string;
     }
     
+    /**
+     * @param WP_Post|object{post_excerpt: string, post_content: string} $post
+     */
     private function generate_the_excerpt( object $post, int $length ) : string {
         $excerpt = $post->post_excerpt;
     
@@ -651,12 +702,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     
         if ( $this->useWPExcerptExtraction ) {
             $excerpt = apply_filters('the_content', $post->post_content);
+            if (!is_string($excerpt)) {
+                $excerpt = '';
+            }
 
             // Entferne alle HTML-Headings (h1 bis h6) inklusive ihrer Inhalte
             $excerpt = preg_replace('/<h[1-6][^>]*>.*?<\/h[1-6]>/si', '', $excerpt);
+            if (!is_string($excerpt)) {
+                $excerpt = '';
+            }
 
             // Entferne doppelte oder überflüssige Leerzeilen und konvertiere nicht-HTML Leerzeichen
             $excerpt = preg_replace(["/[\r\n]{2,}/", '/&nbsp;/'], ["\n", ' '], $excerpt);
+            if (!is_string($excerpt)) {
+                $excerpt = '';
+            }
 
             // Entferne Shortcodes, Tags und trimme den Text
             $excerpt = trim(strip_tags(strip_shortcodes($excerpt)));
@@ -666,7 +726,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         } else {
             $content = $post->post_content;
             $p = '';
-            foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
+            foreach (preg_split("/((\r?\n)|(\r\n?))/", $content) ?: [] as $line) { 
                 $line = trim($line);
                 $sub = substr($line,0,3); // html-tag aus der zeile ausschneiden
                 $isshortcode = strpos($line,'['); 
@@ -695,7 +755,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             // geostat prüfen
             $geostatarr= \explode(' ', $geostat);
     
-            if ( 'Dist:' !== $geostatarr[0] && !isset($geostatarr[1]) && !isset($geostatarr[4]) && !isset($geostatarr[7]) ) {
+            if (!isset($geostatarr[1], $geostatarr[4], $geostatarr[7]) || 'Dist:' !== $geostatarr[0]) {
                 //file with desc in meta but no statistics
                 return $default;
                 
@@ -724,6 +784,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return number_format($number, $decimals, '.', '');
     }
     
+	/**
+	 * @param array<string, string>|string $geoaddress
+	 * @return array{address: string, state: string, country: string}
+	 */
     private function sanitize_geoaddress( string|array $geoaddress ) : array {
         if ( \is_string( $geoaddress ) ) {
             return [
@@ -752,6 +816,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return compact('address', 'state', 'country');
     }
     
+    	/**
+    	 * @param array<string, mixed> $queryArgs
+    	 * @return array{0: array<int, array<string, mixed>>, 1: array<int, array<string, mixed>>}
+    	 */
     private function prepare_data( array $queryArgs, string $gpx_dir, int $lenexcerpt ) : array {
         $postArray = [];
         $data2 = [];
@@ -793,6 +861,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         
             // tags des posts holen und in string umwandeln
             $tag_names = wp_get_post_tags($post->ID, array('fields' => 'names'));
+            if (is_wp_error($tag_names)) {
+                $tag_names = [];
+            }
             
             $wpcat = \get_the_category( $post->ID );
             $wpcat_names = [];
@@ -808,7 +879,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             // extract the gpxfile from the shortcode of fotorama if any
             $content = $post->post_content;
             $gpxfilearr = [];
-            foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){ 
+            foreach (preg_split("/((\r?\n)|(\r\n?))/", $content) ?: [] as $line) { 
                 
                 // extract the gpxfile from the shortcode
                 $isshortcode = strpos($line,'[gpxview');	
@@ -819,7 +890,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
                     if ( $isgpxfile) {
                         $line = substr($line, $isgpxfile+9);
-                        $gpx = substr($line, 0, strpos($line, '"'));
+                        $endPos = strpos($line, '"');
+                        if ($endPos === false) {
+                            continue;
+                        }
+                        $gpx = substr($line, 0, $endPos);
                         $morethanone = strpos($gpx, ',');
                         if ($morethanone) {
                             $gpxfilearr = explode(',', $gpx);
@@ -895,6 +970,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return [$postArray, $data2];
     }
 
+    	/**
+    	 * @return array{title?: string, text?: string, link?: string, image_link?: string}
+    	 */
     private function extractHTMLFromGeoJson( string $html ) : array {
         $result = [];
 
@@ -911,10 +989,14 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $title = $dom->getElementsByTagName('strong')->item(0);
         if (!$title) return $result;
         $result['title'] = trim($title->textContent);
-
-        $text = trim($dom->documentElement->nodeValue);
-        $text = trim(str_replace($result['title'],'' ,$text));
-        $result['text'] = $text;
+        
+        if ($dom->documentElement && $dom->documentElement->nodeValue) {
+            $text = trim($dom->documentElement->nodeValue);
+            $text = trim(str_replace($result['title'],'' ,$text));
+            $result['text'] = $text;
+        } else {
+            $result['text'] = '';
+        }   
 
         $aTag = $dom->getElementsByTagName('a')->item(0);
         $result['link'] = $aTag ? $aTag->getAttribute('href') : '';
@@ -929,11 +1011,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         if ( is_user_logged_in() && is_admin() ) {
             $screen = get_current_screen();
 
-            if ( 'page' === $screen->post_type && isset($_GET['post'])) {
+            if ( $screen && 'page' === $screen->post_type && isset($_GET['post'])) {
                 $post_id = absint($_GET['post']);
                 $post = get_post( $post_id);
 
-                if ($post && has_shortcode( $post->post_content, 'mapview' )) return true;
+                if ($post instanceof WP_Post && has_shortcode( $post->post_content, 'mapview' )) return true;
             }
         }
         return false;

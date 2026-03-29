@@ -48,6 +48,9 @@ if ( $_GET["tile"] === 'testfile.webp' ) {
 }
 
 $req = preg_split('/(\/|\.)/', $_GET["tile"]);
+if ($req === false) {
+	return;
+}
 if ( count($req) !== 5 ) {
 	return;
 }
@@ -209,6 +212,9 @@ function webpImage( string $source, int $quality = 80, bool $removeOld = false) 
 		$image = imagecreatefrompng($source);
 	} else {
 		return $source;
+	}
+	if ($image === false) {
+		return false;
 	}
 	if ($isAlpha) {
 		imagepalettetotruecolor($image);

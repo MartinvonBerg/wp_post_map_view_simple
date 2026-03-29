@@ -30,6 +30,9 @@ defined('ABSPATH') or die('Are you ok?');
 include_once __DIR__ . '/inc/PostMapViewSimpleClass.php';
 
 add_shortcode('mapview', 'mvbplugins\postmapviewsimple\register_mapview_shortcode');
+/**
+ * @param array<string, mixed> $atts
+ */
 function register_mapview_shortcode( array $atts ) :string {
     // Die Klasse nur instanziieren, wenn der Shortcode einmalig genutzt wird.
     if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes === 0) 
@@ -41,6 +44,9 @@ function register_mapview_shortcode( array $atts ) :string {
 }
 
 add_shortcode('tourmap', 'mvbplugins\postmapviewsimple\register_tourmap_shortcode');
+/**
+ * @param array<string, mixed> $atts
+ */
 function register_tourmap_shortcode(array $atts ) : string {
     // Die Klasse nur instanziieren, wenn der Shortcode einmalig genutzt wird.
     if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes === 0) 
