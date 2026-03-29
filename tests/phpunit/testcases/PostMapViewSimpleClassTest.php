@@ -344,7 +344,19 @@ class PostMapViewSimpleClassTest extends TestCase
             ->andReturn(1); 
 
         expect('update_option')
-            ->andReturn( true );    
+            ->andReturn( true );
+
+        expect('esc_html')
+            // just return the input for testing purposes
+            ->andReturnUsing(function ($text) {
+                return $text;
+            });
+
+        expect('esc_url')
+            // just return the input for testing purposes
+            ->andReturnUsing(function ($url) {
+                return $url;
+            });    
 
         //$output = \mvbplugins\postmapviewsimple\show_post_map($attr);
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);

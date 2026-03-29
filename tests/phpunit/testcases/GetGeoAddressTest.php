@@ -89,7 +89,55 @@ class GetGeoaddressTest extends TestCase
         $this->assertArrayHasKey('country', $result);
         $this->assertEquals('Deutschland', $result['country']);
     }
-    
+
+    public function testSanitizeGeoaddressAllKeysPresent()
+    {
+        $input = [
+            'village'        => 'Musterweiler',
+            'city'           => 'Musterstadt',
+            'town'           => 'Mustertown',
+            'municipality'   => 'Mustergemeinde',
+            'country'        => 'Deutschland',
+            'state'          => 'Bayern',
+            'county'         => 'Musterlandkreis',
+            'state_district' => 'Musterbezirk',
+        ];
+
+        $result = sanitize_geoaddress($input);
+
+        $this->assertSame($input, $result);
+    }
+
+    public function testSanitizeGeoaddressMissingKeysFilled()
+    {
+        $input = [
+            'country' => 'Deutschland',
+            'state'   => 'Bayern',
+        ];
+
+        $result = sanitize_geoaddress($input);
+
+        $this->assertSame('Deutschland', $result['country']);
+        $this->assertSame('Bayern',      $result['state']);
+
+        foreach (['village', 'city', 'town', 'municipality', 'county', 'state_district'] as $key) {
+            $this->assertArrayHasKey($key, $result);
+            $this->assertSame('', $result[$key], "Key '$key' should default to empty string");
+        }
+    }
+
+    public function testSanitizeGeoaddressEmptyInputAllKeysEmpty()
+    {
+        $result = sanitize_geoaddress([]);
+
+        $expectedKeys = ['village', 'city', 'town', 'municipality', 'country', 'state', 'county', 'state_district'];
+
+        foreach ($expectedKeys as $key) {
+            $this->assertArrayHasKey($key, $result);
+            $this->assertSame('', $result[$key], "Key '$key' should be empty string for empty input");
+        }
+    }
+
 }
 
 // Mocks for global functions

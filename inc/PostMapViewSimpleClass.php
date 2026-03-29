@@ -510,6 +510,21 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
     }
 
+    private function sanitize_table_row(array $data): array {
+        return [
+            'id'       => isset($data['id'])       ? esc_html((string) $data['id'])  : '',
+            'title'    => isset($data['title'])    ? esc_html($data['title'])         : '',
+            'category' => isset($data['category']) ? esc_html($data['category'])      : '',
+            'link'     => isset($data['link'])     ? esc_url($data['link'])           : '',
+            'lat'      => isset($data['lat'])      ? number_format((float) $data['lat'], 6) : 0.0,
+            'lon'      => isset($data['lon'])      ? number_format((float) $data['lon'], 6) : 0.0,
+            'country'  => isset($data['country'])  ? esc_html($data['country'])       : '',
+            'state'    => isset($data['state'])    ? esc_html($data['state'])         : '',
+            'address'  => isset($data['address'])  ? esc_html($data['address'])       : '',
+            'geostat'  => isset($data['geostat'])  ? esc_html($data['geostat'])       : '0 0 0 0 0 0 0 0',
+        ];
+    }
+
     private function generate_table_html( $headerhtml, $data2, $caller = '') {
         if ( count($data2) === 0) return '';
 
@@ -570,7 +585,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // generate table with post data 
         if ( $caller !== 'tourmap' ) {
             foreach ($data2 as $data) {
-                
+                $data = $this->sanitize_table_row($data);
                 // get geo statistics
                 $geostatarr= \explode(' ', $data['geostat'] ); // gives strings of the values
                 
@@ -595,7 +610,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             }
         } else {
             foreach ($data2 as $data) {
-                
+                $data = $this->sanitize_table_row($data);
                 // define google url
                 //$googleurl = 'https://www.google.com/maps/place/' . $data['lat'] . ',' . $data['lon'] . '/@' . $data['lat'] . ',' . $data['lon'] . ',9z';
                 $googleurl = 'https://wego.here.com/l/' . $data['lat'] . ',' . $data['lon'] . '?map=' . $data['lat'] . ',' . $data['lon'] . '&z=9';
@@ -677,6 +692,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     
         if ( \is_file( $path_to_gpxfile) ) {		
             $gpxdata = \simplexml_load_file($path_to_gpxfile);
+            if ($gpxdata === false) return $default;
+
             $geostat = (string) $gpxdata->metadata->desc;
             // geostat prüfen
             $geostatarr= \explode(' ', $geostat);
@@ -886,6 +903,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         };
         
         $title = $dom->getElementsByTagName('strong')->item(0);
+        if (!$title || !$title === null) return $result;
         $result['title'] = trim($title->textContent);
 
         $text = trim($dom->documentElement->nodeValue);
@@ -906,7 +924,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $screen = get_current_screen();
 
             if ( 'page' === $screen->post_type && isset($_GET['post'])) {
-                $post_id = $_GET['post'];
+                $post_id = absint($_GET['post']);
                 $post = get_post( $post_id);
 
                 if ($post && has_shortcode( $post->post_content, 'mapview' )) return true;

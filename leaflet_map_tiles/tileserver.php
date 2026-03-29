@@ -32,6 +32,8 @@ $ds = \DIRECTORY_SEPARATOR;
 $allowed = \ini_get('allow_url_fopen') === '1';
 $useWebp = true;
 $error = false;
+$site_url = $_SERVER['HTTP_HOST'] ?? ''; 
+$admin_email = $_SERVER['ADMIN_EMAIL'] ?? '';
 
 // return silently if the request is not a tile request
 if ( !isset($_GET["tile"]) ) {
@@ -196,6 +198,7 @@ function webpImage($source, $quality = 80, $removeOld = false) {
 	$name = pathinfo($source, PATHINFO_FILENAME);
 	$destination = $dir . DIRECTORY_SEPARATOR . $name . '.webp';
 	$info = getimagesize($source);
+	if ($info === false) return false;
 	$isAlpha = false;
 
 	if ($info['mime'] == 'image/jpeg')

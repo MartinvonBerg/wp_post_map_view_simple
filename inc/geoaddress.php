@@ -28,7 +28,7 @@ defined('ABSPATH') or die('Are you ok?');
  * @param string $lon Die Länge (Longitude), wie im benutzerdefinierten Feld gespeichert.
  * @return string Die serialisierte Geo-Adresse oder ein Fallback-Wert.
  */
-function get_geoaddress($postid, $lat, $lon) {
+function get_geoaddress( int $postid, string $lat, string $lon) : string {
     // API-URL mit Parametern
     $url = 'https://nominatim.openstreetmap.org/reverse?' . http_build_query([
         'lat' => $lat,
@@ -109,7 +109,7 @@ function get_geoaddress($postid, $lat, $lon) {
  * @param array $geoaddress geoaddress to sanitize
  * @return array $geoaddress sanitized geoaddress
  */
-function sanitize_geoaddress($geoaddress) {
+function sanitize_geoaddress( array $geoaddress) : array {
     $keys = ['village', 'city', 'town', 'municipality', 'country', 'state', 'county', 'state_district'];
 
     foreach ($keys as $key) {
