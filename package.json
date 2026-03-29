@@ -7,7 +7,7 @@
 	"homepage": "https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/",
 	"main": "build/index.js",
 	"scripts": {
-		"test": "eslint --config ./js/eslint.config.js ./js/pmtv_main*.js ./js/tabulator/*.js ./js/libs/*.js ./js/leafletGpxJs/*.js",
+		"test": "eslint --config ./js/eslint.config.mjs ./js/pmtv_main*.js ./js/tabulator/*.js ./js/libs/*.js ./js/leafletGpxJs/*.js",
 		"build": "webpack --config ./js/webpack.config.js"
 	},
 	"overrides": {
@@ -18,8 +18,9 @@
 		"@babel/preset-env": "^7.26.7",
 		"babel-loader": "^9.2.1",
 		"css-loader": "^7.1.2",
-		"eslint": "^9.39.1",
-		"eslint-plugin-security": "^3.0.1",
+		"eslint": "^10.0.0",
+		"eslint-plugin-security": "^4.0.0",
+		"@eslint/js": "^10.0.1",
 		"path-browserify": "^1.0.1",
 		"style-loader": "^4.0.0",
 		"webpack": "^5.105.1",

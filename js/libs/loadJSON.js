@@ -2,6 +2,7 @@ function sanitizeString (value, maxLength = 100) {
     if (typeof value !== 'string') return null;
 
     // Entferne Steuerzeichen + trim
+    // eslint-disable-next-line no-control-regex
     let sanitized = value.replace(/[\x00-\x1F\x7F]/g, '').trim();
 
     // Länge begrenzen

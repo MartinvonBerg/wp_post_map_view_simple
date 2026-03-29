@@ -496,7 +496,7 @@ class LeafletMap {
                 // do nothing. skip this image if no gpx-data provided.
             }
             else {
-                let selectedIcon = {};
+                let selectedIcon = {}; // eslint-disable-line no-useless-assignment
                 if (tour['mime'] === 'video') {
                     selectedIcon = this.myIcon4;
                 } else {
@@ -584,7 +584,7 @@ class LeafletMap {
      */
     setBoundsToMarkers (markergroup) {
         let oldbounds = this.bounds;
-        let newbounds = [];
+        let newbounds = []; // eslint-disable-line no-useless-assignment
 
         if (markergroup instanceof L.LayerGroup) {
             newbounds = markergroup.getBounds().pad(0.1);

@@ -197,7 +197,7 @@ class MyTabulatorClass {
     createTable (tableId, options={}) {
         let page_size = options.tablePageSize ? options.tablePageSize : 20;
         let tableHeight = options.tableHeight ? options.tableHeight : '0px';
-        let tabulatorOptions = {};
+        let tabulatorOptions = {}; // eslint-disable-line no-useless-assignment
         let columns = this.getTableColumns();        
 
         if (options.type === 'tourmap') {

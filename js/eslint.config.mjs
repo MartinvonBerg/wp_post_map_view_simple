@@ -1,8 +1,10 @@
 // eslint.config.js
 import { defineConfig } from 'eslint/config';
+import js from '@eslint/js';
 import security from 'eslint-plugin-security';
 
 export default defineConfig([
+	js.configs.recommended,
 	{
 		languageOptions: {
 			ecmaVersion: 'latest',
@@ -13,7 +15,13 @@ export default defineConfig([
 				define: 'readonly',
 				require: 'readonly',
 				window: 'readonly',
-				document: 'readonly'
+				document: 'readonly',
+				pageVarsForJs: 'readonly',
+				navigator: 'readonly',
+				CustomEvent: 'readonly',
+				fetch: 'readonly',
+				console: 'readonly',
+				php_touren: 'readonly',
 			}
 		},
 		plugins: {
@@ -22,6 +30,10 @@ export default defineConfig([
 		rules: {
 			camelcase: 'off',
 			quotes: ['error', 'single', { avoidEscape: true }],
+			'no-constant-condition': 'error',
+			'no-shadow': 'warn',
+			'no-unreachable': 'error',
+			'no-unsafe-finally': 'error',
 			'no-mixed-spaces-and-tabs': ['error', 'smart-tabs'],
 			'space-before-function-paren': ['error', 'always'],
 			'space-in-parens': ['error', 'never'],
@@ -44,7 +56,7 @@ export default defineConfig([
 			argsIgnorePattern: '^_',
 			ignoreRestSiblings: true
 			}],
-			//...security.configs.recommended.rules, // aktiviert empfohlene Sicherheitsregeln
+			...security.configs.recommended.rules, // aktiviert empfohlene Sicherheitsregeln
 			
 			'security/detect-object-injection': 'off',
 			'security/detect-eval-with-expression': 'error',

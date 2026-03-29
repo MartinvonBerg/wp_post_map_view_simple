@@ -6,9 +6,9 @@ import { loadSettings } from './libs/loadJSON.js';
  * 
  * @param {Window} window - The global window object.
  * @param {Document} document - The global document object.
- * @param {undefined} undefined - An undefined value.
+ *
  */
-function mainLogic (window, document, undefined) {
+function mainLogic (window, document) {
     'use strict';
   
     /**
@@ -142,7 +142,7 @@ function mainLogic (window, document, undefined) {
      */
     function fitMaptoMarkers (map, markersArray, padding = [50, 50], checkZoom = false) {
       let bounds = L.latLngBounds();
-      let marker = new Array();
+      let marker = new Array(); // eslint-disable-line no-useless-assignment
       marker = markersArray.flat();
       marker.forEach(m => {
           let lat_lng = m._latlng;
@@ -271,14 +271,14 @@ function mainLogic (window, document, undefined) {
           allMaps[m] = new LeafletGpxJs.LeafletGpxJs(m, 'map0');
                           
           // Define Icons from imported json file
-          let settingsUrl = '';
+          let settingsUrl = ''; // eslint-disable-line no-useless-assignment
           if (pageVars.settingsFile) {
             settingsUrl = pageVars.settingsFile;
           } else {
             settingsUrl = postmap_url.replace('images/','') + 'settings/category_mapping.json';
           }
 
-          let category_mapping = {};
+          let category_mapping = {}; // eslint-disable-line no-useless-assignment
           try {
               category_mapping = await loadSettings(settingsUrl);
           } catch {
@@ -295,7 +295,7 @@ function mainLogic (window, document, undefined) {
           }); 
           
           // Creating markers as an array of arrays -----------------
-          let markersInGroups = [];
+          let markersInGroups = []; // eslint-disable-line no-useless-assignment
           markersInGroups = createMarkers(php_touren, allIcons, myIcon, nposts, pageVars.type);
           
           // ---add the marker cluster group to map --------------
@@ -486,7 +486,7 @@ function mainLogic (window, document, undefined) {
               if (document.activeElement.type === 'search') {
                 toggleGroup({ op: 'removeLayer' }, group); // Vorab alle Layer entfernen
             
-                let markersInGroups = [];
+                let markersInGroups = []; // eslint-disable-line no-useless-assignment
                 nposts = Array(allIcons.length).fill(0);
             
                 if (filters.length > 0 && rows.length > 0) {

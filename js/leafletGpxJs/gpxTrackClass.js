@@ -403,7 +403,7 @@ class gpxTrackClass {
      * @returns {string} 'Dist: 11 km, Gain: 22 Hm, Loss: 33 Hm' : The distance and elevation data for the track.
      */
     calcGpxTrackInfo (inCoords=null) {
-        let info = '';
+        let info = ''; // eslint-disable-line no-useless-assignment
         let coords = inCoords ? inCoords : this.coords;
 
         if (coords.length == 0) return 'No Data found';
