@@ -83,6 +83,18 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private bool $myMarkerIcons = false;
     /** @var array<int, string>|string */
     private string|array $categoryFilter = [];
+
+    // new parametes to hide columns in the table by javascript so needed for pageVarsForJs (pageVars in JS) 
+    private bool $hidetitle = false;
+    private bool $hidecategory = false;
+    private bool $hidedistance = false;
+    private bool $hideascent = false;
+    private bool $hidedescent = false;
+    private bool $hidecountry = false;
+    private bool $hidestate = false;
+    private bool $hidecity = false;
+    private bool $hidemap = false; // is very close to showmap!
+        
     // ---------- end of shortcode parameters ----------
 
     private string $plugin_url;
@@ -135,7 +147,17 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'mapselector'       => 'OpenStreeMap',
             'mymarkericons'     => 'false',
             'categoryfilter'    => 'Reisebericht,Tourenbericht', // string
-            ], $attr);
+            // new parametes to hide columns in the table by javascript so needed for pageVarsForJs (pageVars in JS) 
+            'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
+        ], $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
 		$this->wp_postmap_url = $this->plugin_url . 'images/';
@@ -183,6 +205,17 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->mapselector = (string) $attr['mapselector'];
         $this->myMarkerIcons = (string) $attr['mymarkericons'] === 'true';
         $this->categoryFilter = $this->parseParameterToArray((string) $attr['categoryfilter']);
+
+        // new parametes to hide columns in the table by javascript so needed for pageVarsForJs (pageVars in JS)
+        $this->hidetitle = (string) $attr['hidetitle'] === 'true';
+        $this->hidecategory = (string) $attr['hidecategory'] === 'true';
+        $this->hidedistance = (string) $attr['hidedistance'] === 'true';
+        $this->hideascent = (string) $attr['hideascent'] === 'true';
+        $this->hidedescent = (string) $attr['hidedescent'] === 'true';
+        $this->hidecountry = (string) $attr['hidecountry'] === 'true';
+        $this->hidestate = (string) $attr['hidestate'] === 'true';
+        $this->hidecity = (string) $attr['hidecity'] === 'true';
+        $this->hidemap = (string) $attr['hidemap'] === 'true';
     }
 	
 	public function show_post_map(): string {
@@ -250,9 +283,20 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $this->pageVarsForJs[$this->m]['mapWidth'] = $this->mapWidth; //
             $this->pageVarsForJs[$this->m]['mapAspectRatio'] = $this->mapAspectRatio; //
             
-            //$this->pageVarsForJs[$this->m]['tabulatorTheme'] = $this->tabulatorTheme;
+            //$this->pageVarsForJs[$this->m]['tabulatorTheme'] = $this->tabulatorTheme; // TODO: why is it not used?
             $this->pageVarsForJs[$this->m]['tablePageSize'] = $this->tablePageSize;
             $this->pageVarsForJs[$this->m]['tableHeight'] = strval($this->tableHeight) . 'px';
+
+            // set the hidecolumns parameters for JS
+            $this->pageVarsForJs[$this->m]['hidetitle'] = $this->hidetitle ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidecategory'] = $this->hidecategory ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidedistance'] = $this->hidedistance ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hideascent'] = $this->hideascent ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidedescent'] = $this->hidedescent ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidecountry'] = $this->hidecountry ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidestate'] = $this->hidestate ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidecity'] = $this->hidecity ? 'true' : 'false';
+            $this->pageVarsForJs[$this->m]['hidemap'] = $this->hidemap ? 'true' : 'false';
 
             $args = array(
                 'numberposts' => $this->numberposts, 

@@ -530,7 +530,20 @@ function mainLogic (window, document) {
               allMaps[m].mapFlyTo([lat, lng]);
             })
           }
-
+          // wait for the table to be created before hiding columns.
+          table.on('tableBuilt', function () {
+              // TODO: Define parameters for hiding columns.
+              pageVars.hidetitle==='true'? table.hideColumn('Title') : null;
+              pageVars.hidecategory==='true'? table.hideColumn('Category') : null;
+              pageVars.hidedistance==='true'? table.hideColumn('Distance') : null;
+              pageVars.hideascent==='true'? table.hideColumn('Ascent') : null;
+              pageVars.hidedescent==='true'? table.hideColumn('Descent') : null;
+              pageVars.hidecountry==='true'? table.hideColumn('Country') : null;
+              pageVars.hidestate==='true'? table.hideColumn('State') : null;
+              pageVars.hidecity==='true'? table.hideColumn('City') : null;
+              pageVars.hidemap==='true'? table.hideColumn('Map') : null;
+          });
+          
         });
       } // end if hasTable
       

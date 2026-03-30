@@ -94,6 +94,16 @@ class PostMapViewSimpleClassTest extends TestCase
 			'mapselector' => 'OSM',
 			'mymarkericons' => 'true',
 			'categoryfilter' => 'reise',
+            // add the new parameters
+            'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
         ];
 
         // Mock die Funktion shortcode_atts
@@ -260,6 +270,15 @@ class PostMapViewSimpleClassTest extends TestCase
 			'mapselector' => 'OSM',
 			'mymarkericons' => 'true',
 			'categoryfilter' => 'reise',
+            'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
         ];
 
         // Mock die Funktion shortcode_atts

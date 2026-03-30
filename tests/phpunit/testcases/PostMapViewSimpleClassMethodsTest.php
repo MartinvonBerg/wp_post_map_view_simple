@@ -66,6 +66,15 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 			'mapselector' => 'OSM',
 			'mymarkericons' => 'true',
 			'categoryfilter' => 'reise',
+			'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
         ];
 
         // Mock die Funktion shortcode_atts
@@ -149,6 +158,15 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 			'mapselector' => 'OSM',
 			'mymarkericons' => 'true',
 			'categoryfilter' => 'reise',
+			'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
         ];
 
         // Mock die Funktion shortcode_atts
@@ -244,6 +262,15 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 			'mapselector' => 'OSM',
 			'mymarkericons' => 'true',
 			'categoryfilter' => 'reise',
+			'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
         ];
 
 		// Mock die Funktion shortcode_atts
@@ -386,6 +413,15 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 			'mapselector' => 'OSM',
 			'mymarkericons' => 'true',
 			'categoryfilter' => 'reise',
+			'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
         ];
 
 		// Mock die Funktion shortcode_atts
