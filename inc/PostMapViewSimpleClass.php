@@ -58,6 +58,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private string|array $post_type = 'post'; // is shortcode parameter 
 	private bool $showmap = true; // is shortcode parameter
 	private bool $showtable = true; // is shortcode parameter
+    private bool $tablefirst = false; // is shortcode parameter
     /** @var array<int, string>|string */
     private string|array $category = 'all'; // is shortcode parameter
 	private string $headerhtml = ''; // is shortcode parameter
@@ -111,7 +112,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 			'numberposts' => 100, 
 			'post_type'   => 'post', // laut doku geht das so : array( 'post', 'page', 'movie', 'book' ) post_types können mit array abgefragt werden
 			'showmap'     => 'true',
-			'showtable'   => 'true',
+			'showtable'   => 'true', 
+            'tablefirst' => 'false', // new in V1.3.4
 			'category'    => 'all', // mehrere Kategorien können über den slug zur Kategorie abgefragt werden. Case Sensitiv. Childs werden mit abgefragt! Geht nur einzeln nicht mit category_name=cat1+cat2!
 			'headerhtml'  => '',
             'gpxfolder'   => 'gpx',
@@ -149,6 +151,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 		$this->post_type = $this->parseParameterToArray((string) $attr['post_type']);
 		$this->showmap = (string) $attr['showmap'] === 'true';
 		$this->showtable = (string) $attr['showtable'] === 'true';
+        $this->tablefirst = (string) $attr['tablefirst'] === 'true';
 		$this->category = $this->parseParameterToArray(strtolower((string) $attr['category']));
 		$this->headerhtml = (string) $attr['headerhtml'];
         $this->lenexcerpt = (int) $attr['lenexcerpt'];
@@ -264,12 +267,18 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
             // generate html for map with post data 
             $html = '';
+
+            // generate html for table with post data
+            if ( $this->showtable && $this->tablefirst ){
+                $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray );
+            }
+
             if ( $this->showmap ) {
-                $html = $this->generate_map_html($this->postArray);
+                $html .= $this->generate_map_html($this->postArray);
             }
             
             // generate html for table with post data
-            if ( $this->showtable ){
+            if ( $this->showtable && !$this->tablefirst ){
                 $html .= $this->generate_table_html( $this->headerhtml, $this->geoDataArray );
             }
 
@@ -450,7 +459,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         // generate html for map with post data 
         $html = '';
 
-        if ( $this->showmap ) {
+        if ( $this->showmap && !$this->tablefirst ) {
             $html .= $this->generate_map_html([1,1,1]);
         }
 
@@ -459,6 +468,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             $html .= '<div id="post_table_wrapper"><div>'; // hier 2x div, da sonst mit Headerhtml eine flex-Tabelle angezeigt wird.
             $html .= $this->generate_table_html($this->headerhtml, $this->postArray, 'tourmap');
             $html .= '</div></div>';
+        }
+
+        if ( $this->showmap && $this->tablefirst ) {
+            $html .= $this->generate_map_html([1,1,1]);
         }
 
         // --- enqueue scripts and styles ---

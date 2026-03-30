@@ -176,8 +176,9 @@ The following parameters are available for both shortcodes (where not all will b
 | `post_type` | post | Post types (can be an array) | post,page
 | `showmap` | true | Show the map |
 | `showtable` | true | Show the table |
+| `tablefirst` | false | Show the table above the map |
 | `category` | all | Filter by category-slug NOT Name! (case-sensitive, includes child categories) | travel,biking
-| `headerhtml` | "" | Custom HTML for table header. Mind restrictions of passing html in shortcode parameters | <h3>Tour Table</h3>
+| `headerhtml` | "" | Custom HTML for table header. Mind restrictions of passing html in shortcode parameters | `<h3>Tour Table</h3>`
 | `gpxfolder` | gpx | Folder containing GPX files | gpx
 | `lenexcerpt` | 150 | Length of the excerpt |
 | `usewpexcerpt` | false | Use WordPress excerpt |
