@@ -269,6 +269,19 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
                 }
             });
 
+		expect('is_readable')
+			->atLeast()
+			->once()
+			->with($this->anything())
+			->andReturnUsing(function ($path_to_gpxfile) {
+                // Dynamische Rückgabe basierend auf dem Meta-Key
+                if ($path_to_gpxfile === '') {
+                    return false;
+				} else {
+					return true;
+                }
+            });
+
 		when('simplexml_load_file')->alias(function ($path_to_gpxfile) {
 			if ($path_to_gpxfile === 'file1') {
 				return (object)[
@@ -282,10 +295,16 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 						'desc' => 'Dist: 17,0 km, Gain: 1214 m, Loss: 1181 m'
 					]
 				];
-			} else {
+			} elseif ($path_to_gpxfile === 'file3') {
 				return (object)[
 					'metadata' => (object)[
-						'desc' => 'Dist: 17.111 km, Gain: 1214.22 m, Loss: 1181.333 m'
+						'desc' => 'Dist: 17,111 km, Gain: 1214,22 m, Loss: 1181,333 m'
+					]
+				];
+			} elseif ($path_to_gpxfile === 'file4') {
+				return (object)[
+					'metadata' => (object)[
+						'desc' => 'Dist 17.11123456789 km Gain 1214.2234567 m, Loss 1181.3334567890123456 m'
 					]
 				];
 			}
@@ -306,15 +325,20 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		$privateMethod->setAccessible( TRUE );
 
 		$out = $privateMethod->invoke( $tested, '' );
-		$this->assertEquals( '0 0 0 0 0 0 0 0', $out );
+		$this->assertEquals( 'Dist: 0 km Gain: 0 m Loss: 0 m', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file1' );
-		$this->assertEquals( 'Dist: 111.0 0 0 444 0 0 777', $out );
+		//$this->assertEquals( 'Dist: 111.0 0 0 444 0 0 777', $out );
+		$this->assertEquals( 'Dist: 0 km Gain: 0 m Loss: 0 m', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file2' );
 		$this->assertEquals( 'Dist: 17.0 km, Gain: 1214 m, Loss: 1181 m', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file3' );
+		// the assertion here is because number_format_i18n is mocked and returns the same value as the input
+		$this->assertEquals( 'Dist: 17.1 km, Gain: 1214 m, Loss: 1181 m', $out );
+
+		$out = $privateMethod->invoke( $tested, 'file4' );
 		// the assertion here is because number_format_i18n is mocked and returns the same value as the input
 		$this->assertEquals( 'Dist: 17.1 km, Gain: 1214 m, Loss: 1181 m', $out );
     }

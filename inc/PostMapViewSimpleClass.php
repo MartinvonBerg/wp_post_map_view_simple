@@ -747,37 +747,77 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     /**
      * This function reads a gpx file and returns the statistics as a string in the format 'distance ascent descent points time movingtime'
      * 
-     * @param string $path_to_gpxfile the path to the gpx file
+     * @param string $path_to_gpxfile the path to the gpx file which is expected to have the statistics in the desc field of the metadata like so
+     * <metadata>
+     *   <name>Skitour-Güntlespitze.gpx</name>
+     *   <desc>Dist: 7.5 km, Gain: 866 Hm, Loss: 860 Hm</desc>
+     *   <time>2026-01-31T07:21:33.000Z</time>
+     *   <bounds minlat="47.3009692132473" maxlat="47.30993600562215" minlon="10.078713102266192" maxlon="10.121628362685442" />
+     * </metadata>
      * 
      * @return string the statistics as a string in the format 'distance ascent descent points time movingtime'
      */
-    private function get_statistics_from_gpxfile( string $path_to_gpxfile ) : string {
-        $default = '0 0 0 0 0 0 0 0';
-    
-        if ( \is_file( $path_to_gpxfile) ) {		
-            $gpxdata = \simplexml_load_file($path_to_gpxfile);
-            if ($gpxdata === false) return $default;
+    private function get_statistics_from_gpxfile(string $path_to_gpxfile): string {
+        $default = 'Dist: 0 km Gain: 0 m Loss: 0 m';
 
-            $geostat = (string) $gpxdata->metadata->desc;
-            // geostat prüfen
-            $geostatarr= \explode(' ', $geostat);
-    
-            if (!isset($geostatarr[1], $geostatarr[4], $geostatarr[7]) || 'Dist:' !== $geostatarr[0]) {
-                //file with desc in meta but no statistics
-                return $default;
-                
-            //sanitize the geostatistics value and array. The i18n causes problems with tabulator, so dist should be 25.3 instead of 25,3
-            } else {
-                $geostatarr[1] = $this->normalizeNumber( $geostatarr[1], 1);
-                $geostatarr[4] = $this->normalizeNumber( $geostatarr[4], 0);
-                $geostatarr[7] = $this->normalizeNumber( $geostatarr[7], 0);
-                $geostat = implode(' ', $geostatarr);
-                
-                return $geostat;
-            }
+        // 1. Basic file checks
+        if (!\is_file($path_to_gpxfile) || !\is_readable($path_to_gpxfile)) {
+            return $default;
         }
-    
-        return $default;
+
+        // 2. Ensure SimpleXML is available (avoid fatal error)
+        if (!\function_exists('simplexml_load_file')) {
+            return $default;
+        }
+
+        // 3. Prevent URL usage (avoid allow_url_fopen issues)
+        if (\preg_match('#^(https?:)?//#i', $path_to_gpxfile)) {
+            return $default;
+        }
+
+        // 4. Load XML safely
+        \libxml_use_internal_errors(true);
+        $gpxdata = \simplexml_load_file($path_to_gpxfile);
+
+        if ($gpxdata === false) {
+            \libxml_clear_errors();
+            return $default;
+        }
+
+        // 5. Check required structure
+        if (!isset($gpxdata->metadata->desc)) {
+            return $default;
+        }
+
+        $geostat = (string) $gpxdata->metadata->desc;
+
+        if ($geostat === '') {
+            return $default;
+        }
+
+        // 6. Robust parsing using regex (order-independent, whitespace-safe)
+        $distance = $ascent = $descent = null;
+
+        if (\preg_match('/Dist:?\s*([\d.,]+)/i', $geostat, $m)) {
+            $distance = $this->normalizeNumber($m[1], 1);
+        }
+
+        if (\preg_match('/Gain:?\s*([\d.,]+)/i', $geostat, $m)) {
+            $ascent = $this->normalizeNumber($m[1], 0);
+        }
+
+        if (\preg_match('/Loss:?\s*([\d.,]+)/i', $geostat, $m)) {
+            $descent = $this->normalizeNumber($m[1], 0);
+        }
+
+        // 7. Validate extracted values
+        if ($distance === null || $ascent === null || $descent === null) {
+            return $default;
+        }
+
+        // 8. Rebuild string in original expected format (positions preserved)
+        // You originally expect indices [1], [4], [7], so we keep structure compatible
+        return "Dist: $distance km, Gain: $ascent m, Loss: $descent m";
     }
 
     private function normalizeNumber( string $numberString, int $decimals = 1) : string {
