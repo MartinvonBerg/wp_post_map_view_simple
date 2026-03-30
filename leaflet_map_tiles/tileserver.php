@@ -236,7 +236,8 @@ function generateHtaccess() : bool {
 	}
 	$plugin_main_dir = dirname( __DIR__, 1 );
 	//$slug = \WP_PLUGIN_URL . '/' . \basename( $plugin_main_dir ) . '/leaflet_map_tiles/';
-	$slug = plugins_url('leaflet_map_tiles', $plugin_main_dir) . '/';
+	//$slug = plugins_url('leaflet_map_tiles', $plugin_main_dir) . '/';
+	$slug = plugin_dir_url(__FILE__);
 	$relative_url =  \str_replace($url, '', $slug);
 
 	// create the file name 
@@ -261,8 +262,8 @@ function generateHtaccess() : bool {
     # Do not change after this line
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} \.(jpeg|jpg|png|webp)$
-    RewriteRule ^(.+)$ tileserver.php/?tile=$1 [L]
+    RewriteCond %{REQUEST_URI} \.(jpeg|jpg|png|webp)$ [NC]
+    RewriteRule ^(.+)$ tileserver.php/?tile=$1 [L,QSA]
 </IfModule>
 EOT;
 	// save the original file

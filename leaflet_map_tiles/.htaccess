@@ -11,10 +11,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     # Change only the next line according to your server 
-    RewriteBase /wordpress/wp-content/plugins/leaflet_map_tiles/
+    RewriteBase /wordpress/wp-content/plugins/PostMapTableView/leaflet_map_tiles/
     # Do not change after this line
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} \.(jpeg|jpg|png|webp)$
-    RewriteRule ^(.+)$ tileserver.php/?tile=$1 [L]
+    RewriteCond %{REQUEST_URI} \.(jpeg|jpg|png|webp)$ [NC]
+    RewriteRule ^(.+)$ tileserver.php/?tile=$1 [L,QSA]
 </IfModule>
