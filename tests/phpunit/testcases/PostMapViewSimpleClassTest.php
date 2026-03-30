@@ -181,7 +181,9 @@ class PostMapViewSimpleClassTest extends TestCase
             ->andReturn(1); 
 
         expect('update_option')
-            ->andReturn( true );    
+            ->andReturn( true );
+
+        when('get_shortcode_regex')->justReturn('\\[(\\[?)(gpxview)([^\\]]*)\\]');
 
         //$output = \mvbplugins\postmapviewsimple\show_post_map($attr);
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
@@ -226,7 +228,7 @@ class PostMapViewSimpleClassTest extends TestCase
 
         expect('wp_get_upload_dir')
             ->once()
-            ->andReturn( ['basedir' => 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\uploads'] );
+            ->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
 
         // Erwartetes Ergebnis nach shortcode_atts
         $attr = [];
@@ -356,13 +358,14 @@ class PostMapViewSimpleClassTest extends TestCase
             // just return the input for testing purposes
             ->andReturnUsing(function ($url) {
                 return $url;
-            });    
+            });
+
+        when('get_shortcode_regex')->justReturn('\\[(\\[?)(gpxview)([^\\]]*)\\]');
 
         //$output = \mvbplugins\postmapviewsimple\show_post_map($attr);
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
         $output = $class->show_post_map();
 
-        //$expected = '<div class="box1"><div id="map"></div><div id="map10_img"><a href="http://localhost/wordpress/wp-content/uploads/2022/01/thumbnail-1.jpg" data-title="Post 1" data-icon="travel" data-geo="lat:12.98765,lon:49.123456" data-link="http://localhost/wordpress/post-permalink">Content of Post 1...</a><a href="http://localhost/wordpress/wp-content/uploads/2022/01/thumbnail-1.jpg" data-title="Post 2" data-icon="travel" data-geo="lat:12.98765,lon:49.123456" data-link="http://localhost/wordpress/post-permalink">Content of Post 2...</a></div></div>';
         $expected = '<div class="box1"><div id="map0"></div></div><h4>Tourenübersicht</h4><p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p><p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p><table id="post_table"><thead><tr><th data-filter="false">Nr</th><th data-type="html">Title</th><th>Category</th><th data-filter="number">Distance</th><th data-filter="number">Ascent</th><th data-filter="number">Descent</th><th>Country</th><th>State</th><th data-type="html" data-selector="true">City</th></tr></thead><tbody><tr><td>1</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 1</a></td><td>Reisebericht</td><td>0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://wego.here.com/l/12.987650,49.123456?map=12.987650,49.123456&z=9" target="_blank" rel="noopener noreferrer">none</a></td></tr><tr><td>2</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 2</a></td><td>Reisebericht</td><td>0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://wego.here.com/l/12.987650,49.123456?map=12.987650,49.123456&z=9" target="_blank" rel="noopener noreferrer">none</a></td></tr></tbody></table>';
         $this->assertEquals($expected, $output);
     }

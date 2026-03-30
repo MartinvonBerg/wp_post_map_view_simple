@@ -2,7 +2,7 @@
 
 This WordPress plugin displays posts or pages with GPS coordinates (latitude/longitude stored in custom fields) on an interactive OpenStreetMap using Leaflet.
 
-Posts can be organized and filtered by categories and visualized with custom markers. In addition to the map, an optional table view lists all displayed entries.
+Posts can be organized and filtered by Tags and categories and visualized with custom markers. In addition to the map, an optional table view lists all displayed entries.
 
 As an alternative to WordPress-based content, the plugin also supports external JSON data sources. This allows you to create maps for travel routes, destinations, or any custom points of interest (POIs) independent of posts or pages.
 
@@ -11,7 +11,7 @@ The plugin is configuration-driven and does not provide an admin interface. All 
 ## Features
 
 - Display posts or pages with GPS coordinates on a map
-- Category-based filtering and custom marker icons
+- Tag and Category-based filtering and custom marker icons
 - Optional table view of all entries
 - Support for external JSON-based data sources
 - Local storage of map tiles (optional)
@@ -44,8 +44,8 @@ This mode is intended for advanced users who manage data manually via JSON files
     - [1. Prepare Posts / Pages for the Post-Map shown by \[mapview\]](#1-prepare-posts--pages-for-the-post-map-shown-by-mapview)
       - [Add Custom Fields](#add-custom-fields)
       - [GPX-Tracks](#gpx-tracks)
-      - [Define Categories](#define-categories)
-      - [2. Check Category and Icon Mapping](#2-check-category-and-icon-mapping)
+      - [Define Categories or Tags](#define-categories-or-tags)
+      - [2. Check Category/Tag and Icon Mapping](#2-check-categorytag-and-icon-mapping)
     - [2. Displaying the Map](#2-displaying-the-map)
   - [Detailed Usage of \[tourmap\]](#detailed-usage-of-tourmap)
     - [1. Generate JSON-File(s) locally (Required!)](#1-generate-json-files-locally-required)
@@ -88,10 +88,10 @@ Example of the plugin in action: [Demo](https://www.berg-reise-foto.de/uebersich
     ```
   - This is done automatically if the GPX-Track-Uploader of https://github.com/MartinvonBerg/Fotorama-Leaflet-Elevation is used.
 
-#### Define Categories
-The Posts are sorted by WordPress-Categories. If no Category is defined the default category will be used. So, define some WordPress Categories (see Table below) and change the `/<Plugin-Folder>/settings/category_mapping.json` accordingly.
+#### Define Categories or Tags
+The Posts are sorted by a combination of WordPress-Categories and Tags. If no Tags are defined the WP-category will be used. If both are not defined the default will be used. So, define some WordPress Categories (see Table below) and change the `/<Plugin-Folder>/settings/category_mapping.json` accordingly. (The combination of Tags and Categories is furtheron shortened by 'Category')
 
-#### 2. Check Category and Icon Mapping
+#### 2. Check Category/Tag and Icon Mapping
 Categories are now defined in a JSON file in `/<Plugin-Folder>/settings/category_mapping.json`. So it is fully customizable by changing this file. The Icon-PNGs are expected in `/<Plugin-Folder>/images/` Below is the default (german) mapping (which might be changed easily in the settings-file):
 
 | Category       | Icon               | Note |

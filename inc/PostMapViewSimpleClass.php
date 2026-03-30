@@ -744,6 +744,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         return $excerpt;
     }
     
+    /**
+     * This function reads a gpx file and returns the statistics as a string in the format 'distance ascent descent points time movingtime'
+     * 
+     * @param string $path_to_gpxfile the path to the gpx file
+     * 
+     * @return string the statistics as a string in the format 'distance ascent descent points time movingtime'
+     */
     private function get_statistics_from_gpxfile( string $path_to_gpxfile ) : string {
         $default = '0 0 0 0 0 0 0 0';
     
@@ -842,7 +849,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             ],
         ];
         
-        // remove category_name from queryAargs if it is 'all'
+        // remove category_name from queryArgs if it is 'all'
         if ( array_key_exists('category_name', $queryArgs) && $queryArgs['category_name'] === 'all' ) {
             unset( $queryArgs['category_name'] );
         }
@@ -856,15 +863,15 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $custom_posts = get_posts($queryArgs);
         $i = 0;
         
-        // loop through all posts and fetch data for the output. breaking change : posts without lat lon are no longer shown!
+        // loop through all posts and fetch data (Tags, Categorie, gpxfiles) for the output. breaking change : posts without lat lon are no longer shown!
         foreach ($custom_posts as $post) { 
         
-            // tags des posts holen und in string umwandeln
+            // tags des posts holen.
             $tag_names = wp_get_post_tags($post->ID, array('fields' => 'names'));
             if (is_wp_error($tag_names)) {
                 $tag_names = [];
             }
-            
+            // categories des posts holen. Kategorie "Uncategorized" wird ignoriert, da sie keinen Mehrwert bietet.
             $wpcat = \get_the_category( $post->ID );
             $wpcat_names = [];
             foreach ($wpcat as $onecat) {
@@ -872,38 +879,13 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 if ( $onecat->name === 'Uncategorized' ) continue;
                 $wpcat_names[] = $onecat->name;
             }
-
-            $all_names = implode(',',array_merge($tag_names, $wpcat_names) );
+            // combine tags and categories to find the best match for the category filter
+            $all_names = implode(',', array_merge($tag_names, $wpcat_names) );
             [$cat, $iconPng] = find_best_category_match($all_names, $this->categoryFilter ); 
             
             // extract the gpxfile from the shortcode of fotorama if any
             $content = $post->post_content;
-            $gpxfilearr = [];
-            foreach (preg_split("/((\r?\n)|(\r\n?))/", $content) ?: [] as $line) { 
-                
-                // extract the gpxfile from the shortcode
-                $isshortcode = strpos($line,'[gpxview');	
-
-                if ( is_numeric($isshortcode) ) {
-                    $line = str_replace(' ', '', $line);
-                    $isgpxfile = strpos($line,'gpxfile'); // suche nicht nach dem shortcode, sondern ob ein gpxfile definiert wirde
-
-                    if ( $isgpxfile) {
-                        $line = substr($line, $isgpxfile+9);
-                        $endPos = strpos($line, '"');
-                        if ($endPos === false) {
-                            continue;
-                        }
-                        $gpx = substr($line, 0, $endPos);
-                        $morethanone = strpos($gpx, ',');
-                        if ($morethanone) {
-                            $gpxfilearr = explode(',', $gpx);
-                        } else {
-                            $gpxfilearr[] = $gpx;
-                        }
-                    }
-                }
-            }
+            $gpxfilearr = $this->extractGpxFiles($content);
 
             // Excerpt nur aus den Absätzen <p> herstellen! Schlüsselwörter entfernen, dürfen dann im Text nicht vorkommen
             // Absätze mit [shortcodes] werden ignoriert.
@@ -943,7 +925,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             ['address' => $address, 'state' => $state, 'country' => $country] = $this->sanitize_geoaddress($geoaddress);
 
             $gpxcount = 1;
-            if ( empty($gpxfilearr) ) $gpxfilearr = [''];
+            if ( empty($gpxfilearr) ) $gpxfilearr = ['']; // we need this here to loop at least once, even if there is no gpx file, to show the post in the table with empty gpxfile and geostatistics
 
             foreach ($gpxfilearr as $gpxfile) {
 
@@ -964,15 +946,36 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                 );
                 $gpxcount++;
             }
-            //}
+            
         }
     
         return [$postArray, $data2];
     }
 
-    	/**
-    	 * @return array{title?: string, text?: string, link?: string, image_link?: string}
-    	 */
+    /**
+     * @return array<int, string>
+     */
+    private function extractGpxFiles(string $content): array
+    {
+        $result = [];
+
+        preg_match_all('/' . get_shortcode_regex(['gpxview']) . '/', $content, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $shortcode) {
+            $atts = shortcode_parse_atts($shortcode[3] ?? '');
+
+            if (!empty($atts['gpxfile'])) {
+                $files = array_map('trim', explode(',', $atts['gpxfile']));
+                $result = array_merge($result, array_filter($files));
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array{title?: string, text?: string, link?: string, image_link?: string}
+     */
     private function extractHTMLFromGeoJson( string $html ) : array {
         $result = [];
 

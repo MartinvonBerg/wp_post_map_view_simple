@@ -37,8 +37,10 @@ function register_mapview_shortcode( array $atts ) :string {
     // Die Klasse nur instanziieren, wenn der Shortcode einmalig genutzt wird.
     if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes === 0) 
     {
+        // generate the html for the page and increase the counter for the number of shortcodes afterwards
+        $html = (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_post_map();    
         \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
-        return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_post_map();
+        return $html;
     }
     return '';
 }
@@ -51,8 +53,10 @@ function register_tourmap_shortcode(array $atts ) : string {
     // Die Klasse nur instanziieren, wenn der Shortcode einmalig genutzt wird.
     if ( \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes === 0) 
     {
+        // generate the html for the page and increase the counter for the number of shortcodes afterwards
+        $html = (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_tourmap();
         \mvbplugins\postmapviewsimple\PostMapViewSimple::$numberShortcodes++;
-        return (new \mvbplugins\postmapviewsimple\PostMapViewSimple($atts))->show_tourmap();
+        return $html;
     }
     return '';
 }

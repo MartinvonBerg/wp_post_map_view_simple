@@ -402,7 +402,9 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		<!-- /wp:heading -->
 
 		<!-- wp:shortcode -->
-		[gpxview imgpath="Alben_Website/Deutschland/Bergtour-Langer-Sand-Duerrnbachhorn" gpxfile="Wanderung-Langer-Sand-Duerrnbachhorn.gpx"]
+		[ gpxview 
+		 imgpath="Alben_Website/Deutschland/Bergtour-Langer-Sand-Duerrnbachhorn" 
+		 gpxfile = "Wanderung-Langer-Sand-Duerrnbachhorn.gpx"]
 		<!-- /wp:shortcode -->
 
 		<!-- wp:heading {"className":"wp-block-heading"} -->
@@ -432,5 +434,42 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		$out = $privateMethod->invoke( $tested, $mocked_post, 100 );
 		$this->assertEquals( 'Lange, anspruchsvolle Bergtour vom Langen Sand über das Dürrnbachhorn in den Chiemgauer Alpen. Ein...', $out );
 
+	}
+
+	public function test_extract_gpx_files_edge_cases()
+	{
+		when('get_shortcode_regex')->justReturn('\\[(\\[?)(gpxview)([^\\]]*)\\]');
+
+		when('shortcode_parse_atts')->alias(function (string $text): array {
+			$atts = [];
+			preg_match_all('/(\\w+)\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s"\']+))/', $text, $matches, PREG_SET_ORDER);
+
+			foreach ($matches as $match) {
+				$key = $match[1];
+				$value = $match[2] !== '' ? $match[2] : ($match[3] !== '' ? $match[3] : $match[4]);
+				$atts[$key] = $value;
+			}
+
+			return $atts;
+		});
+
+		$class = new \ReflectionClass('mvbplugins\postmapviewsimple\PostMapViewSimple');
+		$tested = $class->newInstanceWithoutConstructor();
+
+		$privateMethod = $class->getMethod('extractGpxFiles');
+		$privateMethod->setAccessible(true);
+
+		$cases = [
+			'[gpxview gpxfile="a.gpx"]' => ['a.gpx'],
+			'[gpxview foo="bar" gpxfile="a.gpx"]' => ['a.gpx'],
+			"[gpxview gpxfile='a.gpx']" => ['a.gpx'],
+			'[gpxview gpxfile=a.gpx]' => ['a.gpx'],
+			'[gpxview foo="x" bar="y" gpxfile="a.gpx,b.gpx"]' => ['a.gpx', 'b.gpx'],
+		];
+
+		foreach ($cases as $content => $expected) {
+			$out = $privateMethod->invoke($tested, $content);
+			$this->assertSame($expected, $out, 'Failed for shortcode: ' . $content);
+		}
 	}
 }

@@ -1,40 +1,17 @@
-# ----------------------------------------
-# Zugriffsschutz für alle außer GET/HEAD
-# ----------------------------------------
-
-<IfModule mod_version.c>
-    <IfVersion >= 2.4>
-        <LimitExcept GET HEAD>
-            Require all denied
-        </LimitExcept>
-    </IfVersion>
-    <IfVersion < 2.4>
-        <LimitExcept GET HEAD>
-            Order deny,allow
-            Deny from all
-        </LimitExcept>
-    </IfVersion>
-</IfModule>
-
-# Fallback für Server ohne mod_version
-<IfModule !mod_version.c>
+<LimitExcept GET HEAD>
     <IfModule mod_authz_core.c>
-        <LimitExcept GET HEAD>
-            Require all denied
-        </LimitExcept>
+        Require all denied
     </IfModule>
     <IfModule !mod_authz_core.c>
-        <LimitExcept GET HEAD>
-            Order deny,allow
-            Deny from all
-        </LimitExcept>
+        Order Allow,Deny
+        Deny from all
     </IfModule>
-</IfModule>
+</LimitExcept>
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     # Change only the next line according to your server 
-    RewriteBase /wordpress/wp-content/plugins/PostMapTableView/leaflet_map_tiles/
+    RewriteBase /wordpress/wp-content/plugins/leaflet_map_tiles/
     # Do not change after this line
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
