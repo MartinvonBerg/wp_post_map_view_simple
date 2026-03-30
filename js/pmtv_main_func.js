@@ -532,7 +532,6 @@ function mainLogic (window, document) {
           }
           // wait for the table to be created before hiding columns.
           table.on('tableBuilt', function () {
-              // TODO: Define parameters for hiding columns.
               pageVars.hidetitle==='true'? table.hideColumn('Title') : null;
               pageVars.hidecategory==='true'? table.hideColumn('Category') : null;
               pageVars.hidedistance==='true'? table.hideColumn('Distance') : null;

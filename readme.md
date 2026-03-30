@@ -198,6 +198,15 @@ The following parameters are available for both shortcodes (where not all will b
 | `trackwidth` | 3 | The width in px of the gpx-track on the map, if any| 3px |
 | `mapselector` | OpenStreeMap | The preselected Map | - |
 | `mymarkericons` | false | Use another styling for the marker icons if true | - |
+| **Use the following with [mapview] only** |||
+| `hidetitle` | false | Hide the column with field name 'title'. Mind that the translated name is different! |
+| `hidecategory` | false | Hide the column with field name 'category'. Mind that the translated name is different! |
+| `hidedistance` | false | Hide the column with field name 'distance'. Mind that the translated name is different! |
+| `hideascent` | false | Hide the column with field name 'ascent'. Mind that the translated name is different! |
+| `hidedescent` | false | Hide the column with field name 'desecent'. Mind that the translated name is different! |
+| `hidecountry` | false | Hide the column with field name 'country'. Mind that the translated name is different! |
+| `hidestate` | false | Hide the column with field name 'state'. Mind that the translated name is different! |
+| `hidecity` | false | Hide the column with field name 'city'. Mind that the translated name is different! |
 
 ## Check Tile Server Settings in .htaccess
 Used by both shortcodes.
@@ -239,6 +248,14 @@ No need to upgrade right now. So, no new release will be submitted.
 - Use the standard method of WordPress.
 
 ## Changelog <!-- omit from toc -->
+
+### 1.3.4 (30.03.2026) <!-- omit from toc -->
+- add parameters to change order of table and map and to hide table columns.
+- update treatment of gpxfiles in PHP
+- Fix .htaccess generation for tileserver
+- fixes due to usage of PHPStan (level 8) and eslint
+- update leaflet.fullscreen to V5.3.1
+
 
 ### 1.3.3 (28.03.2026) <!-- omit from toc -->
 - Update Unit Tests, Minor PHP Bug Fixes. Update PHP-Header for Plugin main file.
