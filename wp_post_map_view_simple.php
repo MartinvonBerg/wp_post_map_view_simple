@@ -2,13 +2,13 @@
 
 /**
  *
- * @link              https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
+ * @link              https://github.com/MartinvonBerg/Post-Map-Table-View
  * @since             5.3.0
  * @package           PostMapTableView
  *
  * @wordpress-plugin
  * Plugin Name:       Post Map Table View
- * Plugin URI:        https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
+ * Plugin URI:        https://github.com/MartinvonBerg/Post-Map-Table-View
  * Description:       Shows a map with posts that have geotags. Or shows a tour map with posts that have geotags and a tour date.
  * Version:           1.4.0
  * Author:            Martin von Berg
@@ -24,7 +24,7 @@
 
 namespace mvbplugins\postmapviewsimple;
 
-defined('ABSPATH') or die('Are you ok?');
+\defined('ABSPATH') or die('Are you ok?');
 
 //include_once __DIR__ . '/inc/post_map_table.php';
 include_once __DIR__ . '/inc/PostMapViewSimpleClass.php';
