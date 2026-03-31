@@ -112,6 +112,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     /** @var positive-int */
     private int $chunksize = 20;
     private string $tableMapMoveSelector = '';
+
+    private string $cf_distance = '';
+    private string $cf_ascent = '';
+    private string $cf_descent = '';
+    private bool $hasGpxStatsCustomFields = false;
 	
     /**
      * @param array<string, mixed> $attr
@@ -157,6 +162,10 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             'hidestate' => 'false',
             'hidecity' => 'false',
             'hidemap' => 'false',
+            // new in V1.5.0
+            'cf_distance' => '',
+            'cf_ascent' => '',
+            'cf_descent' => '',
         ], $attr);
 
         $this->plugin_url = plugin_dir_url(__DIR__);
@@ -216,6 +225,16 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         $this->hidestate = (string) $attr['hidestate'] === 'true';
         $this->hidecity = (string) $attr['hidecity'] === 'true';
         $this->hidemap = (string) $attr['hidemap'] === 'true';
+
+        // new parameters for custom fields for track statistics
+        $this->cf_distance = (string) $attr['cf_distance'];
+        $this->cf_ascent = (string) $attr['cf_ascent'];
+        $this->cf_descent = (string) $attr['cf_descent'];
+
+        // check if shortcode parameters for custom fields for track statistics are set. Could be different for every post.
+        if ( !empty($this->cf_distance) && !empty($this->cf_ascent) && !empty($this->cf_descent) ) {
+            $this->hasGpxStatsCustomFields = true;
+        }
     }
 	
 	public function show_post_map(): string {
@@ -815,7 +834,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
      * @return string the statistics as a string in the format 'distance ascent descent points time movingtime'
      */
     private function get_statistics_from_gpxfile(string $path_to_gpxfile): string {
-        $default = 'Dist: 0 km Gain: 0 m Loss: 0 m';
+        $default = 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m';
 
         // 1. Basic file checks
         if (!\is_file($path_to_gpxfile) || !\is_readable($path_to_gpxfile)) {
@@ -873,7 +892,32 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
 
         // 8. Rebuild string in original expected format (positions preserved)
-        // You originally expect indices [1], [4], [7], so we keep structure compatible
+        return "Dist: $distance km, Gain: $ascent m, Loss: $descent m";
+    }
+
+    private function get_statistics_from_postmeta( int $postID): string {
+        $default = 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m';
+
+        // guard the function against missing post meta keys or empty values which was checked in the constructor.
+        if ( !$this->hasGpxStatsCustomFields) {
+            return $default;
+        }
+
+        $distance =  get_post_meta($postID, $this->cf_distance, true) ?? '';
+        $ascent = get_post_meta($postID, $this->cf_ascent, true) ?? '';
+        $descent = get_post_meta($postID, $this->cf_descent, true) ?? '';
+
+        // normalize the values
+        $distance = $this->normalizeNumber($distance, 1);
+        $ascent = $this->normalizeNumber($ascent, 0);
+        $descent = $this->normalizeNumber($descent, 0);
+
+        // Validate extracted values
+        if ($distance === "0.0" || $ascent === "0" || $descent === "0") {
+            return $default;
+        }
+
+        // Rebuild string in original expected format (positions preserved)
         return "Dist: $distance km, Gain: $ascent m, Loss: $descent m";
     }
 
@@ -952,7 +996,6 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         }
         // convert category_name array to comma separated string
         if ( array_key_exists('category_name', $queryArgs) && is_array($queryArgs['category_name'])) {
-            
             $queryArgs['category_name'] = implode(',', $queryArgs['category_name']);
         }
         
@@ -1021,12 +1064,20 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             // sanitize geoaddress
             ['address' => $address, 'state' => $state, 'country' => $country] = $this->sanitize_geoaddress($geoaddress);
 
+            // get geostatistics from post meta.
+            $geostat = '';
+            if ( $this->hasGpxStatsCustomFields ) {
+                $geostat = $this->get_statistics_from_postmeta($post->ID);
+            }
+
             $gpxcount = 1;
             if ( empty($gpxfilearr) ) $gpxfilearr = ['']; // we need this here to loop at least once, even if there is no gpx file, to show the post in the table with empty gpxfile and geostatistics
-
+            
             foreach ($gpxfilearr as $gpxfile) {
 
-                $geostat = $this->get_statistics_from_gpxfile( $gpx_dir . $gpxfile );
+                if ( $geostat === '' || $geostat === 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m' ) {
+                    $geostat = $this->get_statistics_from_gpxfile( $gpx_dir . $gpxfile ); // Keine Plausibilisierung dass Datei und custom fields zusammenpassen durchführen.
+                }                
 
                 $data2[] = array(
                     'id' => count($gpxfilearr) == 1 ? $i : $i . '.' . $gpxcount,
@@ -1042,6 +1093,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
                     'geostat' => $geostat,
                 );
                 $gpxcount++;
+                $geostat = '';
             }
             
         }

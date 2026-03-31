@@ -11,35 +11,8 @@ use function Brain\Monkey\Filters\expectApplied;
 #include_once 'C:\Bitnami\wordpress-6.0.1-0\apps\wordpress\htdocs\wp-content\plugins\PostMapViewSimple\inc\PostMapViewSimpleClass.php';
 
 final class PostMapViewSimpleClassMethodsTest extends TestCase {
-	public function setUp(): void
-    {
-        parent::setUp();
-        // Set up necessary WordPress functions and mocks
-        expect('add_shortcode')
-            ->andReturn(true);
-        require_once PLUGIN_DIR . '\inc\PostMapViewSimpleClass.php';
-        setUp();
-    }
-	public function tearDown(): void {
-		tearDown();
-		parent::tearDown();
-	}
 
-	public function test_construct_with_default_atts() {
-		
-		expect('plugins_url')
-            ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
-
-		expect('wp_get_upload_dir')
-            ->once()
-            ->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
-
-        expect('plugin_dir_url')
-            ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
-
-		// Erwartetes Ergebnis nach shortcode_atts
-        $attr = [];
-        $expected_atts = [
+	private $exptected_atts = [
             'numberposts' => 100,
             'post_type'   => 'post',
             'showmap'     => 'true',
@@ -75,7 +48,40 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
             'hidestate' => 'false',
             'hidecity' => 'false',
             'hidemap' => 'false',
+			'cf_distance' => '',
+			'cf_ascent' => '',
+			'cf_descent' => '',
         ];
+
+	public function setUp(): void
+    {
+        parent::setUp();
+        // Set up necessary WordPress functions and mocks
+        expect('add_shortcode')
+            ->andReturn(true);
+        require_once PLUGIN_DIR . '\inc\PostMapViewSimpleClass.php';
+        setUp();
+    }
+	public function tearDown(): void {
+		tearDown();
+		parent::tearDown();
+	}
+
+	public function test_construct_with_default_atts() {
+		
+		expect('plugins_url')
+            ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
+
+		expect('wp_get_upload_dir')
+            ->once()
+            ->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
+
+        expect('plugin_dir_url')
+            ->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
+
+		// Erwartetes Ergebnis nach shortcode_atts
+        $attr = [];
+        $expected_atts = $this->exptected_atts;
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
@@ -131,43 +137,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		// Erwartetes Ergebnis nach shortcode_atts
         $attr = [];
-        $expected_atts = [
-            'numberposts' => 100,
-            'post_type'   => 'post',
-            'showmap'     => 'true',
-            'showtable'   => 'true',
-			'tablefirst'  => 'false',
-            'category'    => 'all',
-            'headerhtml'  => '',
-			'gpxfolder'    => 'gpx',
-			'lenexcerpt'   => 150,
-			'usewpexcerpt' => 'true',
-			'titlelength'  => 80,
-			'usetileserver' => 'true',
-			'converttiles'  => 'true',
-			'contentfilter'  => '',
-			'tabulatortheme' => '',
-			'tablepagesize' => 100,
-			'tableheight' => 10,
-			'mapheight' => 400,
-			'mapwidth' => 300,
-			'mapaspectratio' => 1.5,
-			'tourfolder' => 'touren',
-			'trackwidth' => 4,
-			'trackcolour' => 'blue',
-			'mapselector' => 'OSM',
-			'mymarkericons' => 'true',
-			'categoryfilter' => 'reise',
-			'hidetitle' => 'false',
-            'hidecategory' => 'false',
-            'hidedistance' => 'false',
-            'hideascent' => 'false',
-            'hidedescent' => 'false',
-            'hidecountry' => 'false',
-            'hidestate' => 'false',
-            'hidecity' => 'false',
-            'hidemap' => 'false',
-        ];
+        $expected_atts = $this->exptected_atts;
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
@@ -235,43 +205,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		// Erwartetes Ergebnis nach shortcode_atts
 		$attr = [];
-		$expected_atts = [
-            'numberposts' => 100,
-            'post_type'   => 'post',
-            'showmap'     => 'true',
-            'showtable'   => 'true',
-			'tablefirst'  => 'false',
-            'category'    => 'all',
-            'headerhtml'  => '',
-			'gpxfolder'    => 'gpx',
-			'lenexcerpt'   => 150,
-			'usewpexcerpt' => 'true',
-			'titlelength'  => 80,
-			'usetileserver' => 'true',
-			'converttiles'  => 'true',
-			'contentfilter'  => '',
-			'tabulatortheme' => '',
-			'tablepagesize' => 100,
-			'tableheight' => 10,
-			'mapheight' => 400,
-			'mapwidth' => 300,
-			'mapaspectratio' => 1.5,
-			'tourfolder' => 'touren',
-			'trackwidth' => 4,
-			'trackcolour' => 'blue',
-			'mapselector' => 'OSM',
-			'mymarkericons' => 'true',
-			'categoryfilter' => 'reise',
-			'hidetitle' => 'false',
-            'hidecategory' => 'false',
-            'hidedistance' => 'false',
-            'hideascent' => 'false',
-            'hidedescent' => 'false',
-            'hidecountry' => 'false',
-            'hidestate' => 'false',
-            'hidecity' => 'false',
-            'hidemap' => 'false',
-        ];
+		$expected_atts = $this->exptected_atts;
 
 		// Mock die Funktion shortcode_atts
 		expect('shortcode_atts')
@@ -355,11 +289,11 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		$privateMethod->setAccessible( TRUE );
 
 		$out = $privateMethod->invoke( $tested, '' );
-		$this->assertEquals( 'Dist: 0 km Gain: 0 m Loss: 0 m', $out );
+		$this->assertEquals( 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file1' );
 		//$this->assertEquals( 'Dist: 111.0 0 0 444 0 0 777', $out );
-		$this->assertEquals( 'Dist: 0 km Gain: 0 m Loss: 0 m', $out );
+		$this->assertEquals( 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m', $out );
 
 		$out = $privateMethod->invoke( $tested, 'file2' );
 		$this->assertEquals( 'Dist: 17.0 km, Gain: 1214 m, Loss: 1181 m', $out );
@@ -386,43 +320,7 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 
 		// Erwartetes Ergebnis nach shortcode_atts
 		$attr = [];
-		$expected_atts = [
-            'numberposts' => 100,
-            'post_type'   => 'post',
-            'showmap'     => 'true',
-            'showtable'   => 'true',
-			'tablefirst'  => 'false',
-            'category'    => 'all',
-            'headerhtml'  => '',
-			'gpxfolder'    => 'gpx',
-			'lenexcerpt'   => 150,
-			'usewpexcerpt' => 'true',
-			'titlelength'  => 80,
-			'usetileserver' => 'true',
-			'converttiles'  => 'true',
-			'contentfilter'  => '',
-			'tabulatortheme' => '',
-			'tablepagesize' => 100,
-			'tableheight' => 10,
-			'mapheight' => 400,
-			'mapwidth' => 300,
-			'mapaspectratio' => 1.5,
-			'tourfolder' => 'touren',
-			'trackwidth' => 4,
-			'trackcolour' => 'blue',
-			'mapselector' => 'OSM',
-			'mymarkericons' => 'true',
-			'categoryfilter' => 'reise',
-			'hidetitle' => 'false',
-            'hidecategory' => 'false',
-            'hidedistance' => 'false',
-            'hideascent' => 'false',
-            'hidedescent' => 'false',
-            'hidecountry' => 'false',
-            'hidestate' => 'false',
-            'hidecity' => 'false',
-            'hidemap' => 'false',
-        ];
+		$expected_atts = $this->exptected_atts;
 
 		// Mock die Funktion shortcode_atts
 		expect('shortcode_atts')

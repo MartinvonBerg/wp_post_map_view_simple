@@ -32,7 +32,7 @@ $ds = \DIRECTORY_SEPARATOR;
 $allowed = \ini_get('allow_url_fopen') === '1';
 $useWebp = true;
 $error = false;
-$site_url = $_SERVER['HTTP_HOST'] ?? ''; 
+$site_url = \WP_SITEURL ?? ''; //$_SERVER['HTTP_HOST'] ?? '';
 $admin_email = $_SERVER['ADMIN_EMAIL'] ?? '';
 
 // return silently if the request is not a tile request
@@ -230,16 +230,16 @@ function webpImage( string $source, int $quality = 80, bool $removeOld = false) 
 }
 
 function generateHtaccess() : bool {
-	$url = 'http://' . $_SERVER['HTTP_HOST'];
-	if ( is_ssl() ) {
+
+	//$url = 'http://' . $_SERVER['HTTP_HOST'];
+	$url = \WP_SITEURL ?? '';
+	if ( \is_ssl() ) {
 		$url = str_replace('http://', 'https://', $url);
 	}
-	$plugin_main_dir = dirname( __DIR__, 1 );
-	//$slug = \WP_PLUGIN_URL . '/' . \basename( $plugin_main_dir ) . '/leaflet_map_tiles/';
-	//$slug = plugins_url('leaflet_map_tiles', $plugin_main_dir) . '/';
+	
 	$slug = plugin_dir_url(__FILE__);
 	$relative_url =  \str_replace($url, '', $slug);
-
+	
 	// create the file name 
 	$localFile = __DIR__ . \DIRECTORY_SEPARATOR . '.htaccess';
 

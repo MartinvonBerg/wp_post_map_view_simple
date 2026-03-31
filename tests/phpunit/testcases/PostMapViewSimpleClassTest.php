@@ -13,6 +13,47 @@ use function Brain\Monkey\Functions\expect;
 
 class PostMapViewSimpleClassTest extends TestCase
 {
+    private $expected_atts = [
+            'numberposts' => 100,
+            'post_type'   => 'post',
+            'showmap'     => 'true',
+            'showtable'   => 'true',
+			'tablefirst'  => 'false',
+            'category'    => 'all',
+            'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'true',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
+			'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
+			'cf_distance' => '',
+			'cf_ascent' => '',
+			'cf_descent' => '',
+        ];
+
     public function setUp(): void
     {
         parent::setUp();
@@ -67,44 +108,7 @@ class PostMapViewSimpleClassTest extends TestCase
 
         // Erwartetes Ergebnis nach shortcode_atts
         $attr = [];
-        $expected_atts = [
-            'numberposts' => 100,
-            'post_type'   => 'post',
-            'showmap'     => 'true',
-            'showtable'   => 'false',
-            'tablefirst'  => 'false',
-            'category'    => 'all',
-            'headerhtml'  => '',
-			'gpxfolder'    => 'gpx',
-			'lenexcerpt'   => 150,
-			'usewpexcerpt' => 'true',
-			'titlelength'  => 80,
-			'usetileserver' => 'false',
-			'converttiles'  => 'true',
-			'contentfilter'  => '',
-			'tabulatortheme' => '',
-			'tablepagesize' => 100,
-			'tableheight' => 10,
-			'mapheight' => 400,
-			'mapwidth' => 300,
-			'mapaspectratio' => 1.5,
-			'tourfolder' => 'touren',
-			'trackwidth' => 4,
-			'trackcolour' => 'blue',
-			'mapselector' => 'OSM',
-			'mymarkericons' => 'true',
-			'categoryfilter' => 'reise',
-            // add the new parameters
-            'hidetitle' => 'false',
-            'hidecategory' => 'false',
-            'hidedistance' => 'false',
-            'hideascent' => 'false',
-            'hidedescent' => 'false',
-            'hidecountry' => 'false',
-            'hidestate' => 'false',
-            'hidecity' => 'false',
-            'hidemap' => 'false',
-        ];
+        $expected_atts = $this->expected_atts;
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
@@ -196,6 +200,8 @@ class PostMapViewSimpleClassTest extends TestCase
 
         when('get_shortcode_regex')->justReturn('\\[(\\[?)(gpxview)([^\\]]*)\\]');
 
+        when('is_ssl')->justReturn(false);
+
         //$output = \mvbplugins\postmapviewsimple\show_post_map($attr);
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
         $output = $class->show_post_map();
@@ -243,43 +249,7 @@ class PostMapViewSimpleClassTest extends TestCase
 
         // Erwartetes Ergebnis nach shortcode_atts
         $attr = [];
-        $expected_atts = [
-            'numberposts' => 100,
-            'post_type'   => 'post',
-            'showmap'     => 'true',
-            'showtable'   => 'true',
-            'tablefirst'  => 'false',
-            'category'    => 'all',
-            'headerhtml'  => '',
-			'gpxfolder'    => 'gpx',
-			'lenexcerpt'   => 150,
-			'usewpexcerpt' => 'true',
-			'titlelength'  => 80,
-			'usetileserver' => 'false',
-			'converttiles'  => 'true',
-			'contentfilter'  => '',
-			'tabulatortheme' => '',
-			'tablepagesize' => 100,
-			'tableheight' => 10,
-			'mapheight' => 400,
-			'mapwidth' => 300,
-			'mapaspectratio' => 1.5,
-			'tourfolder' => 'touren',
-			'trackwidth' => 4,
-			'trackcolour' => 'blue',
-			'mapselector' => 'OSM',
-			'mymarkericons' => 'true',
-			'categoryfilter' => 'reise',
-            'hidetitle' => 'false',
-            'hidecategory' => 'false',
-            'hidedistance' => 'false',
-            'hideascent' => 'false',
-            'hidedescent' => 'false',
-            'hidecountry' => 'false',
-            'hidestate' => 'false',
-            'hidecity' => 'false',
-            'hidemap' => 'false',
-        ];
+        $expected_atts = $this->expected_atts;
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
