@@ -249,13 +249,12 @@ No need to upgrade right now. So, no new release will be submitted.
 
 ## Changelog <!-- omit from toc -->
 
-### 1.3.4 (30.03.2026) <!-- omit from toc -->
+### 1.4.0 (30.03.2026) <!-- omit from toc -->
 - add parameters to change order of table and map and to hide table columns.
 - update treatment of gpxfiles in PHP
 - Fix .htaccess generation for tileserver
 - fixes due to usage of PHPStan (level 8) and eslint
 - update leaflet.fullscreen to V5.3.1
-
 
 ### 1.3.3 (28.03.2026) <!-- omit from toc -->
 - Update Unit Tests, Minor PHP Bug Fixes. Update PHP-Header for Plugin main file.

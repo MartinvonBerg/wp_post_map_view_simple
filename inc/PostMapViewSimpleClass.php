@@ -16,7 +16,7 @@ use WP_Post;
  * Author URI: https://www.berg-reise-foto.de/software-wordpress-lightroom-plugins/wordpress-plugins-fotos-und-gpx/
  * License: GPL-2.0
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
- * Version: 1.3.3
+ * Version: 1.4.0
  *
  * @package Post-Map-View-Simple
  */
@@ -125,7 +125,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 			'post_type'   => 'post', // laut doku geht das so : array( 'post', 'page', 'movie', 'book' ) post_types können mit array abgefragt werden
 			'showmap'     => 'true',
 			'showtable'   => 'true', 
-            'tablefirst' => 'false', // new in V1.3.4
+            'tablefirst' => 'false', // new in V1.4.0
 			'category'    => 'all', // mehrere Kategorien können über den slug zur Kategorie abgefragt werden. Case Sensitiv. Childs werden mit abgefragt! Geht nur einzeln nicht mit category_name=cat1+cat2!
 			'headerhtml'  => '',
             'gpxfolder'   => 'gpx',
@@ -342,8 +342,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
             
         // --- enqueue scripts
         $plugin_url = plugin_dir_url(__DIR__);
-        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.3.3', 'all');
-        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.3.3', true);
+        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.4.0', 'all');
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.4.0', true);
 		
 		wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
@@ -520,8 +520,8 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // --- enqueue scripts and styles ---
         $plugin_url = plugin_dir_url(__DIR__);
-        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.3.3', 'all');
-        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.3.3', true);
+        wp_enqueue_style('wp_pmtv_main_css', $plugin_url . 'css/wp_post_map_view_simple.css', [], '1.4.0', 'all');
+        wp_enqueue_script('wp_pmtv_main_js', $plugin_url . 'build/pmtv_main.js', [], '1.4.0', true);
         wp_localize_script('wp_pmtv_main_js', 'php_touren' , $this->postArray );
 		wp_localize_script('wp_pmtv_main_js', 'g_wp_postmap_path' , array( 
             'path'  => $this->wp_postmap_url, 
@@ -596,9 +596,9 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
 
         // Load default Styles
         if ( $theme == '' ) {
-            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '1.3.3', 'all');
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/tabulator.min.css', [], '1.4.0', 'all');
         } else {
-            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '1.3.3', 'all');
+            wp_enqueue_style('tabulator_css', $plugin_url . 'css/' . $themes[$theme], [], '1.4.0', 'all');
         }
     }
 
