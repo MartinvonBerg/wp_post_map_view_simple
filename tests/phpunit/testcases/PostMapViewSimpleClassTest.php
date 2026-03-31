@@ -13,47 +13,6 @@ use function Brain\Monkey\Functions\expect;
 
 class PostMapViewSimpleClassTest extends TestCase
 {
-    private $expected_atts = [
-            'numberposts' => 100,
-            'post_type'   => 'post',
-            'showmap'     => 'true',
-            'showtable'   => 'true',
-			'tablefirst'  => 'false',
-            'category'    => 'all',
-            'headerhtml'  => '',
-			'gpxfolder'    => 'gpx',
-			'lenexcerpt'   => 150,
-			'usewpexcerpt' => 'true',
-			'titlelength'  => 80,
-			'usetileserver' => 'true',
-			'converttiles'  => 'true',
-			'contentfilter'  => '',
-			'tabulatortheme' => '',
-			'tablepagesize' => 100,
-			'tableheight' => 10,
-			'mapheight' => 400,
-			'mapwidth' => 300,
-			'mapaspectratio' => 1.5,
-			'tourfolder' => 'touren',
-			'trackwidth' => 4,
-			'trackcolour' => 'blue',
-			'mapselector' => 'OSM',
-			'mymarkericons' => 'true',
-			'categoryfilter' => 'reise',
-			'hidetitle' => 'false',
-            'hidecategory' => 'false',
-            'hidedistance' => 'false',
-            'hideascent' => 'false',
-            'hidedescent' => 'false',
-            'hidecountry' => 'false',
-            'hidestate' => 'false',
-            'hidecity' => 'false',
-            'hidemap' => 'false',
-			'cf_distance' => '',
-			'cf_ascent' => '',
-			'cf_descent' => '',
-        ];
-
     public function setUp(): void
     {
         parent::setUp();
@@ -108,7 +67,47 @@ class PostMapViewSimpleClassTest extends TestCase
 
         // Erwartetes Ergebnis nach shortcode_atts
         $attr = [];
-        $expected_atts = $this->expected_atts;
+        $expected_atts = [
+            'numberposts' => 100,
+            'post_type'   => 'post',
+            'showmap'     => 'true',
+            'showtable'   => 'false',
+            'tablefirst'  => 'false',
+            'category'    => 'all',
+            'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'false',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
+            // add the new parameters
+            'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
+            'cf_distance' => '',
+			'cf_ascent' => '',
+			'cf_descent' => '',
+        ];
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
@@ -200,8 +199,6 @@ class PostMapViewSimpleClassTest extends TestCase
 
         when('get_shortcode_regex')->justReturn('\\[(\\[?)(gpxview)([^\\]]*)\\]');
 
-        when('is_ssl')->justReturn(false);
-
         //$output = \mvbplugins\postmapviewsimple\show_post_map($attr);
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
         $output = $class->show_post_map();
@@ -249,7 +246,46 @@ class PostMapViewSimpleClassTest extends TestCase
 
         // Erwartetes Ergebnis nach shortcode_atts
         $attr = [];
-        $expected_atts = $this->expected_atts;
+        $expected_atts = [
+            'numberposts' => 100,
+            'post_type'   => 'post',
+            'showmap'     => 'true',
+            'showtable'   => 'true',
+            'tablefirst'  => 'false',
+            'category'    => 'all',
+            'headerhtml'  => '',
+			'gpxfolder'    => 'gpx',
+			'lenexcerpt'   => 150,
+			'usewpexcerpt' => 'true',
+			'titlelength'  => 80,
+			'usetileserver' => 'false',
+			'converttiles'  => 'true',
+			'contentfilter'  => '',
+			'tabulatortheme' => '',
+			'tablepagesize' => 100,
+			'tableheight' => 10,
+			'mapheight' => 400,
+			'mapwidth' => 300,
+			'mapaspectratio' => 1.5,
+			'tourfolder' => 'touren',
+			'trackwidth' => 4,
+			'trackcolour' => 'blue',
+			'mapselector' => 'OSM',
+			'mymarkericons' => 'true',
+			'categoryfilter' => 'reise',
+            'hidetitle' => 'false',
+            'hidecategory' => 'false',
+            'hidedistance' => 'false',
+            'hideascent' => 'false',
+            'hidedescent' => 'false',
+            'hidecountry' => 'false',
+            'hidestate' => 'false',
+            'hidecity' => 'false',
+            'hidemap' => 'false',
+            'cf_distance' => '',
+			'cf_ascent' => '',
+			'cf_descent' => '',
+        ];
 
         // Mock die Funktion shortcode_atts
         expect('shortcode_atts')
@@ -357,7 +393,7 @@ class PostMapViewSimpleClassTest extends TestCase
         $class = new \mvbplugins\postmapviewsimple\PostMapViewSimple($attr);
         $output = $class->show_post_map();
 
-        $expected = '<div class="box1"><div id="map0"></div></div><h4>Tourenübersicht</h4><p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p><p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p><table id="post_table"><thead><tr><th data-filter="false">Nr</th><th data-type="html">Title</th><th>Category</th><th data-filter="number">Distance</th><th data-filter="number">Ascent</th><th data-filter="number">Descent</th><th>Country</th><th>State</th><th data-type="html" data-selector="true">City</th></tr></thead><tbody><tr><td>1</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 1</a></td><td>Reisebericht</td><td>0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://wego.here.com/l/12.987650,49.123456?map=12.987650,49.123456&z=9" target="_blank" rel="noopener noreferrer">none</a></td></tr><tr><td>2</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 2</a></td><td>Reisebericht</td><td>0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://wego.here.com/l/12.987650,49.123456?map=12.987650,49.123456&z=9" target="_blank" rel="noopener noreferrer">none</a></td></tr></tbody></table>';
+        $expected = '<div class="box1"><div id="map0"></div></div><h4>Tourenübersicht</h4><p>Tabellarische Übersicht aller Touren- und Reiseberichte mit Filter- und Sortierfunktion<br></p><p>Die Kopfzeile ermöglicht die Suche in der Tabelle nach beliebigen Inhalten:</p><table id="post_table"><thead><tr><th data-filter="false">Nr</th><th data-type="html">Title</th><th>Category</th><th data-filter="number">Distance</th><th data-filter="number">Ascent</th><th data-filter="number">Descent</th><th>Country</th><th>State</th><th data-type="html" data-selector="true">City</th></tr></thead><tbody><tr><td>1</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 1</a></td><td>Reisebericht</td><td>0.0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://wego.here.com/l/12.987650,49.123456?map=12.987650,49.123456&z=9" target="_blank" rel="noopener noreferrer">none</a></td></tr><tr><td>2</td><td><a href="http://localhost/wordpress/post-permalink" target="_blank">Post 2</a></td><td>Reisebericht</td><td>0.0</td><td>0</td><td>0</td><td>none</td><td>none</td><td><a href="https://wego.here.com/l/12.987650,49.123456?map=12.987650,49.123456&z=9" target="_blank" rel="noopener noreferrer">none</a></td></tr></tbody></table>';
         $this->assertEquals($expected, $output);
     }
 }
