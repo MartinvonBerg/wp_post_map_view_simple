@@ -333,6 +333,70 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 		$this->assertEquals( 'Dist: 17.1 km, Gain: 1214 m, Loss: 1181 m', $out );
     }
 
+	public function testGetStatisticsFromGpxfileRejectsXxePayload()
+	{
+		expect('plugins_url')
+			->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
+
+		expect('wp_get_upload_dir')
+			->once()
+			->andReturn( ['basedir' => 'C:\wamp64\www\wordpress\wp-content\uploads'] );
+
+		expect('plugin_dir_url')
+			->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
+
+		$attr = [];
+		$expected_atts = $this->exptected_atts;
+
+		expect('shortcode_atts')
+			->with([
+				'numberposts' => 100,
+				'post_type'   => 'post',
+				'showmap'     => 'true',
+				'showtable'   => 'true',
+				'category'    => 'all',
+				'headerhtml'  => '',
+			], $attr)
+			->andReturn($expected_atts);
+
+		expect('wp_enqueue_style')
+			->atLeast()
+			->once()
+			->andReturn(true);
+
+		$tested = new mvbplugins\postmapviewsimple\PostMapViewSimple([]);
+		$this->assertInstanceOf( '\mvbplugins\postmapviewsimple\PostMapViewSimple', $tested );
+
+		$class = new \ReflectionClass( 'mvbplugins\postmapviewsimple\PostMapViewSimple' );
+		$privateMethod = $class->getMethod( 'get_statistics_from_gpxfile' );
+		$privateMethod->setAccessible( true );
+
+		$entitySource = tempnam(sys_get_temp_dir(), 'pmtv-xxe-src-');
+		$gpxFile = tempnam(sys_get_temp_dir(), 'pmtv-xxe-gpx-');
+
+		$this->assertNotFalse($entitySource);
+		$this->assertNotFalse($gpxFile);
+
+		$entityPath = str_replace('\\', '/', (string) $entitySource);
+		$entityUri = 'file:///' . ltrim($entityPath, '/');
+
+		file_put_contents((string) $entitySource, 'Dist: 999 km, Gain: 999 m, Loss: 999 m');
+		file_put_contents(
+			(string) $gpxFile,
+			'<?xml version="1.0" encoding="UTF-8"?>' .
+			'<!DOCTYPE gpx [<!ENTITY xxe SYSTEM "' . $entityUri . '">]>' .
+			'<gpx><metadata><desc>&xxe;</desc></metadata></gpx>'
+		);
+
+		try {
+			$out = $privateMethod->invoke( $tested, (string) $gpxFile );
+			$this->assertSame( 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m', $out );
+		} finally {
+			@unlink((string) $entitySource);
+			@unlink((string) $gpxFile);
+		}
+	}
+
 	public function test_method_post_extract() {
 		expect('plugins_url')
 		->andReturn('http://localhost/wordpress/wp-content/plugins/PostMapTableView/');
