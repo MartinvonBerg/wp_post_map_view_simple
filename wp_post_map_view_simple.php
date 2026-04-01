@@ -10,7 +10,7 @@
  * Plugin Name:       Post Map Table View
  * Plugin URI:        https://github.com/MartinvonBerg/Post-Map-Table-View
  * Description:       Shows a map with posts that have geotags. Or shows a tour map with posts that have geotags and a tour date.
- * Version:           1.5.0
+ * Version:           1.5.1
  * Author:            Martin von Berg
  * Author URI:        https://www.berg-reise-foto.de/info/ueber-mich/
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@
  * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      8.0
- * Tested up to:      6.9
+ * Tested up to:      7.0
  */
 
 // TODOs / Ideas für das Plugin in der Tabelle

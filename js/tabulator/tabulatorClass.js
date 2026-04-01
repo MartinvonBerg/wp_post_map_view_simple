@@ -1,6 +1,6 @@
 //tabulatorClass.js
 /*!
-	tabulatorClass V 1.5.0
+	tabulatorClass V 1.5.1
 	license: GPL 2.0
 	Martin von Berg
 */

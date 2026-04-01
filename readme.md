@@ -228,7 +228,7 @@ Drawback: No fileage clean-up implemented. So, once stored, the tiles are used f
 
 ## Upgrade Notice
 
-No need to upgrade right now. So, no new release will be submitted.
+No need to upgrade right now. Update, if your GPX-files are not parsed correctly.
 **ATTENTION** Your changes in `category_mapping.json` will be overwritten! Safe this file and `.htaccess` locally prior to updating.
 
 ## I18N
@@ -252,6 +252,11 @@ No need to upgrade right now. So, no new release will be submitted.
 - Use the standard method of WordPress.
 
 ## Changelog <!-- omit from toc -->
+
+### 1.5.1 (1.04.2026) <!-- omit from toc -->
+- update "get_statistics_from_gpxfile" including Unit-Tests. Extend PHPUnit-Tests for that and for XSS-Attacks.
+- test with WP 7.0 RC2 locally.
+
 
 ### 1.5.0 (31.03.2026) <!-- omit from toc -->
 - add shortcode parameters to get gpx-statistics distance, ascent, distance from WP custom fields.
