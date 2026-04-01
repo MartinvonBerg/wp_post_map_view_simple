@@ -836,63 +836,125 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     private function get_statistics_from_gpxfile(string $path_to_gpxfile): string {
         $default = 'Dist: 0.0 km, Gain: 0 m, Loss: 0 m';
 
-        // 1. Basic file checks
-        if (!\is_file($path_to_gpxfile) || !\is_readable($path_to_gpxfile)) {
-            return $default;
-        }
-
-        // 2. Ensure SimpleXML is available (avoid fatal error)
-        if (!\function_exists('simplexml_load_file')) {
-            return $default;
-        }
-
-        // 3. Prevent URL usage (avoid allow_url_fopen issues)
+        // 1. Basic file checks and local path resolution
         if (\preg_match('#^(https?:)?//#i', $path_to_gpxfile)) {
             return $default;
         }
 
-        // 4. Load XML safely
-        \libxml_use_internal_errors(true);
-        $gpxdata = \simplexml_load_file($path_to_gpxfile);
+        $resolvedPath = \realpath($path_to_gpxfile);
+        if ($resolvedPath === false || !\is_file($resolvedPath) || !\is_readable($resolvedPath)) {
+            return $default;
+        }
 
-        if ($gpxdata === false) {
+        // 2. Read file once; this avoids stream wrapper and open_basedir surprises in XML loaders
+        $raw = @\file_get_contents($resolvedPath);
+        if ($raw === false || $raw === '') {
+            return $default;
+        }
+        if (\str_starts_with($raw, "\xEF\xBB\xBF")) {
+            $raw = \substr($raw, 3);
+        }
+
+        /** @var array<int, string> $descCandidates */
+        $descCandidates = [];
+
+        // 3. Primary parser: SimpleXML with namespace-agnostic XPath
+        if ( \function_exists('simplexml_load_string') ) {
+            $previousLibxmlState = \libxml_use_internal_errors(true);
+            $options = \LIBXML_NONET | \LIBXML_NOCDATA;
+            $gpxdata = @\simplexml_load_string($raw, 'SimpleXMLElement', $options);
+
+            if ($gpxdata !== false) {
+                if (isset($gpxdata->metadata->desc)) {
+                    $descCandidates[] = (string) $gpxdata->metadata->desc;
+                }
+
+                $nodes = $gpxdata->xpath('/*[local-name()="gpx"]/*[local-name()="metadata"]/*[local-name()="desc"]');
+                if (\is_array($nodes)) {
+                    foreach ($nodes as $node) {
+                        $descCandidates[] = (string) $node;
+                    }
+                }
+            }
+
             \libxml_clear_errors();
-            return $default;
+            \libxml_use_internal_errors($previousLibxmlState);
         }
 
-        // 5. Check required structure
-        if (!isset($gpxdata->metadata->desc)) {
-            return $default;
+        // 4. Fallback parser: DOM + XPath for environments where SimpleXML behaves differently
+        if ( \count($descCandidates) === 0 && \class_exists('DOMDocument') ) {
+            $previousLibxmlState = \libxml_use_internal_errors(true);
+            $dom = new DOMDocument();
+            $domLoaded = @$dom->loadXML($raw, \LIBXML_NONET | \LIBXML_NOCDATA | \LIBXML_NOERROR | \LIBXML_NOWARNING);
+
+            if ($domLoaded) {
+                $xpath = new \DOMXPath($dom);
+                $nodes = $xpath->query('/*[local-name()="gpx"]/*[local-name()="metadata"]/*[local-name()="desc"]');
+                if ($nodes !== false) {
+                    foreach ($nodes as $node) {
+                        if ($node instanceof \DOMElement) {
+                            $descCandidates[] = \trim($node->textContent);
+                        }
+                    }
+                }
+            }
+
+            \libxml_clear_errors();
+            \libxml_use_internal_errors($previousLibxmlState);
         }
 
-        $geostat = (string) $gpxdata->metadata->desc;
-
-        if ($geostat === '') {
-            return $default;
+        // 5. Last-resort fallback for partially broken XML
+        if (\count($descCandidates) === 0) {
+            if (\preg_match('/<metadata\b[^>]*>.*?<desc\b[^>]*>(.*?)<\/desc>/is', $raw, $m)
+                || \preg_match('/<desc\b[^>]*>(.*?)<\/desc>/is', $raw, $m)) {
+                $decoded = \html_entity_decode((string) $m[1], \ENT_QUOTES | \ENT_XML1, 'UTF-8');
+                $descCandidates[] = \trim(\strip_tags($decoded));
+            }
         }
 
-        // 6. Robust parsing using regex (order-independent, whitespace-safe)
-        $distance = $ascent = $descent = null;
+        $descCandidates = \array_values(\array_unique(\array_filter(\array_map('trim', $descCandidates))));
 
-        if (\preg_match('/Dist:?\s*([\d.,]+)/i', $geostat, $m)) {
+        // 6. Parse and normalize stats from candidate description texts
+        foreach ($descCandidates as $candidate) {
+            $parsed = $this->parseGpxStatisticsDescription($candidate);
+            if ($parsed !== null) {
+                return "Dist: {$parsed['distance']} km, Gain: {$parsed['ascent']} m, Loss: {$parsed['descent']} m";
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * @return array{distance: string, ascent: string, descent: string}|null
+     */
+    private function parseGpxStatisticsDescription(string $description): ?array {
+        $distance = null;
+        $ascent = null;
+        $descent = null;
+
+        // Support common key variants produced by GPX tools
+        if (\preg_match('/(?:Dist(?:ance)?):?\s*([\d.,]+)/i', $description, $m)) {
             $distance = $this->normalizeNumber($m[1], 1);
         }
 
-        if (\preg_match('/Gain:?\s*([\d.,]+)/i', $geostat, $m)) {
+        if (\preg_match('/(?:Gain|Ascent|Elevation\s*Gain):?\s*([\d.,]+)/i', $description, $m)) {
             $ascent = $this->normalizeNumber($m[1], 0);
         }
 
-        if (\preg_match('/Loss:?\s*([\d.,]+)/i', $geostat, $m)) {
+        if (\preg_match('/(?:Loss|Descent|Elevation\s*Loss):?\s*([\d.,]+)/i', $description, $m)) {
             $descent = $this->normalizeNumber($m[1], 0);
         }
 
-        // 7. Validate extracted values
         if ($distance === null || $ascent === null || $descent === null) {
-            return $default;
+            return null;
         }
 
-        // 8. Rebuild string in original expected format (positions preserved)
-        return "Dist: $distance km, Gain: $ascent m, Loss: $descent m";
+        return [
+            'distance' => $distance,
+            'ascent' => $ascent,
+            'descent' => $descent,
+        ];
     }
 
     private function get_statistics_from_postmeta( int $postID): string {

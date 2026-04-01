@@ -30,7 +30,7 @@
             "runtimeExecutable": "C:/PHP/php.exe",
             "program": "${workspaceFolder}/vendor/bin/phpunit",
             "args": [
-                "${workspaceFolder}/tests/phpunit/testcases/PostMapViewSimpleClassTest.php"
+                "${workspaceFolder}/tests/phpunit/testcases/PostMapViewSimpleClassMethodsTest.php"
             ],
             "cwd": "${workspaceFolder}",
             "env": {

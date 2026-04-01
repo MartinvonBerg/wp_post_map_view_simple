@@ -219,7 +219,20 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 				'headerhtml'  => '',
 			], $attr)
 			->andReturn($expected_atts);
-		
+
+		expect('realpath')
+			->atLeast()
+			->once()
+			->with($this->anything())
+			->andReturnUsing(function ($path_to_gpxfile) {
+                // Dynamische Rückgabe basierend auf dem Meta-Key
+                if ($path_to_gpxfile === '') {
+                    return false;
+				} else {
+					return $path_to_gpxfile;
+                }
+            });
+
 		expect('is_file')
 			->atLeast()
 			->once()
@@ -271,6 +284,19 @@ final class PostMapViewSimpleClassMethodsTest extends TestCase {
 						'desc' => 'Dist 17.11123456789 km Gain 1214.2234567 m, Loss 1181.3334567890123456 m'
 					]
 				];
+			}
+		});
+
+		when('file_get_contents')->alias(function ($path_to_gpxfile) {
+			// this shall return a string or false
+			if ($path_to_gpxfile === 'file1') {
+				return (string) '<?xml version="1.0" encoding="UTF-8"?><gpx><metadata><desc>Dist: 111 0 0 444 0 0 777</desc></metadata></gpx>';
+			} elseif ($path_to_gpxfile === 'file2') {
+				return (string) '<gpx><metadata><desc>Dist: 17,0 km, Gain: 1214 m, Loss: 1181 m</desc></metadata></gpx>';
+			} elseif ($path_to_gpxfile === 'file3') {
+				return (string) '<metadata><desc>Dist: 17,111 km, Gain: 1214,22 m, Loss: 1181,333 m</desc></metadata>';
+			} elseif ($path_to_gpxfile === 'file4') {
+				return (string) '<desc>Dist 17.11123456789 km Gain 1214.2234567 m, Loss 1181.3334567890123456 m</desc></metadata></gpx>';
 			}
 		});
 		
