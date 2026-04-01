@@ -59,7 +59,7 @@ class MyTabulatorClass {
                 column.hozAlign = 'right';
                 column.headerFilterPlaceholder = '>...m';
                 column.headerFilterFunc = this.HeaderFilter;
-                column.headerFilterFuncParams = { Distanz: 0 };
+                column.headerFilterFuncParams = { Distanz: 0 }; // TODO : is it correct?
             }
             
             columns.push(column);

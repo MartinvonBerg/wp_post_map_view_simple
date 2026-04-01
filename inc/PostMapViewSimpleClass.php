@@ -1102,6 +1102,11 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
     }
 
     /**
+     * Extract the gpx-files from the content which are expected to be in the shortcode 
+     * [gpxview gpxfile="file1.gpx, file2.gpx"] or [gpxview gpxfile="file1.gpx"] or [gpxview gpxfile=file1.gpx].
+     * This is the "fotorama" shortcode.
+     * 
+     * @param string $content the page content retrieved from the database.
      * @return array<int, string>
      */
     private function extractGpxFiles(string $content): array
@@ -1111,7 +1116,7 @@ final class PostMapViewSimple implements PostMapViewSimpleInterface {
         preg_match_all('/' . get_shortcode_regex(['gpxview']) . '/', $content, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $shortcode) {
-            $atts = shortcode_parse_atts($shortcode[3] ?? '');
+            $atts = shortcode_parse_atts($shortcode[3] ?? ''); // $shortcode[3] ist per Definition der Attribut-String.
 
             if (!empty($atts['gpxfile'])) {
                 $files = array_map('trim', explode(',', $atts['gpxfile']));

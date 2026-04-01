@@ -22,6 +22,18 @@
  * Tested up to:      6.9
  */
 
+// TODOs / Ideas für das Plugin in der Tabelle
+// in der Kopfzeile steht bei Distanz auch "m", das müsste eigentlich "km" heißen
+//          Anpassung in der js/tabulator/tabulatorClass.js -> getLangs() -> 'Distance':'Distanz / km',
+//          Dann aber auch in der js/tabulator/tabulatorClass.js -> getLangs() die en-en Übersetzung ergänzen.
+//          TBD : Array als JSON auslagern, damit der Anwender ändern kann? Dann aber sanitizen, absichern, fallback im Code etc.
+//          oder Array im Code direkt anpassen und mit einem shortcode Parameter anpassen "useUnitsinTable" ??
+//          oder alles mit Shortcodes-Parametern vorgeben, damit es flexibel ist? Diese müssen auch bereinigt werden.
+//          Der Headerfilter bleibt dann aber "m", da die Änderung zuviel Aufwand wäre. 
+// eine Spalte mit dem Datum der Reise ? -> Aus GPX auslesen oder einem Custom-Field?
+// eine Spalte mit dem Kategorie-Icon ? -> Ergänzung in der Kategorie-Spalte?
+// eine Spalte mit der jeweiligen gpx-Datei (Überschrift "Download") -> GPX-Download, sonst unklar.
+
 namespace mvbplugins\postmapviewsimple;
 
 \defined('ABSPATH') or die('Are you ok?');
