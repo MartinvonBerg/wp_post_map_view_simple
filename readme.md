@@ -253,6 +253,10 @@ No need to upgrade right now. Update, if your GPX-files are not parsed correctly
 
 ## Changelog <!-- omit from toc -->
 
+### 1.5.1 (13.08.2026) <!-- omit from toc -->
+- Close github security issues.
+- test with WP 7.1.
+
 ### 1.5.1 (12.06.2026) <!-- omit from toc -->
 - update "get_statistics_from_gpxfile" including Unit-Tests. Extend PHPUnit-Tests for that and for XSS-Attacks.
 - test with WP 7.0.
