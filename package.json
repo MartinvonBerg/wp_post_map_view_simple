@@ -16,11 +16,11 @@
 	"devDependencies": {
 		"@babel/core": "^8.0.1",
 		"@babel/preset-env": "^8.0.2",
+		"@eslint/js": "^10.0.1",
 		"babel-loader": "^10.1.1",
 		"css-loader": "^7.1.2",
 		"eslint": "^10.0.0",
 		"eslint-plugin-security": "^4.0.0",
-		"@eslint/js": "^10.0.1",
 		"path-browserify": "^1.0.1",
 		"style-loader": "^4.0.0",
 		"webpack": "^5.105.1",
